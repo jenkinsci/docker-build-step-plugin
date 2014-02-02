@@ -44,9 +44,6 @@ public class DockerBuilder extends Builder {
         	dockerClient.startContainer(containerId);
         } catch(DockerException e) {
         	LOGGER.severe("Cannot start container " + containerId + ": " + e.getMessage());
-        	try {
-        		dockerClient.stopContainer(containerId);
-        	} catch(DockerException ex) {}
         	throw new AbortException(e.getMessage());
         }
         return true;
