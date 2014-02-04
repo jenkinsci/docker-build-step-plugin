@@ -9,6 +9,7 @@ import hudson.model.AbstractProject;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -17,6 +18,7 @@ import javax.servlet.ServletException;
 
 import net.sf.json.JSONObject;
 
+import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommands;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -26,24 +28,30 @@ import com.kpelykh.docker.client.DockerException;
 
 public class DockerBuilder extends Builder {
 	
-	private String containerId;
+	private DockerCommands dockerCmd;
+	private String cmdParams;
 	
 	@DataBoundConstructor
-	public DockerBuilder(String containerId) {
-		this.containerId = containerId;
+	public DockerBuilder(DockerCommands dockerCmd, String cmdParams) {
+		this.dockerCmd = dockerCmd;
+		this.cmdParams = cmdParams;
 	}
 	
-	public String getContainerId() {
-		return containerId;
+	public DockerCommands getDockerCmd() {
+		return dockerCmd;
 	}
-	
+
+	public String getCmdParams() {
+		return cmdParams;
+	}
+
 	@Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws AbortException {
         DockerClient dockerClient = getDescriptor().getDockerClient();
         try {
-        	dockerClient.startContainer(containerId);
+        	dockerCmd.execute(dockerClient, cmdParams.split(","));
         } catch(DockerException e) {
-        	LOGGER.severe("Cannot start container " + containerId + ": " + e.getMessage());
+        	LOGGER.severe("Failed to execute Docker command " + dockerCmd.getCmdName() + ": " + e.getMessage());
         	throw new AbortException(e.getMessage());
         }
         return true;
@@ -77,7 +85,7 @@ public class DockerBuilder extends Builder {
         }
         
         public String getDisplayName() {
-            return "Start Docker container";
+            return "Execute Docker container";
         }
 
         @Override
@@ -94,6 +102,14 @@ public class DockerBuilder extends Builder {
         
         public DockerClient getDockerClient() {
         	return dockerClient;
+        }
+        
+        public ListBoxModel doFillDockerCmdItems() {
+            ListBoxModel commands = new ListBoxModel();
+            for (DockerCommands cmd : DockerCommands.values()) {
+            	commands.add(cmd.getCmdName(), cmd.toString());
+            }
+            return commands;
         }
     }
 	
