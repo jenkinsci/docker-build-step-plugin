@@ -6,7 +6,9 @@ import com.kpelykh.docker.client.DockerException;
 public enum DockerCommands {
 
 	START("Start container", new StartCommand()), //TODO replace DockerCommand by abstract class and static methods?
-	STOP("Stop container", new StopCommand());
+	STOP("Stop container", new StopCommand()),
+	RESTART("Restart container", new RestartCommand()),
+	KILL("Kill container", new KillCommand());
 	
 	private final String cmdName;
 	private final DockerCommand cmd;
