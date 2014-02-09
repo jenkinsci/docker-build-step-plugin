@@ -1,10 +1,39 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
+import hudson.DescriptorExtensionList;
+import hudson.ExtensionPoint;
+import hudson.model.Describable;
+import hudson.model.Descriptor;
+import jenkins.model.Jenkins;
+
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
+
 import com.kpelykh.docker.client.DockerClient;
 import com.kpelykh.docker.client.DockerException;
 
-public interface DockerCommand {
+public abstract class DockerCommand implements Describable<DockerCommand>, ExtensionPoint {
 
-	public void execute(DockerClient client, String[] params) throws DockerException ;
+	public abstract void execute() throws DockerException ;
 	
+	protected static DockerClient getClient() {
+		return ((DockerBuilder.DescriptorImpl)Jenkins.getInstance().getDescriptor(DockerBuilder.class)).getDockerClient();
+	}
+	
+	public DockerCommandDescriptor getDescriptor() {
+        return (DockerCommandDescriptor)Jenkins.getInstance().getDescriptor(getClass());
+    }
+
+    public static DescriptorExtensionList<DockerCommand,DockerCommandDescriptor> all() {
+        return Jenkins.getInstance().<DockerCommand,DockerCommandDescriptor>getDescriptorList(DockerCommand.class);
+    }
+	
+    
+    public abstract static class DockerCommandDescriptor extends Descriptor<DockerCommand> {
+        protected DockerCommandDescriptor(Class<? extends DockerCommand> clazz) {
+            super(clazz);
+        }
+
+        protected DockerCommandDescriptor() {
+        }
+    }
 }

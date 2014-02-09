@@ -1,10 +1,15 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
-	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
+    xmlns:f="/lib/form">
 
-	<f:entry field="dockerCmd" title="Docker command">
-		<f:select />
-	</f:entry>
-	<f:entry field="cmdParams" title="Command parameters (comma separated list)">
-		<f:textbox />
-	</f:entry>
+    <j:set var="currCmd" value="${instance.dockerCmd}" />
+    <f:dropdownList name="dockerCmd" title="Docker command">
+        <j:forEach var="desc" items="${instance.cmdDescriptors}" varStatus="loop">
+            <f:dropdownListBlock title="${desc.displayName}" value="${loop.index}" selected="${desc==currCmd.descriptor}"
+                staplerClass="${desc.clazz.name}">
+                <j:set var="instance" value="${currCmd}" />
+                <st:include page="${desc.configPage}" from="${desc}" />
+            </f:dropdownListBlock>
+        </j:forEach>
+    </f:dropdownList>
+
 </j:jelly>

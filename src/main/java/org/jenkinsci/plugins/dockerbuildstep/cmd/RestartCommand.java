@@ -1,27 +1,44 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
-import com.kpelykh.docker.client.DockerClient;
+import hudson.Extension;
+
+import org.kohsuke.stapler.DataBoundConstructor;
+
 import com.kpelykh.docker.client.DockerException;
 
-public class RestartCommand implements DockerCommand {
-	
-	@Override
-	public void execute(DockerClient client, String[] params) throws DockerException {
-		if(params == null || params.length < 1) { 
-			throw new IllegalArgumentException("At least one parameter is required");
-		}
-		
-		Integer timeout = new Integer(5);
-		if(params.length > 1) {
-			try {
-				timeout = new Integer(params[1]);
-			} catch(NumberFormatException e) {
-				// TODO log exception 
-				// fall back to default
-			}
-		}
-		
-		client.restart(params[0], timeout);
-	}
+public class RestartCommand extends DockerCommand {
+
+    private String containerId;
+    private int timeout;
+
+    @DataBoundConstructor
+    public RestartCommand(String containerId, int timeout) {
+        this.containerId = containerId;
+        this.timeout = timeout;
+    }
+
+    public String getContainerId() {
+        return containerId;
+    }
+
+    public int getTimeout() {
+        return timeout;
+    }
+
+    @Override
+    public void execute() throws DockerException {
+        if (containerId == null || containerId.isEmpty()) {
+            throw new IllegalArgumentException("At least one parameter is required");
+        }
+        getClient().restart(containerId, timeout);
+    }
+
+    @Extension
+    public static class RestartCommandDescriptor extends DockerCommandDescriptor {
+        @Override
+        public String getDisplayName() {
+            return "Restart constainer";
+        }
+    }
 
 }

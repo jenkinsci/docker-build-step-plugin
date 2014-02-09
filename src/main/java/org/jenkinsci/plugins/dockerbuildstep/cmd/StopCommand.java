@@ -1,16 +1,38 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
-import com.kpelykh.docker.client.DockerClient;
+import hudson.Extension;
+
+import org.kohsuke.stapler.DataBoundConstructor;
+
 import com.kpelykh.docker.client.DockerException;
 
-public class StopCommand implements DockerCommand {
-	
-	@Override
-	public void execute(DockerClient client, String[] params) throws DockerException {
-		if(params == null || params.length < 1) { 
-			throw new IllegalArgumentException("At least one parameter is required");
-		}
-		client.stopContainer(params[0]);
-	}
+public class StopCommand extends DockerCommand {
+
+    private String containerId;
+
+    @DataBoundConstructor
+    public StopCommand(String containerId) {
+        this.containerId = containerId;
+    }
+
+    public String getContainerId() {
+        return containerId;
+    }
+
+    @Override
+    public void execute() throws DockerException {
+        if (containerId == null || containerId.isEmpty()) {
+            throw new IllegalArgumentException("At least one parameter is required");
+        }
+        getClient().stopContainer(containerId);
+    }
+
+    @Extension
+    public static class StopCommandDescriptor extends DockerCommandDescriptor {
+        @Override
+        public String getDisplayName() {
+            return "Stop constainer";
+        }
+    }
 
 }
