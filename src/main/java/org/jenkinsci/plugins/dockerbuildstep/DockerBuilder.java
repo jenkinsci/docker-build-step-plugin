@@ -52,10 +52,6 @@ public class DockerBuilder extends Builder {
         return true;
     }
 
-    public DescriptorExtensionList<DockerCommand, DockerCommandDescriptor> getCmdDescriptors() {
-        return DockerCommand.all();
-    }
-
     @Override
     public DescriptorImpl getDescriptor() {
         return (DescriptorImpl) super.getDescriptor();
@@ -99,6 +95,10 @@ public class DockerBuilder extends Builder {
 
         public DockerClient getDockerClient() {
             return dockerClient;
+        }
+        
+        public DescriptorExtensionList<DockerCommand, DockerCommandDescriptor> getCmdDescriptors() {
+            return DockerCommand.all();
         }
 
     }
