@@ -1,0 +1,11 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
+    xmlns:f="/lib/form">
+
+    <f:entry field="image" title="Image name">
+        <f:textbox />
+    </f:entry>
+    <f:entry field="command" title="Command">
+        <f:textbox />
+    </f:entry>
+
+</j:jelly>
