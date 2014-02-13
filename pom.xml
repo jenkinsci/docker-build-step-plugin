@@ -14,7 +14,7 @@
 	<packaging>hpi</packaging>
 
 	<properties>
-		<version.docker.java>0.6.1-SNAPSHOT</version.docker.java>
+		<version.docker.java>0.7.6-SNAPSHOT</version.docker.java>
 	</properties>
 
 	<dependencies>
