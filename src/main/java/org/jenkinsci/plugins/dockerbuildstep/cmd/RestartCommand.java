@@ -1,24 +1,28 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
+import java.util.Arrays;
+import java.util.List;
+
 import hudson.Extension;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import com.kpelykh.docker.client.DockerClient;
 import com.kpelykh.docker.client.DockerException;
 
 public class RestartCommand extends DockerCommand {
 
-    private String containerId;
+    private String containerIds;
     private int timeout;
 
     @DataBoundConstructor
-    public RestartCommand(String containerId, int timeout) {
-        this.containerId = containerId;
+    public RestartCommand(String containerIds, int timeout) {
+        this.containerIds = containerIds;
         this.timeout = timeout;
     }
 
-    public String getContainerId() {
-        return containerId;
+    public String getContainerIds() {
+        return containerIds;
     }
 
     public int getTimeout() {
@@ -27,17 +31,23 @@ public class RestartCommand extends DockerCommand {
 
     @Override
     public void execute() throws DockerException {
-        if (containerId == null || containerId.isEmpty()) {
+        if (containerIds == null || containerIds.isEmpty()) {
             throw new IllegalArgumentException("At least one parameter is required");
         }
-        getClient().restart(containerId, timeout);
+        
+        List<String> ids = Arrays.asList(containerIds.split(","));
+        DockerClient client = getClient();
+        for(String id : ids) {
+            id = id.trim();
+            client.restart(id, timeout);
+        }
     }
 
     @Extension
     public static class RestartCommandDescriptor extends DockerCommandDescriptor {
         @Override
         public String getDisplayName() {
-            return "Restart constainer";
+            return "Restart constainer(s)";
         }
     }
 
