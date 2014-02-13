@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import hudson.Extension;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -24,7 +26,7 @@ public class KillCommand extends DockerCommand {
     }
 
     @Override
-    public void execute() throws DockerException {
+    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, BuildListener listener) throws DockerException {
         if (containerIds == null || containerIds.isEmpty()) {
             throw new IllegalArgumentException("At least one parameter is required");
         }

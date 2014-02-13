@@ -1,6 +1,8 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
 import hudson.Extension;
+import hudson.model.AbstractBuild;
+import hudson.model.BuildListener;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -28,7 +30,7 @@ public class CreateContainerCommand extends DockerCommand {
     }
 
     @Override
-    public void execute() throws DockerException {
+    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, BuildListener listener) throws DockerException {
         // TODO check it when submitting the form
         if (image == null || image.isEmpty()) {
             throw new IllegalArgumentException("At least one parameter is required");

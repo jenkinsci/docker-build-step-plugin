@@ -41,9 +41,9 @@ public class DockerBuilder extends Builder {
     }
 
     @Override
-    public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws AbortException {
+    public boolean perform(@SuppressWarnings("rawtypes") AbstractBuild build, Launcher launcher, BuildListener listener) throws AbortException {
         try {
-            dockerCmd.execute();
+            dockerCmd.execute(build, listener);
         } catch (DockerException e) {
             LOGGER.severe("Failed to execute Docker command " + dockerCmd.getDescriptor().getDisplayName() + ": "
                     + e.getMessage());
@@ -73,7 +73,7 @@ public class DockerBuilder extends Builder {
             return FormValidation.ok();
         }
 
-        public boolean isApplicable(Class<? extends AbstractProject> aClass) {
+        public boolean isApplicable(@SuppressWarnings("rawtypes") Class<? extends AbstractProject> aClass) {
             return true;
         }
 
