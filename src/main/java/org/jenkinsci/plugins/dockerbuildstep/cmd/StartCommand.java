@@ -7,10 +7,12 @@ import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 
+import org.jenkinsci.plugins.dockerbuildstep.action.EnvInvisibleAction;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import com.kpelykh.docker.client.DockerClient;
 import com.kpelykh.docker.client.DockerException;
+import com.kpelykh.docker.client.model.ContainerInspectResponse;
 
 public class StartCommand extends DockerCommand {
 
@@ -36,6 +38,11 @@ public class StartCommand extends DockerCommand {
         for(String id : ids) {
             id = id.trim();
             client.startContainer(id);
+            
+            ContainerInspectResponse inspectResp = client.inspectContainer(id);
+            System.out.println("Adding action for " + id);
+            EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
+            build.addAction(envAction);
         }
     }
 

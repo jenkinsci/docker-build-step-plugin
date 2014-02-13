@@ -1,14 +1,17 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
 import hudson.Extension;
-import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import hudson.model.AbstractBuild;
 
+import org.jenkinsci.plugins.dockerbuildstep.action.EnvInvisibleAction;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import com.kpelykh.docker.client.DockerClient;
 import com.kpelykh.docker.client.DockerException;
 import com.kpelykh.docker.client.model.ContainerConfig;
 import com.kpelykh.docker.client.model.ContainerCreateResponse;
+import com.kpelykh.docker.client.model.ContainerInspectResponse;
 
 public class CreateContainerCommand extends DockerCommand {
 
@@ -38,13 +41,16 @@ public class CreateContainerCommand extends DockerCommand {
         ContainerConfig cfg = new ContainerConfig();
         cfg.setImage(image);
         cfg.setCmd(new String[] { command });
-        ContainerCreateResponse resp = getClient().createContainer(cfg);
+        DockerClient client = getClient();
+        ContainerCreateResponse resp = client.createContainer(cfg);
 
         /*if (resp.getWarnings() != null) {
             for (String warn : resp.getWarnings())
                 System.out.println("WARN: " + warn);
         }*/
-        
+        ContainerInspectResponse inspectResp = client.inspectContainer(resp.getId());
+        EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
+        build.addAction(envAction);
     }
 
     @Extension
