@@ -17,11 +17,13 @@ public class CreateContainerCommand extends DockerCommand {
 
     private final String image;
     private final String command;
+    private final String hostName;
 
     @DataBoundConstructor
-    public CreateContainerCommand(String image, String command) {
+    public CreateContainerCommand(String image, String command, String hostName) {
         this.image = image;
         this.command = command;
+        this.hostName = hostName;
     }
 
     public String getImage() {
@@ -30,6 +32,10 @@ public class CreateContainerCommand extends DockerCommand {
 
     public String getCommand() {
         return command;
+    }
+    
+    public String getHostName() {
+        return hostName;
     }
 
     @Override
@@ -41,6 +47,7 @@ public class CreateContainerCommand extends DockerCommand {
         ContainerConfig cfg = new ContainerConfig();
         cfg.setImage(image);
         cfg.setCmd(new String[] { command });
+        cfg.setHostName(hostName);
         DockerClient client = getClient();
         ContainerCreateResponse resp = client.createContainer(cfg);
 

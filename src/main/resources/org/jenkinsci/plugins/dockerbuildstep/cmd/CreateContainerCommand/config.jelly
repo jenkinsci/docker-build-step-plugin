@@ -7,5 +7,8 @@
     <f:entry field="command" title="Command">
         <f:textbox />
     </f:entry>
-
+    <f:entry field="hostName" title="Hostname">
+        <f:textbox />
+    </f:entry>
+    
 </j:jelly>
