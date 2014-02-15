@@ -12,6 +12,12 @@ import com.kpelykh.docker.client.DockerClient;
 import com.kpelykh.docker.client.DockerException;
 import com.kpelykh.docker.client.model.Container;
 
+/**
+ * This command removes all Docker containers. Before removing them, it kills all them in case some of them are running.
+ * 
+ * @author vjuranek
+ * 
+ */
 public class RemoveAllCommand extends DockerCommand {
 
     @DataBoundConstructor
@@ -19,10 +25,11 @@ public class RemoveAllCommand extends DockerCommand {
     }
 
     @Override
-    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, BuildListener listener) throws DockerException {
+    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, BuildListener listener)
+            throws DockerException {
         DockerClient client = getClient();
         List<Container> conatiners = client.listContainers(true);
-        for(Container container : conatiners) {
+        for (Container container : conatiners) {
             client.kill(container.getId());
             client.removeContainer(container.getId());
         }

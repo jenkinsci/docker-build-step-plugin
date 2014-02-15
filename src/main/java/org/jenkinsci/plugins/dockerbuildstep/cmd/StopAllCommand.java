@@ -11,16 +11,23 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import com.kpelykh.docker.client.DockerException;
 import com.kpelykh.docker.client.model.Container;
 
+/**
+ * This command stop all Docker containers.
+ * 
+ * @author vjuranek
+ * 
+ */
 public class StopAllCommand extends DockerCommand {
 
     @DataBoundConstructor
     public StopAllCommand() {
     }
-    
+
     @Override
-    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, BuildListener listener) throws DockerException {
+    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, BuildListener listener)
+            throws DockerException {
         List<Container> containers = getClient().listContainers(true);
-        for(Container c : containers) {
+        for (Container c : containers) {
             getClient().stopContainer(c.getId());
         }
     }

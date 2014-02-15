@@ -13,6 +13,14 @@ import com.kpelykh.docker.client.model.ContainerConfig;
 import com.kpelykh.docker.client.model.ContainerCreateResponse;
 import com.kpelykh.docker.client.model.ContainerInspectResponse;
 
+/**
+ * This command creates new container from specified image.
+ * 
+ * @see http://docs.docker.io/en/master/api/docker_remote_api_v1.8/#create-a-container
+ * 
+ * @author vjuranek
+ * 
+ */
 public class CreateContainerCommand extends DockerCommand {
 
     private final String image;
@@ -33,13 +41,14 @@ public class CreateContainerCommand extends DockerCommand {
     public String getCommand() {
         return command;
     }
-    
+
     public String getHostName() {
         return hostName;
     }
 
     @Override
-    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, BuildListener listener) throws DockerException {
+    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, BuildListener listener)
+            throws DockerException {
         // TODO check it when submitting the form
         if (image == null || image.isEmpty()) {
             throw new IllegalArgumentException("At least one parameter is required");
@@ -51,10 +60,10 @@ public class CreateContainerCommand extends DockerCommand {
         DockerClient client = getClient();
         ContainerCreateResponse resp = client.createContainer(cfg);
 
-        /*if (resp.getWarnings() != null) {
-            for (String warn : resp.getWarnings())
-                System.out.println("WARN: " + warn);
-        }*/
+        /*
+         * if (resp.getWarnings() != null) { for (String warn : resp.getWarnings()) System.out.println("WARN: " + warn);
+         * }
+         */
         ContainerInspectResponse inspectResp = client.inspectContainer(resp.getId());
         EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
         build.addAction(envAction);

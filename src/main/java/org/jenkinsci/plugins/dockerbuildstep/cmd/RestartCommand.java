@@ -12,6 +12,14 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import com.kpelykh.docker.client.DockerClient;
 import com.kpelykh.docker.client.DockerException;
 
+/**
+ * This command restarts specified Docker container(s).
+ * 
+ * @see http://docs.docker.io/en/master/api/docker_remote_api_v1.8/#restart-a-container
+ * 
+ * @author vjuranek
+ *
+ */
 public class RestartCommand extends DockerCommand {
 
     private String containerIds;

@@ -12,6 +12,14 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import com.kpelykh.docker.client.DockerClient;
 import com.kpelykh.docker.client.DockerException;
 
+/**
+ * This command kills specified container(s).
+ * 
+ * @see http://docs.docker.io/en/master/api/docker_remote_api_v1.8/#kill-a-container
+ * 
+ * @author vjuranek
+ * 
+ */
 public class KillCommand extends DockerCommand {
 
     private String containerIds;
@@ -26,14 +34,15 @@ public class KillCommand extends DockerCommand {
     }
 
     @Override
-    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, BuildListener listener) throws DockerException {
+    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, BuildListener listener)
+            throws DockerException {
         if (containerIds == null || containerIds.isEmpty()) {
             throw new IllegalArgumentException("At least one parameter is required");
         }
-        
+
         List<String> ids = Arrays.asList(containerIds.split(","));
         DockerClient client = getClient();
-        for(String id : ids) {
+        for (String id : ids) {
             id = id.trim();
             client.kill(id);
         }

@@ -11,6 +11,13 @@ import java.util.List;
 
 import org.jenkinsci.plugins.dockerbuildstep.action.EnvInvisibleAction;
 
+/**
+ * This contributor adds various Docker relate variable like container IDs or IP addresses into build environment
+ * variables.
+ * 
+ * @author vjuranek
+ * 
+ */
 @Extension
 public class DockerEnvContributor extends EnvironmentContributor {
 

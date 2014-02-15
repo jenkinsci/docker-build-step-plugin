@@ -27,6 +27,12 @@ import org.kohsuke.stapler.StaplerRequest;
 import com.kpelykh.docker.client.DockerClient;
 import com.kpelykh.docker.client.DockerException;
 
+/**
+ * Build step which executes various Docker commands via Docker REST API.
+ * 
+ * @author vjuranek
+ * 
+ */
 public class DockerBuilder extends Builder {
 
     private DockerCommand dockerCmd;
@@ -41,7 +47,8 @@ public class DockerBuilder extends Builder {
     }
 
     @Override
-    public boolean perform(@SuppressWarnings("rawtypes") AbstractBuild build, Launcher launcher, BuildListener listener) throws AbortException {
+    public boolean perform(@SuppressWarnings("rawtypes") AbstractBuild build, Launcher launcher, BuildListener listener)
+            throws AbortException {
         try {
             dockerCmd.execute(build, listener);
         } catch (DockerException e) {
@@ -96,7 +103,7 @@ public class DockerBuilder extends Builder {
         public DockerClient getDockerClient() {
             return dockerClient;
         }
-        
+
         public DescriptorExtensionList<DockerCommand, DockerCommandDescriptor> getCmdDescriptors() {
             return DockerCommand.all();
         }

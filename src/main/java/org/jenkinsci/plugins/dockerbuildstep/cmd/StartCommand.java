@@ -14,6 +14,15 @@ import com.kpelykh.docker.client.DockerClient;
 import com.kpelykh.docker.client.DockerException;
 import com.kpelykh.docker.client.model.ContainerInspectResponse;
 
+/**
+ * This command starts one or more Docker containers. It also exports some build environment variable like IP or started
+ * containers.
+ * 
+ * @see http://docs.docker.io/en/master/api/docker_remote_api_v1.8/#start-a-container
+ * 
+ * @author vjuranek
+ * 
+ */
 public class StartCommand extends DockerCommand {
 
     private String containerIds;
@@ -28,17 +37,18 @@ public class StartCommand extends DockerCommand {
     }
 
     @Override
-    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, BuildListener listener) throws DockerException {
+    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, BuildListener listener)
+            throws DockerException {
         if (containerIds == null || containerIds.isEmpty()) {
             throw new IllegalArgumentException("At least one parameter is required");
         }
-        
+
         List<String> ids = Arrays.asList(containerIds.split(","));
         DockerClient client = getClient();
-        for(String id : ids) {
+        for (String id : ids) {
             id = id.trim();
             client.startContainer(id);
-            
+
             ContainerInspectResponse inspectResp = client.inspectContainer(id);
             EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
             build.addAction(envAction);
