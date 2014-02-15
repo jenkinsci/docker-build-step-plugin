@@ -40,7 +40,6 @@ public class StartCommand extends DockerCommand {
             client.startContainer(id);
             
             ContainerInspectResponse inspectResp = client.inspectContainer(id);
-            System.out.println("Adding action for " + id);
             EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
             build.addAction(envAction);
         }
