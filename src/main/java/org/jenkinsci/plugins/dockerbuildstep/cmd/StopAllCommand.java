@@ -29,6 +29,7 @@ public class StopAllCommand extends DockerCommand {
         List<Container> containers = getClient().listContainers(true);
         for (Container c : containers) {
             getClient().stopContainer(c.getId());
+            console.logInfo("stopped container id " + c.getId());
         }
     }
 

@@ -59,6 +59,7 @@ public class CreateContainerCommand extends DockerCommand {
         cfg.setHostName(hostName);
         DockerClient client = getClient();
         ContainerCreateResponse resp = client.createContainer(cfg);
+        console.logInfo("created container id " + resp.getId() + " (from image " + image + ")");
 
         /*
          * if (resp.getWarnings() != null) { for (String warn : resp.getWarnings()) System.out.println("WARN: " + warn);

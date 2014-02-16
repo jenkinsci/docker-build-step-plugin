@@ -32,6 +32,7 @@ public class RemoveAllCommand extends DockerCommand {
         for (Container container : conatiners) {
             client.kill(container.getId());
             client.removeContainer(container.getId());
+            console.logInfo("removed container id " + container.getId());
         }
     }
 

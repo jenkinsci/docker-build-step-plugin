@@ -48,6 +48,7 @@ public class StartCommand extends DockerCommand {
         for (String id : ids) {
             id = id.trim();
             client.startContainer(id);
+            console.logInfo("started container id " + id);
 
             ContainerInspectResponse inspectResp = client.inspectContainer(id);
             EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);

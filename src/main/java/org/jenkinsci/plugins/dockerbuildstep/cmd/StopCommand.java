@@ -45,6 +45,7 @@ public class StopCommand extends DockerCommand {
         for (String id : ids) {
             id = id.trim();
             client.stopContainer(id);
+            console.logInfo("stopped container id " + id);
         }
     }
 
