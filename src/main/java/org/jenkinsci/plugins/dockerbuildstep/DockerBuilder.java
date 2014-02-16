@@ -50,10 +50,13 @@ public class DockerBuilder extends Builder {
     @Override
     public boolean perform(@SuppressWarnings("rawtypes") AbstractBuild build, Launcher launcher, BuildListener listener)
             throws AbortException {
+        
+        ConsoleLogger clog = new ConsoleLogger(listener);
         try {
-            ConsoleLogger clog = new ConsoleLogger(listener); 
+             
             dockerCmd.execute(build, clog);
         } catch (DockerException e) {
+            clog.logError("command '" + dockerCmd.getDescriptor().getDisplayName() + "' failed: " + e.getMessage());
             LOGGER.severe("Failed to execute Docker command " + dockerCmd.getDescriptor().getDisplayName() + ": "
                     + e.getMessage());
             throw new AbortException(e.getMessage());

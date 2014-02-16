@@ -41,7 +41,7 @@ public class ConsoleLogger {
     }
     
     public void logError(String message) {
-        logAnnot("[Docker] Error: ", message);
+        logAnnot("[Docker] ERROR: ", message);
     }
     
     /**
