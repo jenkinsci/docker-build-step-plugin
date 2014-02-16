@@ -42,6 +42,7 @@ public class StopCommand extends DockerCommand {
 
         List<String> ids = Arrays.asList(containerIds.split(","));
         DockerClient client = getClient();
+        //TODO check, if container is actually running
         for (String id : ids) {
             id = id.trim();
             client.stopContainer(id);

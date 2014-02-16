@@ -45,6 +45,7 @@ public class StartCommand extends DockerCommand {
 
         List<String> ids = Arrays.asList(containerIds.split(","));
         DockerClient client = getClient();
+        //TODO check, if container exists and is stopped (probably catch exception)
         for (String id : ids) {
             id = id.trim();
             client.startContainer(id);
