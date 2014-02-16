@@ -1,13 +1,13 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
+import hudson.Extension;
+import hudson.model.AbstractBuild;
+
 import java.util.Arrays;
 import java.util.List;
 
-import hudson.Extension;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-
 import org.jenkinsci.plugins.dockerbuildstep.action.EnvInvisibleAction;
+import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import com.kpelykh.docker.client.DockerClient;
@@ -37,7 +37,7 @@ public class StartCommand extends DockerCommand {
     }
 
     @Override
-    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, BuildListener listener)
+    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
             throws DockerException {
         if (containerIds == null || containerIds.isEmpty()) {
             throw new IllegalArgumentException("At least one parameter is required");

@@ -2,13 +2,13 @@ package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
 import hudson.DescriptorExtensionList;
 import hudson.ExtensionPoint;
-import hudson.model.BuildListener;
 import hudson.model.Describable;
 import hudson.model.AbstractBuild;
 import hudson.model.Descriptor;
 import jenkins.model.Jenkins;
 
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
+import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 
 import com.kpelykh.docker.client.DockerClient;
 import com.kpelykh.docker.client.DockerException;
@@ -21,7 +21,7 @@ import com.kpelykh.docker.client.DockerException;
  */
 public abstract class DockerCommand implements Describable<DockerCommand>, ExtensionPoint {
 
-    public abstract void execute(@SuppressWarnings("rawtypes") AbstractBuild build, BuildListener listener)
+    public abstract void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
             throws DockerException;
 
     protected static DockerClient getClient() {

@@ -2,10 +2,10 @@ package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
 import hudson.Extension;
 import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
 
 import java.util.List;
 
+import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import com.kpelykh.docker.client.DockerClient;
@@ -25,7 +25,7 @@ public class RemoveAllCommand extends DockerCommand {
     }
 
     @Override
-    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, BuildListener listener)
+    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
             throws DockerException {
         DockerClient client = getClient();
         List<Container> conatiners = client.listContainers(true);

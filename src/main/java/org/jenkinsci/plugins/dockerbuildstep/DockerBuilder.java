@@ -20,6 +20,7 @@ import net.sf.json.JSONObject;
 
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand.DockerCommandDescriptor;
+import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -50,7 +51,8 @@ public class DockerBuilder extends Builder {
     public boolean perform(@SuppressWarnings("rawtypes") AbstractBuild build, Launcher launcher, BuildListener listener)
             throws AbortException {
         try {
-            dockerCmd.execute(build, listener);
+            ConsoleLogger clog = new ConsoleLogger(listener); 
+            dockerCmd.execute(build, clog);
         } catch (DockerException e) {
             LOGGER.severe("Failed to execute Docker command " + dockerCmd.getDescriptor().getDisplayName() + ": "
                     + e.getMessage());
