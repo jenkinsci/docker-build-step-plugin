@@ -31,14 +31,27 @@ public class ConsoleLogger {
         return listener.getLogger();
     }
 
+    
+    public void logAnnot(String message) {
+        logAnnot("", message);
+    }
+    
+    public void logInfo(String message) {
+        logAnnot("[Docker] INFO: ", message);
+    }
+    
+    public void logError(String message) {
+        logAnnot("[Docker] Error: ", message);
+    }
+    
     /**
      * Logs annotated messages
      * 
      * @param message
      *            message to be annotated
      */
-    public void logAnnot(String message) {
-        byte[] msg = (message + "\n").getBytes(Charset.defaultCharset());
+    public void logAnnot(String prefix, String message) {
+        byte[] msg = (prefix + message + "\n").getBytes(Charset.defaultCharset());
         try {
             annotator.eol(msg, msg.length);
         } catch (IOException e) {
