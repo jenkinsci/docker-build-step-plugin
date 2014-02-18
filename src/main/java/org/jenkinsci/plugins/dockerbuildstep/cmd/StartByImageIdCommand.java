@@ -14,6 +14,13 @@ import com.kpelykh.docker.client.DockerException;
 import com.kpelykh.docker.client.model.Container;
 import com.kpelykh.docker.client.model.ContainerInspectResponse;
 
+/**
+ * This command starts all containers create from specified image ID. It also exports some build environment variable
+ * like IP or started containers.
+ * 
+ * @author vjuranek
+ * 
+ */
 public class StartByImageIdCommand extends DockerCommand {
 
     private String imageId;

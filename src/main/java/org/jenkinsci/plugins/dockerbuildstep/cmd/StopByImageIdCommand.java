@@ -12,6 +12,12 @@ import com.kpelykh.docker.client.DockerClient;
 import com.kpelykh.docker.client.DockerException;
 import com.kpelykh.docker.client.model.Container;
 
+/**
+ * This command stops all containers create from specified image ID.
+ * 
+ * @author vjuranek
+ *
+ */
 public class StopByImageIdCommand extends DockerCommand {
 
     private String imageId;
