@@ -49,7 +49,7 @@ public class StopByImageIdCommand extends DockerCommand {
     }
 
     @Extension
-    public static class StartCommandDescriptor extends DockerCommandDescriptor {
+    public static class StopByImageCommandDescriptor extends DockerCommandDescriptor {
         @Override
         public String getDisplayName() {
             return "Stop constainer(s) by image ID";
