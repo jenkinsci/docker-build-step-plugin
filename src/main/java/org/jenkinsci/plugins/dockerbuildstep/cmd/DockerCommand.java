@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
+import hudson.AbortException;
 import hudson.DescriptorExtensionList;
 import hudson.ExtensionPoint;
 import hudson.model.Describable;
@@ -22,7 +23,7 @@ import com.kpelykh.docker.client.DockerException;
 public abstract class DockerCommand implements Describable<DockerCommand>, ExtensionPoint {
 
     public abstract void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
-            throws DockerException;
+            throws DockerException, AbortException;
 
     protected static DockerClient getClient() {
         return ((DockerBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(DockerBuilder.class))
