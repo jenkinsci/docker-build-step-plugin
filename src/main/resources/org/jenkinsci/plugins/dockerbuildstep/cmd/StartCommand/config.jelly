@@ -5,4 +5,11 @@
         <f:textbox />
     </f:entry>
 
+
+    <f:advanced align="left">
+        <f:entry field="waitPorts" title="Wait for ports">
+            <f:textarea />
+        </f:entry>
+    </f:advanced>
+
 </j:jelly>
