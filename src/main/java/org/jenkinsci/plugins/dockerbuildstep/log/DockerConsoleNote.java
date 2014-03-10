@@ -20,6 +20,8 @@ public class DockerConsoleNote extends ConsoleNote<Run<?, ?>> {
     public ConsoleAnnotator<Run<?, ?>> annotate(Run<?, ?> context, MarkupText text, int charPos) {
         if (text.getText().contains("ERROR:"))
             text.addMarkup(0, text.length(), "<span style=\"font-weight: bold; color:red\">", "</span>");
+        if (text.getText().contains("WARN:"))
+            text.addMarkup(0, text.length(), "<span style=\"color:#FF8700\">", "</span>");
         if (text.getText().contains("INFO:"))
             text.addMarkup(0, text.length(), "<span style=\"color:#008BB8\">", "</span>");
         return null;

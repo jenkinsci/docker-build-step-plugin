@@ -40,6 +40,10 @@ public class ConsoleLogger {
         logAnnot("[Docker] INFO: ", message);
     }
     
+    public void logWarn(String message) {
+        logAnnot("[Docker] WARN: ", message);
+    }
+    
     public void logError(String message) {
         logAnnot("[Docker] ERROR: ", message);
     }
