@@ -10,7 +10,7 @@ import java.util.Map;
 public class PortUtils {
 
     private static final int RETRIES = 10;
-    private static final int WAIT_TIME_MS = 500;
+    private static final int WAIT_TIME_MS = 2000;
 
     public static boolean isPortAvailable(String host, int port) {
         Socket socket = null;
@@ -19,7 +19,7 @@ public class PortUtils {
             socket = new Socket(host, port);
             available = true;
         } catch (IOException e) {
-            e.printStackTrace();
+            // no-op
         } finally {
             if (socket != null) {
                 try {
