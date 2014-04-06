@@ -8,7 +8,7 @@
 
 	<groupId>org.jenkins-ci.plugins</groupId>
 	<artifactId>docker-build-step</artifactId>
-	<version>1.2-SNAPSHOT</version>
+	<version>1.2</version>
 	<packaging>hpi</packaging>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Docker+build+step+plugin</url>
 
@@ -23,7 +23,8 @@
         <connection>scm:git:git://github.com/jenkinsci/docker-build-step-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/docker-build-step-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/docker-build-step-plugin</url>
-    </scm>
+      <tag>docker-build-step-1.2-redoII</tag>
+  </scm>
 
 	<properties>
 		<version.docker.java>0.8.1</version.docker.java>
