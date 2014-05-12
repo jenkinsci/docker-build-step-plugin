@@ -59,7 +59,7 @@ public class StartByImageIdCommand extends DockerCommand {
     public static class StartByImageCommandDescriptor extends DockerCommandDescriptor {
         @Override
         public String getDisplayName() {
-            return "Start constainer(s) by image ID";
+            return "Start container(s) by image ID";
         }
     }
 

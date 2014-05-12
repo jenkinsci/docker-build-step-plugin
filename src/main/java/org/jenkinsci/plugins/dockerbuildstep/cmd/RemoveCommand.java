@@ -57,7 +57,7 @@ public class RemoveCommand extends DockerCommand {
     public static class RemoveCommandDescriptor extends DockerCommandDescriptor {
         @Override
         public String getDisplayName() {
-            return "Remove constainer(s)";
+            return "Remove container(s)";
         }
     }
 
