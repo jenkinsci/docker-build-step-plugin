@@ -38,7 +38,7 @@ public class StopAllCommand extends DockerCommand {
     public static class StopAllCommandDescriptor extends DockerCommandDescriptor {
         @Override
         public String getDisplayName() {
-            return "Stop all constainers";
+            return "Stop all containers";
         }
     }
 

@@ -90,7 +90,7 @@ public class StartCommand extends DockerCommand {
     public static class StartCommandDescriptor extends DockerCommandDescriptor {
         @Override
         public String getDisplayName() {
-            return "Start constainer(s)";
+            return "Start container(s)";
         }
     }
 

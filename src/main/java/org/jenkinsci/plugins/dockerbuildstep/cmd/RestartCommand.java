@@ -58,7 +58,7 @@ public class RestartCommand extends DockerCommand {
     public static class RestartCommandDescriptor extends DockerCommandDescriptor {
         @Override
         public String getDisplayName() {
-            return "Restart constainer(s)";
+            return "Restart container(s)";
         }
     }
 

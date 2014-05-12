@@ -54,7 +54,7 @@ public class StopCommand extends DockerCommand {
     public static class StopCommandDescriptor extends DockerCommandDescriptor {
         @Override
         public String getDisplayName() {
-            return "Stop constainer(s)";
+            return "Stop container(s)";
         }
     }
 

@@ -74,7 +74,7 @@ public class CreateContainerCommand extends DockerCommand {
     public static class CreateContainerCommandDescriptor extends DockerCommandDescriptor {
         @Override
         public String getDisplayName() {
-            return "Create constainer";
+            return "Create container";
         }
     }
 

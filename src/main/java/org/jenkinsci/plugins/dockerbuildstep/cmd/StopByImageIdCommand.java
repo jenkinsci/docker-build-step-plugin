@@ -52,7 +52,7 @@ public class StopByImageIdCommand extends DockerCommand {
     public static class StopByImageCommandDescriptor extends DockerCommandDescriptor {
         @Override
         public String getDisplayName() {
-            return "Stop constainer(s) by image ID";
+            return "Stop container(s) by image ID";
         }
     }
 
