@@ -10,6 +10,7 @@ import java.util.Map;
 import org.jenkinsci.plugins.dockerbuildstep.action.EnvInvisibleAction;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.PortUtils;
+import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import com.kpelykh.docker.client.DockerClient;
@@ -51,6 +52,8 @@ public class StartCommand extends DockerCommand {
             throw new IllegalArgumentException("At least one parameter is required");
         }
 
+        containerIds = Resolver.buildVar(build, containerIds);
+        
         List<String> ids = Arrays.asList(containerIds.split(","));
         DockerClient client = getClient();
         //TODO check, if container exists and is stopped (probably catch exception)

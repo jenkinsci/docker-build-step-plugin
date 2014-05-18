@@ -6,6 +6,7 @@ import hudson.model.AbstractBuild;
 import java.util.List;
 
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
+import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import com.kpelykh.docker.client.DockerClient;
@@ -38,6 +39,8 @@ public class StopByImageIdCommand extends DockerCommand {
             throw new IllegalArgumentException("At least one parameter is required");
         }
 
+        imageId = Resolver.buildVar(build, imageId);
+        
         DockerClient client = getClient();
         List<Container> containers = getClient().listContainers(false);
         for (Container c : containers) {

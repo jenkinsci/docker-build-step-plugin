@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
+import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import com.kpelykh.docker.client.DockerClient;
@@ -40,6 +41,8 @@ public class StopCommand extends DockerCommand {
             throw new IllegalArgumentException("At least one parameter is required");
         }
 
+        containerIds = Resolver.buildVar(build, containerIds);
+        
         List<String> ids = Arrays.asList(containerIds.split(","));
         DockerClient client = getClient();
         //TODO check, if container is actually running
