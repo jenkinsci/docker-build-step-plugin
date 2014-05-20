@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
+import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import com.kpelykh.docker.client.DockerClient;
@@ -69,10 +70,13 @@ public class CreateImageCommand extends DockerCommand {
 			throw new IllegalArgumentException("imageTag is not configured");
 		}
 
-		String expandedDockerFolder = expandEnvironmentVariables(dockerFolder,
+		String dockerFolderRes = Resolver.buildVar(build, dockerFolder);
+		String imageTagRes = Resolver.buildVar(build, imageTag);
+		
+		String expandedDockerFolder = expandEnvironmentVariables(dockerFolderRes,
 				build, console);
 
-		String expandedImageTag = expandEnvironmentVariables(imageTag, build,
+		String expandedImageTag = expandEnvironmentVariables(imageTagRes, build,
 				console);
 
 		FilePath folder = new FilePath(new File(expandedDockerFolder));

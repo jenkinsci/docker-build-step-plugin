@@ -23,7 +23,7 @@ import com.kpelykh.docker.client.DockerException;
  */
 public class StopCommand extends DockerCommand {
 
-    private String containerIds;
+    private final String containerIds;
 
     @DataBoundConstructor
     public StopCommand(String containerIds) {
@@ -41,9 +41,9 @@ public class StopCommand extends DockerCommand {
             throw new IllegalArgumentException("At least one parameter is required");
         }
 
-        containerIds = Resolver.buildVar(build, containerIds);
+        String containerIdsRes = Resolver.buildVar(build, containerIds);
         
-        List<String> ids = Arrays.asList(containerIds.split(","));
+        List<String> ids = Arrays.asList(containerIdsRes.split(","));
         DockerClient client = getClient();
         //TODO check, if container is actually running
         for (String id : ids) {

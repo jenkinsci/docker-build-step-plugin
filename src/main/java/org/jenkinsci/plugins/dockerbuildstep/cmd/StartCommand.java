@@ -28,7 +28,7 @@ import com.kpelykh.docker.client.model.ContainerInspectResponse;
  */
 public class StartCommand extends DockerCommand {
 
-    private String containerIds;
+    private final String containerIds;
     private final String waitPorts;
 
     @DataBoundConstructor
@@ -52,9 +52,9 @@ public class StartCommand extends DockerCommand {
             throw new IllegalArgumentException("At least one parameter is required");
         }
 
-        containerIds = Resolver.buildVar(build, containerIds);
+        String containerIdsRes = Resolver.buildVar(build, containerIds);
         
-        List<String> ids = Arrays.asList(containerIds.split(","));
+        List<String> ids = Arrays.asList(containerIdsRes.split(","));
         DockerClient client = getClient();
         //TODO check, if container exists and is stopped (probably catch exception)
         for (String id : ids) {

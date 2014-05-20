@@ -24,7 +24,7 @@ import com.kpelykh.docker.client.model.ContainerInspectResponse;
  */
 public class StartByImageIdCommand extends DockerCommand {
 
-    private String imageId;
+    private final String imageId;
 
     @DataBoundConstructor
     public StartByImageIdCommand(String imageId) {
@@ -42,12 +42,12 @@ public class StartByImageIdCommand extends DockerCommand {
             throw new IllegalArgumentException("At least one parameter is required");
         }
 
-        imageId = Resolver.buildVar(build, imageId);
+        String imageIdRes = Resolver.buildVar(build, imageId);
         
         DockerClient client = getClient();
         List<Container> containers = getClient().listContainers(true);
         for (Container c : containers) {
-            if (imageId.equalsIgnoreCase(c.getImage())) {
+            if (imageIdRes.equalsIgnoreCase(c.getImage())) {
                 client.startContainer(c.getId());
                 console.logInfo("started container id " + c.getId());
 

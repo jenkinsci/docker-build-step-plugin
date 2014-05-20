@@ -5,6 +5,7 @@ import hudson.model.AbstractBuild;
 
 import org.jenkinsci.plugins.dockerbuildstep.action.EnvInvisibleAction;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
+import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import com.kpelykh.docker.client.DockerClient;
@@ -53,13 +54,18 @@ public class CreateContainerCommand extends DockerCommand {
         if (image == null || image.isEmpty()) {
             throw new IllegalArgumentException("At least one parameter is required");
         }
+        
+        String imageRes = Resolver.buildVar(build, image);
+        String commandRes = Resolver.buildVar(build, command);
+        String hostNameRes = Resolver.buildVar(build, hostName);
+        
         ContainerConfig cfg = new ContainerConfig();
-        cfg.setImage(image);
-        cfg.setCmd(new String[] { command });
-        cfg.setHostName(hostName);
+        cfg.setImage(imageRes);
+        cfg.setCmd(new String[] { commandRes });
+        cfg.setHostName(hostNameRes);
         DockerClient client = getClient();
         ContainerCreateResponse resp = client.createContainer(cfg);
-        console.logInfo("created container id " + resp.getId() + " (from image " + image + ")");
+        console.logInfo("created container id " + resp.getId() + " (from image " + imageRes + ")");
 
         /*
          * if (resp.getWarnings() != null) { for (String warn : resp.getWarnings()) System.out.println("WARN: " + warn);

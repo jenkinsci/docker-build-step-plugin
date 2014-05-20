@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
+import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import com.kpelykh.docker.client.DockerClient;
@@ -22,8 +23,8 @@ import com.kpelykh.docker.client.DockerException;
  */
 public class RestartCommand extends DockerCommand {
 
-    private String containerIds;
-    private int timeout;
+    private final String containerIds;
+    private final int timeout;
 
     @DataBoundConstructor
     public RestartCommand(String containerIds, int timeout) {
@@ -45,7 +46,9 @@ public class RestartCommand extends DockerCommand {
             throw new IllegalArgumentException("At least one parameter is required");
         }
         
-        List<String> ids = Arrays.asList(containerIds.split(","));
+        String containerIdsRes = Resolver.buildVar(build, containerIds);
+        
+        List<String> ids = Arrays.asList(containerIdsRes.split(","));
         DockerClient client = getClient();
         for(String id : ids) {
             id = id.trim();

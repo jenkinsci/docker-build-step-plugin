@@ -9,6 +9,7 @@ import java.util.List;
 import javax.ws.rs.core.Response;
 
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
+import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import com.kpelykh.docker.client.DockerClient;
@@ -57,14 +58,18 @@ public class PullImageCommand extends DockerCommand {
             throw new IllegalArgumentException("At least one parameter is required");
         }
 
-        console.logInfo("Pulling image " + fromImage);
+        String fromImageRes = Resolver.buildVar(build, fromImage);
+        String tagRes = Resolver.buildVar(build, tag);
+        String registryRes = Resolver.buildVar(build, registry);
+        
+        console.logInfo("Pulling image " + fromImageRes);
         DockerClient client = getClient();
-        ClientResponse resp = client.pull(fromImage, tag, registry);
+        ClientResponse resp = client.pull(fromImageRes, tagRes, registryRes);
         if (Response.Status.Family.SUCCESSFUL.equals(resp.getStatusInfo().getFamily())) {
             console.logInfo("Downloading ... ");
         } else {
             console.logError("Something went wrong, response code is " + resp.getStatus() + ". Failing the build ...");
-            throw new AbortException("Failed to pull Docker image name " + fromImage);
+            throw new AbortException("Failed to pull Docker image name " + fromImageRes);
         }
 
         // wait for the image to be downloaded
@@ -73,7 +78,7 @@ public class PullImageCommand extends DockerCommand {
                 Thread.currentThread().sleep(15 * 1000); // wait 15 sec
             } catch (InterruptedException e) {
                 // TODO log
-                throw new AbortException("Download of Docker image name " + fromImage + " was interrupted");
+                throw new AbortException("Download of Docker image name " + fromImageRes + " was interrupted");
             }
         }
 

@@ -1,8 +1,13 @@
 package org.jenkinsci.plugins.dockerbuildstep.util;
 
+import hudson.EnvVars;
 import hudson.Util;
 import hudson.model.AbstractBuild;
+import hudson.util.LogTaskListener;
 import hudson.util.VariableResolver;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Convenient class for resolving/expanding various variabales.
@@ -16,10 +21,13 @@ public class Resolver {
         VariableResolver<String> vr = build.getBuildVariableResolver();
         String resolved = Util.replaceMacro(toResolve, vr);
         try {
-            resolved = build.getEnvironment().expand(resolved);  //TODO avoid deprecated method
+            EnvVars env = build.getEnvironment(new LogTaskListener(LOG, Level.INFO));
+            resolved = env.expand(resolved);
         } catch (Exception e) {
             //TODO no-op?
         }
         return resolved;
     }
+    
+    private static final Logger LOG = Logger.getLogger(Resolver.class.getName());
 }

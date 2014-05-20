@@ -21,7 +21,7 @@ import com.kpelykh.docker.client.model.Container;
  */
 public class StopByImageIdCommand extends DockerCommand {
 
-    private String imageId;
+    private final String imageId;
 
     @DataBoundConstructor
     public StopByImageIdCommand(String imageId) {
@@ -39,12 +39,12 @@ public class StopByImageIdCommand extends DockerCommand {
             throw new IllegalArgumentException("At least one parameter is required");
         }
 
-        imageId = Resolver.buildVar(build, imageId);
+        String imageIdRes = Resolver.buildVar(build, imageId);
         
         DockerClient client = getClient();
         List<Container> containers = getClient().listContainers(false);
         for (Container c : containers) {
-            if (imageId.equalsIgnoreCase(c.getImage())) {
+            if (imageIdRes.equalsIgnoreCase(c.getImage())) {
                 client.stopContainer(c.getId());
                 console.logInfo("stop container id " + c.getId());
             }

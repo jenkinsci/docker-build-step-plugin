@@ -5,6 +5,7 @@ import hudson.Extension;
 import hudson.model.AbstractBuild;
 
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
+import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import com.kpelykh.docker.client.DockerException;
@@ -57,13 +58,15 @@ public class CommitCommand extends DockerCommand {
             throw new IllegalArgumentException("At least one parameter is required");
         }
 
-        CommitConfig cfg = new CommitConfig(containerId);
+        String containerIdRes = Resolver.buildVar(build, containerId);
+        
+        CommitConfig cfg = new CommitConfig(containerIdRes);
         cfg.setRepo(repo);
         cfg.setTag(tag);
         cfg.setRun(runCmd);
         String imageId = getClient().commit(cfg);
 
-        console.logInfo("Container " + containerId + " commited as image " + imageId);
+        console.logInfo("Container " + containerIdRes + " commited as image " + imageId);
     }
 
     @Extension
