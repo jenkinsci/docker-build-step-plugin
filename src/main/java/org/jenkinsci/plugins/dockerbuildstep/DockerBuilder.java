@@ -77,7 +77,11 @@ public class DockerBuilder extends Builder {
 
         public DescriptorImpl() {
             load();
-            dockerClient = new DockerClient(dockerUrl);
+            try {
+                dockerClient = new DockerClient(dockerUrl);
+            } catch(DockerException e) {
+                LOGGER.warning("Cannot create Docker client: " + e.getCause());
+            }
         }
 
         public FormValidation doCheckName(@QueryParameter String dockerURL) throws IOException, ServletException {
@@ -97,7 +101,11 @@ public class DockerBuilder extends Builder {
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             dockerUrl = formData.getString("dockerUrl");
             save();
-            dockerClient = new DockerClient(dockerUrl);
+            try {
+                dockerClient = new DockerClient(dockerUrl);
+            } catch(DockerException e) {
+                LOGGER.warning("Cannot create Docker client: " + e.getCause());
+            }
             return super.configure(req, formData);
         }
 
