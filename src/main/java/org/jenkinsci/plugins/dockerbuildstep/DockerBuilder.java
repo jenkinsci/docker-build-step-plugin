@@ -50,10 +50,16 @@ public class DockerBuilder extends Builder {
     @Override
     public boolean perform(@SuppressWarnings("rawtypes") AbstractBuild build, Launcher launcher, BuildListener listener)
             throws AbortException {
-        
+
         ConsoleLogger clog = new ConsoleLogger(listener);
+
+        if (getDescriptor().getDockerClient() == null) {
+            clog.logError("docker client is not initialized, command '" + dockerCmd.getDescriptor().getDisplayName()
+                    + "' was aborted. Check Jenkins server log which Docker client wasn't initialized");
+            throw new AbortException("Docker client wasn't initialized.");
+        }
+
         try {
-             
             dockerCmd.execute(build, clog);
         } catch (DockerException e) {
             clog.logError("command '" + dockerCmd.getDescriptor().getDisplayName() + "' failed: " + e.getMessage());
@@ -77,9 +83,15 @@ public class DockerBuilder extends Builder {
 
         public DescriptorImpl() {
             load();
+
+            if (dockerUrl == null || dockerUrl.isEmpty()) {
+                LOGGER.warning("Docker URL is not set, docker client won't be initialized");
+                return;
+            }
+
             try {
                 dockerClient = new DockerClient(dockerUrl);
-            } catch(DockerException e) {
+            } catch (DockerException e) {
                 LOGGER.warning("Cannot create Docker client: " + e.getCause());
             }
         }
@@ -100,10 +112,13 @@ public class DockerBuilder extends Builder {
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             dockerUrl = formData.getString("dockerUrl");
+            if (dockerUrl == null || dockerUrl.isEmpty())
+                throw new FormException("Docker REST URL cannot be empty", "dockerUrl");
+
             save();
             try {
                 dockerClient = new DockerClient(dockerUrl);
-            } catch(DockerException e) {
+            } catch (DockerException e) {
                 LOGGER.warning("Cannot create Docker client: " + e.getCause());
             }
             return super.configure(req, formData);
