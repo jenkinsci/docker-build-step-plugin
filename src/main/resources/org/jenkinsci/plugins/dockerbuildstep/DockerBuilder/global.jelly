@@ -4,6 +4,7 @@
     <f:entry title="Docker URL" field="dockerUrl" description="Docker server REST API URL">
       <f:textbox />
     </f:entry>
+    <f:validateButton title="${%Test Connection}" progress="${%Testing...}" method="testConnection" with="dockerUrl" />
   </f:section>
 
 </j:jelly>

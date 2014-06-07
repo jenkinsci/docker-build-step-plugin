@@ -12,6 +12,7 @@ import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
@@ -27,6 +28,7 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import com.kpelykh.docker.client.DockerClient;
 import com.kpelykh.docker.client.DockerException;
+import com.kpelykh.docker.client.model.Info;
 
 /**
  * Build step which executes various Docker commands via Docker REST API.
@@ -96,9 +98,17 @@ public class DockerBuilder extends Builder {
             }
         }
 
-        public FormValidation doCheckName(@QueryParameter String dockerURL) throws IOException, ServletException {
-            // TODO do validation
-            return FormValidation.ok();
+        public FormValidation doTestConnection(@QueryParameter String dockerUrl) throws IOException, ServletException {
+            LOGGER.fine("Trying to get client for " + dockerUrl);
+            try {
+                dockerClient = new DockerClient(dockerUrl);
+                Info info = dockerClient.info(); //TODO replace with _ping once implemented in docker client
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, e.getMessage(), e);
+                return FormValidation.error("Something went wrong, cannot connect to " + dockerUrl + ", cause: "
+                        + e.getCause());
+            }
+            return FormValidation.ok("Connected to " + dockerUrl);
         }
 
         public boolean isApplicable(@SuppressWarnings("rawtypes") Class<? extends AbstractProject> aClass) {
