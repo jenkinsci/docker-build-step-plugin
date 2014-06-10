@@ -102,7 +102,9 @@ public class DockerBuilder extends Builder {
             LOGGER.fine("Trying to get client for " + dockerUrl);
             try {
                 dockerClient = new DockerClient(dockerUrl);
-                Info info = dockerClient.info(); //TODO replace with _ping once implemented in docker client
+                if(dockerClient.ping() != 200) {
+                    return FormValidation.error("Cannot ping REST endpoint of " + dockerUrl);
+                }
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, e.getMessage(), e);
                 return FormValidation.error("Something went wrong, cannot connect to " + dockerUrl + ", cause: "
