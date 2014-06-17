@@ -27,12 +27,12 @@
   </scm>
 
 	<properties>
-		<version.docker.java>0.8.2-SNAPSHOT</version.docker.java>
+		<version.docker.java>0.8.3-SNAPSHOT</version.docker.java>
 	</properties>
 
 	<dependencies>
 		<dependency>
-			<groupId>com.kpelykh</groupId>
+			<groupId>com.github.docker-java</groupId>
 			<artifactId>docker-java</artifactId>
 			<version>${version.docker.java}</version>
 		</dependency>
