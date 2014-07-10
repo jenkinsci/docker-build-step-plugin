@@ -124,8 +124,11 @@ public class DockerBuilder extends Builder {
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             dockerUrl = formData.getString("dockerUrl");
-            if (dockerUrl == null || dockerUrl.isEmpty())
-                throw new FormException("Docker REST URL cannot be empty", "dockerUrl");
+            if (dockerUrl == null || dockerUrl.isEmpty()) {
+                LOGGER.severe("Docker URL is empty, Docker build test plugin cannot work without Docker URL being set up properly");
+                //JENKINS-23733 doen't block user to save the config if admin decides so
+                return true;
+            }
 
             save();
             try {
@@ -147,7 +150,7 @@ public class DockerBuilder extends Builder {
         public DescriptorExtensionList<DockerCommand, DockerCommandDescriptor> getCmdDescriptors() {
             return DockerCommand.all();
         }
-
+        
     }
 
     private static Logger LOGGER = Logger.getLogger(DockerBuilder.class.getName());
