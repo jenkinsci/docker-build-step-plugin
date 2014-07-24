@@ -7,6 +7,10 @@
 
 
     <f:advanced align="left">
+        <f:entry field="portBindings" title="Port bindings">
+            <f:textarea />
+        </f:entry>
+        
         <f:entry field="waitPorts" title="Wait for ports">
             <f:textarea />
         </f:entry>

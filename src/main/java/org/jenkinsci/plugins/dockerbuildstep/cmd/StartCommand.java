@@ -16,6 +16,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import com.kpelykh.docker.client.DockerClient;
 import com.kpelykh.docker.client.DockerException;
 import com.kpelykh.docker.client.model.ContainerInspectResponse;
+import com.kpelykh.docker.client.model.Ports;
 
 /**
  * This command starts one or more Docker containers. It also exports some build environment variable like IP or started
@@ -29,16 +30,22 @@ import com.kpelykh.docker.client.model.ContainerInspectResponse;
 public class StartCommand extends DockerCommand {
 
     private final String containerIds;
+    private final String portBindings;
     private final String waitPorts;
 
     @DataBoundConstructor
-    public StartCommand(String containerIds, String waitPorts) {
+    public StartCommand(String containerIds, String portBindings, String waitPorts) {
         this.containerIds = containerIds;
+        this.portBindings = portBindings;
         this.waitPorts = waitPorts;
     }
 
     public String getContainerIds() {
         return containerIds;
+    }
+    
+    public String getPortBindings() {
+        return portBindings;
     }
     
     public String getWaitPorts() {
@@ -52,10 +59,14 @@ public class StartCommand extends DockerCommand {
             throw new IllegalArgumentException("At least one parameter is required");
         }
 
+        //expand build and env. variable
         String containerIdsRes = Resolver.buildVar(build, containerIds);
+        String portBindingsRes = Resolver.buildVar(build, portBindings);
         
         List<String> ids = Arrays.asList(containerIdsRes.split(","));
+        Ports bindPorts = parsePortBindings(portBindingsRes);
         DockerClient client = getClient();
+        
         //TODO check, if container exists and is stopped (probably catch exception)
         for (String id : ids) {
             id = id.trim();
@@ -69,26 +80,36 @@ public class StartCommand extends DockerCommand {
         
         //wait for ports
         if(waitPorts != null && !waitPorts.isEmpty()) {
-            Map<String, List<Integer>> containers = PortUtils.parsePorts(waitPorts);
-            for(String cId : containers.keySet()) {
-                ContainerInspectResponse inspectResp = client.inspectContainer(cId);
-                String ip = inspectResp.getNetworkSettings().ipAddress;
-                List<Integer> ports = containers.get(cId);
-                for(Integer port : ports) {
-                    console.logInfo("Waiting for port " + port + " on " + ip + " (conatiner ID " + cId + ")");
-                    boolean portReady = PortUtils.waitForPort(ip, port);
-                    if(portReady) {
-                        console.logInfo(ip + ":" + port + " ready");
-                    } 
-                    else {
-                        //TODO fail the build, but make timeout configurable first
-                        console.logWarn(ip + ":" + port + " still not available (conatiner ID " + cId + "), but build continues ...");
-                    }
+            waitForPorts(client, console);
+        }
+    }
+
+    private Ports parsePortBindings(String bindings) {
+        Ports ports = new Ports();
+        
+        return ports;
+    }
+    
+    private void waitForPorts(DockerClient client, ConsoleLogger console) throws DockerException {
+        Map<String, List<Integer>> containers = PortUtils.parsePorts(waitPorts);
+        for(String cId : containers.keySet()) {
+            ContainerInspectResponse inspectResp = client.inspectContainer(cId);
+            String ip = inspectResp.getNetworkSettings().ipAddress;
+            List<Integer> ports = containers.get(cId);
+            for(Integer port : ports) {
+                console.logInfo("Waiting for port " + port + " on " + ip + " (conatiner ID " + cId + ")");
+                boolean portReady = PortUtils.waitForPort(ip, port);
+                if(portReady) {
+                    console.logInfo(ip + ":" + port + " ready");
+                } 
+                else {
+                    //TODO fail the build, but make timeout configurable first
+                    console.logWarn(ip + ":" + port + " still not available (conatiner ID " + cId + "), but build continues ...");
                 }
             }
         }
     }
-
+    
     @Extension
     public static class StartCommandDescriptor extends DockerCommandDescriptor {
         @Override
