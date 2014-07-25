@@ -25,8 +25,8 @@ import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.kpelykh.docker.client.DockerClient;
-import com.kpelykh.docker.client.DockerException;
+import com.github.dockerjava.client.DockerClient;
+import com.github.dockerjava.client.DockerException;
 import com.sun.jersey.api.client.ClientResponse;
 
 /**
@@ -100,7 +100,7 @@ public class CreateImageCommand extends DockerCommand {
 			console.logInfo("Creating docker image from "
 					+ docker.getAbsolutePath());
 
-			ClientResponse response = client.build(docker, expandedImageTag);
+			ClientResponse response = client.execute(client.buildImageCmd(docker).withTag(expandedImageTag));
 
 			if (response.getStatus() != Response.Status.OK.getStatusCode()) {
 				throw new RuntimeException(

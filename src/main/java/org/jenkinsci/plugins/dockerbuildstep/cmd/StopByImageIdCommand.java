@@ -9,9 +9,9 @@ import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.kpelykh.docker.client.DockerClient;
-import com.kpelykh.docker.client.DockerException;
-import com.kpelykh.docker.client.model.Container;
+import com.github.dockerjava.client.DockerClient;
+import com.github.dockerjava.client.DockerException;
+import com.github.dockerjava.client.model.Container;
 
 /**
  * This command stops all containers create from specified image ID.
@@ -42,10 +42,10 @@ public class StopByImageIdCommand extends DockerCommand {
         String imageIdRes = Resolver.buildVar(build, imageId);
         
         DockerClient client = getClient();
-        List<Container> containers = getClient().listContainers(false);
+        List<Container> containers = client.execute(client.listContainersCmd());
         for (Container c : containers) {
             if (imageIdRes.equalsIgnoreCase(c.getImage())) {
-                client.stopContainer(c.getId());
+                client.execute(client.stopContainerCmd(c.getId()));
                 console.logInfo("stop container id " + c.getId());
             }
         }

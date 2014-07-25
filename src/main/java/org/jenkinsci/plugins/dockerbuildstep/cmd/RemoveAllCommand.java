@@ -8,9 +8,9 @@ import java.util.List;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.kpelykh.docker.client.DockerClient;
-import com.kpelykh.docker.client.DockerException;
-import com.kpelykh.docker.client.model.Container;
+import com.github.dockerjava.client.DockerClient;
+import com.github.dockerjava.client.DockerException;
+import com.github.dockerjava.client.model.Container;
 
 /**
  * This command removes all Docker containers. Before removing them, it kills all them in case some of them are running.
@@ -28,10 +28,10 @@ public class RemoveAllCommand extends DockerCommand {
     public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
             throws DockerException {
         DockerClient client = getClient();
-        List<Container> conatiners = client.listContainers(true);
-        for (Container container : conatiners) {
-            client.kill(container.getId());
-            client.removeContainer(container.getId());
+        List<Container> containers = client.execute(client.listContainersCmd().withShowAll(true));
+        for (Container container : containers) {
+            client.execute(client.killContainerCmd(container.getId()));
+            client.execute(client.removeContainerCmd((container.getId())));
             console.logInfo("removed container id " + container.getId());
         }
     }

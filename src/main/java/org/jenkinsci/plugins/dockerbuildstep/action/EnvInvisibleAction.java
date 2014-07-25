@@ -5,7 +5,7 @@ import hudson.model.InvisibleAction;
 import org.jenkinsci.plugins.dockerbuildstep.DockerEnvContributor;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 
-import com.kpelykh.docker.client.model.ContainerInspectResponse;
+import com.github.dockerjava.client.model.ContainerInspectResponse;
 
 /**
  * Helper invisible action which is used for exchanging information between {@link DockerCommand}s and other object like
@@ -44,7 +44,7 @@ public class EnvInvisibleAction extends InvisibleAction {
     }
 
     public String getIpAddress() {
-        return containerInfo.getNetworkSettings().ipAddress;
+        return containerInfo.getNetworkSettings().getIpAddress();
     }
 
 }

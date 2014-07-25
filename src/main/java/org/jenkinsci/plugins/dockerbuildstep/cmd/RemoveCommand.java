@@ -10,8 +10,8 @@ import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.kpelykh.docker.client.DockerClient;
-import com.kpelykh.docker.client.DockerException;
+import com.github.dockerjava.client.DockerClient;
+import com.github.dockerjava.client.DockerException;
 
 /**
  * This command removes specified Docker container(s).
@@ -48,10 +48,10 @@ public class RemoveCommand extends DockerCommand {
         DockerClient client = getClient();
         for (String id : ids) {
             id = id.trim();
-            client.kill(id);
+            client.execute(client.killContainerCmd(id));
         }
-        client.removeContainers(ids, false);
         for (String id : ids) {
+            client.execute(client.removeContainerCmd(id));
             console.logInfo("removed container id " + id);
         }
     }

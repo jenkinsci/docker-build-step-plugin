@@ -13,10 +13,10 @@ import org.jenkinsci.plugins.dockerbuildstep.util.PortUtils;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.kpelykh.docker.client.DockerClient;
-import com.kpelykh.docker.client.DockerException;
-import com.kpelykh.docker.client.model.ContainerInspectResponse;
-import com.kpelykh.docker.client.model.Ports;
+import com.github.dockerjava.client.DockerClient;
+import com.github.dockerjava.client.DockerException;
+import com.github.dockerjava.client.model.ContainerInspectResponse;
+import com.github.dockerjava.client.model.Ports;
 
 /**
  * This command starts one or more Docker containers. It also exports some build environment variable like IP or started
@@ -70,10 +70,10 @@ public class StartCommand extends DockerCommand {
         //TODO check, if container exists and is stopped (probably catch exception)
         for (String id : ids) {
             id = id.trim();
-            client.startContainer(id);
+            client.execute(client.startContainerCmd(id));
             console.logInfo("started container id " + id);
 
-            ContainerInspectResponse inspectResp = client.inspectContainer(id);
+            ContainerInspectResponse inspectResp = client.execute(client.inspectContainerCmd(id));
             EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
             build.addAction(envAction);
         }
@@ -93,8 +93,8 @@ public class StartCommand extends DockerCommand {
     private void waitForPorts(DockerClient client, ConsoleLogger console) throws DockerException {
         Map<String, List<Integer>> containers = PortUtils.parsePorts(waitPorts);
         for(String cId : containers.keySet()) {
-            ContainerInspectResponse inspectResp = client.inspectContainer(cId);
-            String ip = inspectResp.getNetworkSettings().ipAddress;
+            ContainerInspectResponse inspectResp = client.execute(client.inspectContainerCmd(cId));
+            String ip = inspectResp.getNetworkSettings().getIpAddress();
             List<Integer> ports = containers.get(cId);
             for(Integer port : ports) {
                 console.logInfo("Waiting for port " + port + " on " + ip + " (conatiner ID " + cId + ")");

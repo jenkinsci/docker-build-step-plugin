@@ -10,8 +10,8 @@ import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.kpelykh.docker.client.DockerClient;
-import com.kpelykh.docker.client.DockerException;
+import com.github.dockerjava.client.DockerClient;
+import com.github.dockerjava.client.DockerException;
 
 /**
  * This command kills specified container(s).
@@ -47,7 +47,7 @@ public class KillCommand extends DockerCommand {
         DockerClient client = getClient();
         for (String id : ids) {
             id = id.trim();
-            client.kill(id);
+            client.execute(client.killContainerCmd(id));
             console.logInfo("killed container id " + id);
         }
     }

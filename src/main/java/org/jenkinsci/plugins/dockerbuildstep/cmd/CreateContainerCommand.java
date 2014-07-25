@@ -8,11 +8,12 @@ import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.kpelykh.docker.client.DockerClient;
-import com.kpelykh.docker.client.DockerException;
-import com.kpelykh.docker.client.model.ContainerConfig;
-import com.kpelykh.docker.client.model.ContainerCreateResponse;
-import com.kpelykh.docker.client.model.ContainerInspectResponse;
+import com.github.dockerjava.client.DockerClient;
+import com.github.dockerjava.client.DockerException;
+import com.github.dockerjava.client.command.CreateContainerCmd;
+import com.github.dockerjava.client.model.ContainerCreateResponse;
+import com.github.dockerjava.client.model.ContainerInspectResponse;
+import com.github.dockerjava.client.model.CreateContainerConfig;
 
 /**
  * This command creates new container from specified image.
@@ -59,19 +60,18 @@ public class CreateContainerCommand extends DockerCommand {
         String commandRes = Resolver.buildVar(build, command);
         String hostNameRes = Resolver.buildVar(build, hostName);
         
-        ContainerConfig cfg = new ContainerConfig();
-        cfg.setImage(imageRes);
-        cfg.setCmd(new String[] { commandRes });
-        cfg.setHostName(hostNameRes);
         DockerClient client = getClient();
-        ContainerCreateResponse resp = client.createContainer(cfg);
+        CreateContainerCmd cfgCmd = client.createContainerCmd(imageRes);
+        cfgCmd.withCmd(new String[] { commandRes });
+        cfgCmd.withHostName(hostNameRes);
+        ContainerCreateResponse resp = client.execute(cfgCmd);
         console.logInfo("created container id " + resp.getId() + " (from image " + imageRes + ")");
 
         /*
          * if (resp.getWarnings() != null) { for (String warn : resp.getWarnings()) System.out.println("WARN: " + warn);
          * }
          */
-        ContainerInspectResponse inspectResp = client.inspectContainer(resp.getId());
+        ContainerInspectResponse inspectResp = client.execute(client.inspectContainerCmd(resp.getId()));
         EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
         build.addAction(envAction);
     }

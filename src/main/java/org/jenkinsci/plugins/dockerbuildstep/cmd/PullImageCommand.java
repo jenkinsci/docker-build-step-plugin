@@ -12,9 +12,9 @@ import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.kpelykh.docker.client.DockerClient;
-import com.kpelykh.docker.client.DockerException;
-import com.kpelykh.docker.client.model.Image;
+import com.github.dockerjava.client.DockerClient;
+import com.github.dockerjava.client.DockerException;
+import com.github.dockerjava.client.model.Image;
 import com.sun.jersey.api.client.ClientResponse;
 
 /**
@@ -64,7 +64,7 @@ public class PullImageCommand extends DockerCommand {
         
         console.logInfo("Pulling image " + fromImageRes);
         DockerClient client = getClient();
-        ClientResponse resp = client.pull(fromImageRes, tagRes, registryRes);
+        ClientResponse resp = client.execute(client.pullImageCmd(fromImageRes).withTag(tagRes).withRegistry(registryRes));
         if (Response.Status.Family.SUCCESSFUL.equals(resp.getStatusInfo().getFamily())) {
             console.logInfo("Downloading ... ");
         } else {
@@ -86,7 +86,8 @@ public class PullImageCommand extends DockerCommand {
     }
 
     private boolean isImagePulled() throws DockerException {
-        List<Image> images = getClient().getImages(fromImage, true);
+        DockerClient client = getClient();
+        List<Image> images = client.execute(client.listImagesCmd().withFilter(fromImage));
         if (images.size() == 0) {
             return false;
         }

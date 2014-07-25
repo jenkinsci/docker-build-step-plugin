@@ -8,8 +8,10 @@ import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.kpelykh.docker.client.DockerException;
-import com.kpelykh.docker.client.model.CommitConfig;
+import com.github.dockerjava.client.DockerClient;
+import com.github.dockerjava.client.DockerException;
+import com.github.dockerjava.client.command.CommitCmd;
+import com.github.dockerjava.client.model.CommitConfig;
 
 /**
  * This command commits changes done in specified container and create new image from it.
@@ -60,11 +62,9 @@ public class CommitCommand extends DockerCommand {
 
         String containerIdRes = Resolver.buildVar(build, containerId);
         
-        CommitConfig cfg = new CommitConfig(containerIdRes);
-        cfg.setRepo(repo);
-        cfg.setTag(tag);
-        cfg.setRun(runCmd);
-        String imageId = getClient().commit(cfg);
+        DockerClient client = getClient();
+        CommitCmd  commitCmd = client.commitCmd(containerIdRes).withRepository(repo).withTag(tag).withCmd(runCmd);
+        String imageId = client.execute(commitCmd);
 
         console.logInfo("Container " + containerIdRes + " commited as image " + imageId);
     }

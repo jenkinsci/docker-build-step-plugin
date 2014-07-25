@@ -26,9 +26,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
-import com.kpelykh.docker.client.DockerClient;
-import com.kpelykh.docker.client.DockerException;
-import com.kpelykh.docker.client.model.Info;
+import com.github.dockerjava.client.DockerClient;
+import com.github.dockerjava.client.DockerException;
 
 /**
  * Build step which executes various Docker commands via Docker REST API.
@@ -102,7 +101,7 @@ public class DockerBuilder extends Builder {
             LOGGER.fine("Trying to get client for " + dockerUrl);
             try {
                 dockerClient = new DockerClient(dockerUrl);
-                if(dockerClient.ping() != 200) {
+                if(dockerClient.execute(dockerClient.pingCmd()) != 200) {
                     return FormValidation.error("Cannot ping REST endpoint of " + dockerUrl);
                 }
             } catch (Exception e) {

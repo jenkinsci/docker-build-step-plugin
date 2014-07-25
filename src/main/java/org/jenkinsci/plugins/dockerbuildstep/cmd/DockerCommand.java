@@ -11,8 +11,8 @@ import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 
-import com.kpelykh.docker.client.DockerClient;
-import com.kpelykh.docker.client.DockerException;
+import com.github.dockerjava.client.DockerClient;
+import com.github.dockerjava.client.DockerException;
 
 /**
  * Parent class of all Docker commands.
