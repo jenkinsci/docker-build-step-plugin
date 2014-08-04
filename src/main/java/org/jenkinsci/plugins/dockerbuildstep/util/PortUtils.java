@@ -49,7 +49,7 @@ public class PortUtils {
     public static Map<String, List<Integer>> parsePorts(String waitPorts) throws IllegalArgumentException,
             NumberFormatException {
         Map<String, List<Integer>> containers = new HashMap<String, List<Integer>>();
-        String[] containerPorts = waitPorts.split(System.lineSeparator());
+        String[] containerPorts = waitPorts.split(System.getProperty("line.separator"));
         for (String container : containerPorts) {
             String[] idPorts = container.split(" ", 2);
             if (idPorts.length < 2)
