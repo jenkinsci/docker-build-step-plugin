@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.dockerbuildstep.cmd;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +83,8 @@ public class StartCommand extends DockerCommand {
 
         // wait for ports
         if (waitPorts != null && !waitPorts.isEmpty()) {
-            waitForPorts(client, console);
+            String waitPortsResolved = Resolver.buildVar(build, waitPorts);
+            waitForPorts(waitPortsResolved, client, console);
         }
     }
 
@@ -113,8 +115,8 @@ public class StartCommand extends DockerCommand {
         return ports;
     }
 
-    private void waitForPorts(DockerClient client, ConsoleLogger console) throws DockerException {
-        Map<String, List<Integer>> containers = PortUtils.parsePorts(waitPorts);
+    private void waitForPorts(String waitForPorts, DockerClient client, ConsoleLogger console) throws DockerException {
+        Map<String, List<Integer>> containers = PortUtils.parsePorts(waitForPorts);
         for (String cId : containers.keySet()) {
             ContainerInspectResponse inspectResp = client.execute(client.inspectContainerCmd(cId));
             String ip = inspectResp.getNetworkSettings().getIpAddress();
