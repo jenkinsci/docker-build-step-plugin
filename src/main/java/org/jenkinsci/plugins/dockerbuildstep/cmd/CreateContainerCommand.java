@@ -62,7 +62,9 @@ public class CreateContainerCommand extends DockerCommand {
         
         DockerClient client = getClient();
         CreateContainerCmd cfgCmd = client.createContainerCmd(imageRes);
-        cfgCmd.withCmd(new String[] { commandRes });
+        if (!commandRes.isEmpty()) {
+            cfgCmd.withCmd(new String[] { commandRes });
+        }
         cfgCmd.withHostName(hostNameRes);
         ContainerCreateResponse resp = client.execute(cfgCmd);
         console.logInfo("created container id " + resp.getId() + " (from image " + imageRes + ")");
