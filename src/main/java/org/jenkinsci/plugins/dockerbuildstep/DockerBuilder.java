@@ -22,6 +22,7 @@ import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand.DockerCommandDescriptor;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
+import org.jenkinsci.plugins.dockerbuildstep.util.PortBindingParser;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -122,6 +123,16 @@ public class DockerBuilder extends Builder {
                         + e.getCause());
             }
             return FormValidation.ok("Connected to " + dockerUrl);
+        }
+
+        // TODO how can this be moved to StartCommand?
+        public FormValidation doCheckPortBindings(@QueryParameter String value) {
+            try {
+                PortBindingParser.parseBindings(value);
+            } catch (IllegalArgumentException e) {
+                return FormValidation.error(e.getMessage());
+            }
+            return FormValidation.ok();
         }
 
         public boolean isApplicable(@SuppressWarnings("rawtypes") Class<? extends AbstractProject> aClass) {

@@ -12,13 +12,15 @@ public class PortBindingParser {
     /**
      * Assumes one port binding per line in format
      * <ul> 
-     *  <li>dockerPort hostPort</li>
-     *  <li>dockerPort/scheme hostPort</li>
-     *  <li>dockerPort hostIP:hostPort</li>
-     *  <li>dockerPort/scheme hostIP:hostPort</li>
+     *  <li>containerPort hostPort</li>
+     *  <li>containerPort/scheme hostPort</li>
+     *  <li>containerPort hostIP:hostPort</li>
+     *  <li>containerPort/scheme hostIP:hostPort</li>
      * </ul>
+     * 
+     * @throws IllegalArgumentException if any error occurs during parsing
      */
-    public static Ports parseBindings(String bindings) {
+    public static Ports parseBindings(String bindings) throws IllegalArgumentException {
         if (bindings == null || bindings.isEmpty())
             return null;
 
@@ -32,13 +34,17 @@ public class PortBindingParser {
     }
 
     public static Ports parseOneBinding(String binding) throws IllegalArgumentException {
-        String[] bindSplit = binding.trim().split(" ", 2);
-        if(bindSplit.length != 2)
-            throw new IllegalArgumentException("Port binding needs to be in format 'hostPort containerPort'");
-        ExposedPort ep = bindSplit[0].contains("/") ? ExposedPort.parse(bindSplit[0].trim()) : ExposedPort.tcp(new Integer(bindSplit[0].trim()));
-        String[] hostBind = bindSplit[1].trim().split(":", 2);
-        Binding b = hostBind.length > 1 ? new Binding(hostBind[0], new Integer(hostBind[1])) : new Binding(new Integer(hostBind[0]));
-        return new Ports(ep, b);
+        try {
+            String[] bindSplit = binding.trim().split(" ", 2);
+            if(bindSplit.length != 2)
+                throw new IllegalArgumentException();
+            ExposedPort ep = bindSplit[0].contains("/") ? ExposedPort.parse(bindSplit[0].trim()) : ExposedPort.tcp(new Integer(bindSplit[0].trim()));
+            String[] hostBind = bindSplit[1].trim().split(":", 2);
+            Binding b = hostBind.length > 1 ? new Binding(hostBind[0], new Integer(hostBind[1])) : new Binding(new Integer(hostBind[0]));
+            return new Ports(ep, b);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Port binding needs to be in format 'containerPort[/scheme] [hostIP:]hostPort'");
+        }
     }
 
 }
