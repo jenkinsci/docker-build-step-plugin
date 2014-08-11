@@ -26,6 +26,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
+import com.github.dockerjava.client.Config.DockerClientConfigBuilder;
 import com.github.dockerjava.client.DockerClient;
 import com.github.dockerjava.client.DockerException;
 
@@ -80,6 +81,7 @@ public class DockerBuilder extends Builder {
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
         private String dockerUrl;
+        private String dockerVersion;
         private transient DockerClient dockerClient;
 
         public DescriptorImpl() {
@@ -91,16 +93,18 @@ public class DockerBuilder extends Builder {
             }
 
             try {
-                dockerClient = new DockerClient(dockerUrl);
+                DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(dockerVersion);
+                dockerClient = new DockerClient(dcb.build());
             } catch (DockerException e) {
                 LOGGER.warning("Cannot create Docker client: " + e.getCause());
             }
         }
 
-        public FormValidation doTestConnection(@QueryParameter String dockerUrl) throws IOException, ServletException {
-            LOGGER.fine("Trying to get client for " + dockerUrl);
+        public FormValidation doTestConnection(@QueryParameter String dockerUrl, @QueryParameter String dockerVersion) throws IOException, ServletException {
+            LOGGER.fine(String.format("Trying to get client for %s and version", dockerUrl, dockerVersion));
             try {
-                dockerClient = new DockerClient(dockerUrl);
+                DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(dockerVersion);
+                dockerClient = new DockerClient(dcb.build());
                 if(dockerClient.execute(dockerClient.pingCmd()) != 200) {
                     return FormValidation.error("Cannot ping REST endpoint of " + dockerUrl);
                 }
@@ -123,6 +127,7 @@ public class DockerBuilder extends Builder {
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             dockerUrl = formData.getString("dockerUrl");
+            dockerVersion = formData.getString("dockerVersion");
             if (dockerUrl == null || dockerUrl.isEmpty()) {
                 LOGGER.severe("Docker URL is empty, Docker build test plugin cannot work without Docker URL being set up properly");
                 //JENKINS-23733 doen't block user to save the config if admin decides so
@@ -131,7 +136,8 @@ public class DockerBuilder extends Builder {
 
             save();
             try {
-                dockerClient = new DockerClient(dockerUrl);
+                DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(dockerVersion);
+                dockerClient = new DockerClient(dcb.build());
             } catch (DockerException e) {
                 LOGGER.warning("Cannot create Docker client: " + e.getCause());
             }
@@ -140,6 +146,10 @@ public class DockerBuilder extends Builder {
 
         public String getDockerUrl() {
             return dockerUrl;
+        }
+        
+        public String getDockerVersion() {
+            return dockerVersion;
         }
 
         public DockerClient getDockerClient() {

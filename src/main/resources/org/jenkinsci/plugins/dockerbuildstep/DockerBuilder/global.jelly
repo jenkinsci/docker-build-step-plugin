@@ -4,6 +4,13 @@
     <f:entry title="Docker URL" field="dockerUrl" description="Docker server REST API URL">
       <f:textbox />
     </f:entry>
+    
+    <f:advanced align="left">
+        <f:entry field="dockerVersion" title="Docker version">
+            <f:textbox />
+        </f:entry>
+    </f:advanced>
+    
     <f:validateButton title="${%Test Connection}" progress="${%Testing...}" method="testConnection" with="dockerUrl" />
   </f:section>
 
