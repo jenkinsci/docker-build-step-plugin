@@ -11,7 +11,7 @@
         </f:entry>
     </f:advanced>
     
-    <f:validateButton title="${%Test Connection}" progress="${%Testing...}" method="testConnection" with="dockerUrl" />
+    <f:validateButton title="${%Test Connection}" progress="${%Testing...}" method="testConnection" with="dockerUrl,dockerVersion" />
   </f:section>
 
 </j:jelly>

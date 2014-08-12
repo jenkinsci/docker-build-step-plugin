@@ -101,7 +101,7 @@ public class DockerBuilder extends Builder {
         }
 
         public FormValidation doTestConnection(@QueryParameter String dockerUrl, @QueryParameter String dockerVersion) throws IOException, ServletException {
-            LOGGER.fine(String.format("Trying to get client for %s and version", dockerUrl, dockerVersion));
+            LOGGER.fine(String.format("Trying to get client for %s and version %s", dockerUrl, dockerVersion));
             try {
                 DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(dockerVersion);
                 dockerClient = new DockerClient(dcb.build());
