@@ -7,6 +7,10 @@
 
 
     <f:advanced align="left">
+        <f:entry field="publishAllPorts" title="Publish all ports">
+            <f:checkbox />
+        </f:entry>
+
         <f:entry field="portBindings" title="Port bindings">
             <f:textarea />
         </f:entry>

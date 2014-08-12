@@ -3,7 +3,6 @@ package org.jenkinsci.plugins.dockerbuildstep.cmd;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -33,18 +32,24 @@ import com.github.dockerjava.client.model.Ports.Binding;
 public class StartCommand extends DockerCommand {
 
     private final String containerIds;
+    private final boolean publishAllPorts;
     private final String portBindings;
     private final String waitPorts;
 
     @DataBoundConstructor
-    public StartCommand(String containerIds, String portBindings, String waitPorts) {
+    public StartCommand(String containerIds, boolean publishAllPorts, String portBindings, String waitPorts) {
         this.containerIds = containerIds;
+        this.publishAllPorts = publishAllPorts;
         this.portBindings = portBindings;
         this.waitPorts = waitPorts;
     }
 
     public String getContainerIds() {
         return containerIds;
+    }
+    
+    public boolean getPublishAllPorts() {
+        return publishAllPorts;
     }
 
     public String getPortBindings() {
@@ -73,7 +78,9 @@ public class StartCommand extends DockerCommand {
         // TODO check, if container exists and is stopped (probably catch exception)
         for (String id : ids) {
             id = id.trim();
-            client.execute(client.startContainerCmd(id).withPortBindings(bindPorts));
+            client.execute(client.startContainerCmd(id)
+                    .withPublishAllPorts(publishAllPorts)
+                    .withPortBindings(bindPorts));
             console.logInfo("started container id " + id);
 
             ContainerInspectResponse inspectResp = client.execute(client.inspectContainerCmd(id));
