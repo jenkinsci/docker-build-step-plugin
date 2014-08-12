@@ -18,6 +18,10 @@
         <f:entry field="waitPorts" title="Wait for ports">
             <f:textarea />
         </f:entry>
+
+        <f:entry field="privileged" title="Extended privileges">
+            <f:checkbox />
+        </f:entry>
     </f:advanced>
 
 </j:jelly>

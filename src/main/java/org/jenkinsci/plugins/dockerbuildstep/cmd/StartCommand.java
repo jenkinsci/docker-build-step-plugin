@@ -35,13 +35,16 @@ public class StartCommand extends DockerCommand {
     private final boolean publishAllPorts;
     private final String portBindings;
     private final String waitPorts;
+    private final boolean privileged;
 
     @DataBoundConstructor
-    public StartCommand(String containerIds, boolean publishAllPorts, String portBindings, String waitPorts) {
+    public StartCommand(String containerIds, boolean publishAllPorts, String portBindings, String waitPorts, 
+            boolean privileged) {
         this.containerIds = containerIds;
         this.publishAllPorts = publishAllPorts;
         this.portBindings = portBindings;
         this.waitPorts = waitPorts;
+        this.privileged = privileged;
     }
 
     public String getContainerIds() {
@@ -58,6 +61,10 @@ public class StartCommand extends DockerCommand {
 
     public String getWaitPorts() {
         return waitPorts;
+    }
+    
+    public boolean getPrivileged() {
+        return privileged;
     }
 
     @Override
@@ -80,7 +87,8 @@ public class StartCommand extends DockerCommand {
             id = id.trim();
             client.execute(client.startContainerCmd(id)
                     .withPublishAllPorts(publishAllPorts)
-                    .withPortBindings(bindPorts));
+                    .withPortBindings(bindPorts)
+                    .withPrivileged(privileged));
             console.logInfo("started container id " + id);
 
             ContainerInspectResponse inspectResp = client.execute(client.inspectContainerCmd(id));
