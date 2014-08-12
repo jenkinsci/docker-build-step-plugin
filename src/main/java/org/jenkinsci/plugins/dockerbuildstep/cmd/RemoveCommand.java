@@ -16,7 +16,7 @@ import com.github.dockerjava.client.DockerException;
 /**
  * This command removes specified Docker container(s).
  * 
- * @see http://docs.docker.io/en/master/api/docker_remote_api_v1.8/#remove-a-container
+ * @see http://docs.docker.com/reference/api/docker_remote_api_v1.13/#remove-a-container
  * 
  * @author vjuranek
  * 

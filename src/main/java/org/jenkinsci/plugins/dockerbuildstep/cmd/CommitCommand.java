@@ -16,7 +16,7 @@ import com.github.dockerjava.client.model.CommitConfig;
 /**
  * This command commits changes done in specified container and create new image from it.
  * 
- * @see http://docs.docker.io/en/latest/reference/api/docker_remote_api_v1.8/#create-a-new-image-from-a-container-s-changes
+ * @see http://docs.docker.com/reference/api/docker_remote_api_v1.13/#create-a-new-image-from-a-containers-changes
  * 
  * @author vjuranek
  * 
