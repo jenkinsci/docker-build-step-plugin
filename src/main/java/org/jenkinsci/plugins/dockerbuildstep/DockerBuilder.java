@@ -93,17 +93,25 @@ public class DockerBuilder extends Builder {
             }
 
             try {
-                DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(dockerVersion);
+                DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(versionOrNull(dockerVersion));
                 dockerClient = new DockerClient(dcb.build());
             } catch (DockerException e) {
                 LOGGER.warning("Cannot create Docker client: " + e.getCause());
             }
         }
 
+		/**
+		 * Ensures that version is either <code>null</code> or defined, i.e. holding
+		 * a non-empty string value. 
+		 */
+		private static String versionOrNull(String version) {
+			return version == null || version.isEmpty() ? null : version;
+		}
+
         public FormValidation doTestConnection(@QueryParameter String dockerUrl, @QueryParameter String dockerVersion) throws IOException, ServletException {
             LOGGER.fine(String.format("Trying to get client for %s and version %s", dockerUrl, dockerVersion));
             try {
-                DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(dockerVersion);
+                DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(versionOrNull(dockerVersion));
                 dockerClient = new DockerClient(dcb.build());
                 if(dockerClient.execute(dockerClient.pingCmd()) != 200) {
                     return FormValidation.error("Cannot ping REST endpoint of " + dockerUrl);
