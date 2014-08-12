@@ -25,7 +25,7 @@ import com.github.dockerjava.client.model.Ports.Binding;
  * This command starts one or more Docker containers. It also exports some build environment variable like IP or started
  * containers.
  * 
- * @see http://docs.docker.io/en/master/api/docker_remote_api_v1.8/#start-a-container
+ * @see http://docs.docker.com/reference/api/docker_remote_api_v1.13/#start-a-container
  * 
  * @author vjuranek
  * 

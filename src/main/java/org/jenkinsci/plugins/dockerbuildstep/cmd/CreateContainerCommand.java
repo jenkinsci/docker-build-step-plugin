@@ -18,7 +18,7 @@ import com.github.dockerjava.client.model.CreateContainerConfig;
 /**
  * This command creates new container from specified image.
  * 
- * @see http://docs.docker.io/en/master/api/docker_remote_api_v1.8/#create-a-container
+ * @see http://docs.docker.com/reference/api/docker_remote_api_v1.13/#create-a-container
  * 
  * @author vjuranek
  * 

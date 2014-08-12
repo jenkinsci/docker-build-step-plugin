@@ -16,7 +16,7 @@ import com.github.dockerjava.client.DockerException;
 /**
  * This command restarts specified Docker container(s).
  * 
- * @see http://docs.docker.io/en/master/api/docker_remote_api_v1.8/#restart-a-container
+ * @see http://docs.docker.com/reference/api/docker_remote_api_v1.13/#restart-a-container
  * 
  * @author vjuranek
  *

@@ -20,7 +20,7 @@ import com.sun.jersey.api.client.ClientResponse;
 /**
  * This command pulls Docker image from a repository.
  * 
- * @see http://docs.docker.io/en/latest/api/docker_remote_api_v1.8/#create-an-image
+ * @see http://docs.docker.com/reference/api/docker_remote_api_v1.13/#create-an-image
  * 
  * @author vjuranek
  * 

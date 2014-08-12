@@ -32,9 +32,7 @@ import com.sun.jersey.api.client.ClientResponse;
 /**
  * This command creates a new image from specified Dockerfile.
  * 
- * @see http 
- *      ://docs.docker.io/en/latest/reference/api/docker_remote_api_v1.8/#build
- *      -an-image-from-dockerfile-via-stdin
+ * @see http://docs.docker.com/reference/api/docker_remote_api_v1.13/#build-an-image-from-dockerfile-via-stdin
  * 
  * @author marcus
  * 
