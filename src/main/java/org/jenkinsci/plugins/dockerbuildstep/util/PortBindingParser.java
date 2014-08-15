@@ -38,7 +38,7 @@ public class PortBindingParser {
     }
 
     public static Ports parseOneBinding(String definition) throws IllegalArgumentException {
-        Pattern pattern = Pattern.compile("((?<hIp>[0-9.]+):)?(?<hPort>\\d+)[ :](?<cPort>\\d+)(/tcp)?");
+        Pattern pattern = Pattern.compile("((?<hIp>[0-9.]+):)?(?<hPort>\\d+)[ :](?<cPort>\\d+)(/(?<scheme>tcp|udp))?");
         Matcher matcher = pattern.matcher(definition);
         try {
             if (! matcher.matches())
@@ -46,7 +46,9 @@ public class PortBindingParser {
             Binding b = matcher.group("hIp") == null 
                     ? new Binding(Integer.parseInt(matcher.group("hPort")))
                     : new Binding(matcher.group("hIp"), Integer.parseInt(matcher.group("hPort")));
-            ExposedPort ep = ExposedPort.tcp(Integer.parseInt(matcher.group("cPort")));
+            ExposedPort ep = matcher.group("scheme") == null 
+                    ? ExposedPort.tcp(Integer.parseInt(matcher.group("cPort")))
+                    : new ExposedPort(matcher.group("scheme"), Integer.parseInt(matcher.group("cPort")));
             return new Ports(ep, b);
         } catch (Exception e) {
             throw new IllegalArgumentException("Port binding needs to be in format '[hostIP:]hostPort containerPort[/scheme]'");

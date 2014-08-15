@@ -59,6 +59,11 @@ public class PortBindingParserTest {
     }
     
     @Test
+    public void exposedUdpPort() throws Exception {
+        assertCreatesBinding("80 8080/udp", Ports.Binding(80), new ExposedPort("udp", 8080));
+    }
+    
+    @Test
     public void twoBindingsUnixStyle() throws Exception {
         twoBindings("80 8080\n81 8081");
     }
