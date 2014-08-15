@@ -1,5 +1,8 @@
 package org.jenkinsci.plugins.dockerbuildstep.util;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.github.dockerjava.client.model.ExposedPort;
 import com.github.dockerjava.client.model.Ports;
 import com.github.dockerjava.client.model.Ports.Binding;
@@ -17,6 +20,7 @@ public class PortBindingParser {
      *  <li>hostIP:hostPort containerPort</li>
      *  <li>hostIP:hostPort containerPort/scheme</li>
      * </ul>
+     * where host and container part can alternatively be delimited by a colon.
      * 
      * @throws IllegalArgumentException if any error occurs during parsing
      */
@@ -33,14 +37,16 @@ public class PortBindingParser {
         return ports;
     }
 
-    public static Ports parseOneBinding(String binding) throws IllegalArgumentException {
+    public static Ports parseOneBinding(String definition) throws IllegalArgumentException {
+        Pattern pattern = Pattern.compile("((?<hIp>[0-9.]+):)?(?<hPort>\\d+)[ :](?<cPort>\\d+)(/tcp)?");
+        Matcher matcher = pattern.matcher(definition);
         try {
-            String[] bindSplit = binding.trim().split(" ", 2);
-            if(bindSplit.length != 2)
+            if (! matcher.matches())
                 throw new IllegalArgumentException();
-            ExposedPort ep = bindSplit[1].contains("/") ? ExposedPort.parse(bindSplit[1].trim()) : ExposedPort.tcp(new Integer(bindSplit[1].trim()));
-            String[] hostBind = bindSplit[0].trim().split(":", 2);
-            Binding b = hostBind.length > 1 ? new Binding(hostBind[0], new Integer(hostBind[1])) : new Binding(new Integer(hostBind[0]));
+            Binding b = matcher.group("hIp") == null 
+                    ? new Binding(Integer.parseInt(matcher.group("hPort")))
+                    : new Binding(matcher.group("hIp"), Integer.parseInt(matcher.group("hPort")));
+            ExposedPort ep = ExposedPort.tcp(Integer.parseInt(matcher.group("cPort")));
             return new Ports(ep, b);
         } catch (Exception e) {
             throw new IllegalArgumentException("Port binding needs to be in format '[hostIP:]hostPort containerPort[/scheme]'");

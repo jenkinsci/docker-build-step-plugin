@@ -33,6 +33,26 @@ public class PortBindingParserTest {
         assertCreatesBinding("80 8080", Ports.Binding(80), ExposedPort.tcp(8080));
     }
     
+    @Test
+    public void completeDefinition_colon() throws Exception {
+        assertCreatesBinding("127.0.0.1:80:8080/tcp", Ports.Binding("127.0.0.1", 80), ExposedPort.tcp(8080));
+    }
+    
+    @Test
+    public void noScheme_colon() throws Exception {
+        assertCreatesBinding("127.0.0.1:80:8080", Ports.Binding("127.0.0.1", 80), ExposedPort.tcp(8080));
+    }
+    
+    @Test
+    public void noHost_colon() throws Exception {
+        assertCreatesBinding("80:8080/tcp", Ports.Binding(80), ExposedPort.tcp(8080));
+    }
+    
+    @Test
+    public void minimalDefiniton_colon() throws Exception {
+        assertCreatesBinding("80:8080", Ports.Binding(80), ExposedPort.tcp(8080));
+    }
+    
     @Test(expected = IllegalArgumentException.class)
     public void syntaxError() throws Exception {
         PortBindingParser.parseBindings("nonsense");
