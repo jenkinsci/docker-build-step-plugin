@@ -64,6 +64,16 @@ public class PortBindingParserTest {
     }
     
     @Test
+    public void dynamicPort() throws Exception {
+        assertCreatesBinding("127.0.0.1: 8080", Ports.Binding("127.0.0.1", 0), ExposedPort.tcp(8080));
+    }
+    
+    @Test
+    public void dynamicPort_colon() throws Exception {
+        assertCreatesBinding("127.0.0.1::8080", Ports.Binding("127.0.0.1", 0), ExposedPort.tcp(8080));
+    }
+    
+    @Test
     public void twoBindingsUnixStyle() throws Exception {
         twoBindings("80 8080\n81 8081");
     }

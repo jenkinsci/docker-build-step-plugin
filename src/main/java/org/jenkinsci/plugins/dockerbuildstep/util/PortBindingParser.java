@@ -38,21 +38,28 @@ public class PortBindingParser {
     }
 
     public static Ports parseOneBinding(String definition) throws IllegalArgumentException {
-        Pattern pattern = Pattern.compile("((?<hIp>[0-9.]+):)?(?<hPort>\\d+)[ :](?<cPort>\\d+)(/(?<scheme>tcp|udp))?");
+        Pattern pattern = Pattern.compile("((?<hIp>\\d+\\.\\d+\\.\\d+\\.\\d+):)?(?<hPort>\\d+)?[ :](?<cPort>\\d+)(/(?<scheme>tcp|udp))?");
         Matcher matcher = pattern.matcher(definition);
-        try {
-            if (! matcher.matches())
-                throw new IllegalArgumentException();
-            Binding b = matcher.group("hIp") == null 
-                    ? new Binding(Integer.parseInt(matcher.group("hPort")))
-                    : new Binding(matcher.group("hIp"), Integer.parseInt(matcher.group("hPort")));
-            ExposedPort ep = matcher.group("scheme") == null 
-                    ? ExposedPort.tcp(Integer.parseInt(matcher.group("cPort")))
-                    : new ExposedPort(matcher.group("scheme"), Integer.parseInt(matcher.group("cPort")));
-            return new Ports(ep, b);
-        } catch (Exception e) {
+        if (matcher.matches()) {
+            return new Ports(
+                    createExposedPort(matcher.group("cPort"), matcher.group("scheme")), 
+                    createBinding(matcher.group("hIp"), matcher.group("hPort")));
+        } else {
             throw new IllegalArgumentException("Port binding needs to be in format '[hostIP:]hostPort containerPort[/scheme]'");
         }
     }
-
+    
+    private static Binding createBinding(String hIp, String hPort) {
+        if (hPort == null) hPort = "0";
+        return hIp == null 
+                ? new Binding(Integer.parseInt(hPort))
+                : new Binding(hIp, Integer.parseInt(hPort));
+    }
+    
+    private static ExposedPort createExposedPort(String cPort, String scheme) {
+        return scheme == null 
+                ? ExposedPort.tcp(Integer.parseInt(cPort))
+                : new ExposedPort(scheme, Integer.parseInt(cPort));
+    }
+    
 }
