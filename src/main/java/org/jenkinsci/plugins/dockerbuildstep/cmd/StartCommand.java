@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
 import hudson.Extension;
 import hudson.model.AbstractBuild;
+import hudson.util.FormValidation;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.jenkinsci.plugins.dockerbuildstep.util.PortBindingParser;
 import org.jenkinsci.plugins.dockerbuildstep.util.PortUtils;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 
 import com.github.dockerjava.client.DockerClient;
 import com.github.dockerjava.client.DockerException;
@@ -37,7 +39,7 @@ public class StartCommand extends DockerCommand {
     private final boolean privileged;
 
     @DataBoundConstructor
-    public StartCommand(String containerIds, boolean publishAllPorts, String portBindings, String waitPorts, 
+    public StartCommand(String containerIds, boolean publishAllPorts, String portBindings, String waitPorts,
             boolean privileged) {
         this.containerIds = containerIds;
         this.publishAllPorts = publishAllPorts;
@@ -49,7 +51,7 @@ public class StartCommand extends DockerCommand {
     public String getContainerIds() {
         return containerIds;
     }
-    
+
     public boolean getPublishAllPorts() {
         return publishAllPorts;
     }
@@ -61,7 +63,7 @@ public class StartCommand extends DockerCommand {
     public String getWaitPorts() {
         return waitPorts;
     }
-    
+
     public boolean getPrivileged() {
         return privileged;
     }
@@ -127,6 +129,15 @@ public class StartCommand extends DockerCommand {
         @Override
         public String getDisplayName() {
             return "Start container(s)";
+        }
+
+        public FormValidation doTestPortBindings(@QueryParameter String portBindings) {
+            try {
+                PortBindingParser.parseBindings(portBindings);
+            } catch (IllegalArgumentException e) {
+                return FormValidation.error(e.getMessage());
+            }
+            return FormValidation.ok();
         }
     }
 

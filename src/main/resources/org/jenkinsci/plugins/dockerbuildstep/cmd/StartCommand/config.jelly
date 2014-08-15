@@ -14,6 +14,8 @@
         <f:entry field="portBindings" title="Port bindings">
             <f:textarea />
         </f:entry>
+        <j:set var="descriptor" value="${instance.descriptor}" />
+        <f:validateButton title="${%Test syntax}" progress="${%Testing...}" method="testPortBindings" with="portBindings" />
         
         <f:entry field="waitPorts" title="Wait for ports">
             <f:textarea />

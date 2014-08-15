@@ -125,16 +125,6 @@ public class DockerBuilder extends Builder {
             return FormValidation.ok("Connected to " + dockerUrl);
         }
 
-        // TODO how can this be moved to StartCommand?
-        public FormValidation doCheckPortBindings(@QueryParameter String value) {
-            try {
-                PortBindingParser.parseBindings(value);
-            } catch (IllegalArgumentException e) {
-                return FormValidation.error(e.getMessage());
-            }
-            return FormValidation.ok();
-        }
-
         public boolean isApplicable(@SuppressWarnings("rawtypes") Class<? extends AbstractProject> aClass) {
             return true;
         }
