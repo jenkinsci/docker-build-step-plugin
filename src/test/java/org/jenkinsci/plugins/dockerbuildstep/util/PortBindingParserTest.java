@@ -15,22 +15,22 @@ public class PortBindingParserTest {
     
     @Test
     public void completeDefinition() throws Exception {
-        assertCreatesBinding("8080/tcp 127.0.0.1:80", ExposedPort.tcp(8080), Ports.Binding("127.0.0.1", 80));
+        assertCreatesBinding("127.0.0.1:80 8080/tcp", Ports.Binding("127.0.0.1", 80), ExposedPort.tcp(8080));
     }
     
     @Test
     public void noScheme() throws Exception {
-        assertCreatesBinding("8080 127.0.0.1:80", ExposedPort.tcp(8080), Ports.Binding("127.0.0.1", 80));
+        assertCreatesBinding("127.0.0.1:80 8080", Ports.Binding("127.0.0.1", 80), ExposedPort.tcp(8080));
     }
     
     @Test
     public void noHost() throws Exception {
-        assertCreatesBinding("8080/tcp 80", ExposedPort.tcp(8080), Ports.Binding(80));
+        assertCreatesBinding("80 8080/tcp", Ports.Binding(80), ExposedPort.tcp(8080));
     }
     
     @Test
     public void minimalDefiniton() throws Exception {
-        assertCreatesBinding("8080 80", ExposedPort.tcp(8080), Ports.Binding(80));
+        assertCreatesBinding("80 8080", Ports.Binding(80), ExposedPort.tcp(8080));
     }
     
     @Test(expected = IllegalArgumentException.class)
@@ -40,12 +40,12 @@ public class PortBindingParserTest {
     
     @Test
     public void twoBindingsUnixStyle() throws Exception {
-        twoBindings("8080 80\n8081 81");
+        twoBindings("80 8080\n81 8081");
     }
     
     @Test
     public void twoBindingsDosStyle() throws Exception {
-        twoBindings("8080 80\r\n8081 81");
+        twoBindings("80 8080\r\n81 8081");
     }
     
     private void twoBindings(String input) throws Exception {
@@ -55,7 +55,7 @@ public class PortBindingParserTest {
         assertContainsBinding(ports, ExposedPort.tcp(8081), Ports.Binding(81));
     }
     
-    private static void assertCreatesBinding(String input, ExposedPort exposedPort, Binding expectedBinding) {
+    private static void assertCreatesBinding(String input, Binding expectedBinding, ExposedPort exposedPort) {
         Ports ports = PortBindingParser.parseOneBinding(input);
         assertContainsBinding(ports, exposedPort, expectedBinding);
     }

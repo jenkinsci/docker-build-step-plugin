@@ -12,10 +12,10 @@ public class PortBindingParser {
     /**
      * Assumes one port binding per line in format
      * <ul> 
-     *  <li>containerPort hostPort</li>
-     *  <li>containerPort/scheme hostPort</li>
-     *  <li>containerPort hostIP:hostPort</li>
-     *  <li>containerPort/scheme hostIP:hostPort</li>
+     *  <li>hostPort containerPort</li>
+     *  <li>hostPort containerPort/scheme</li>
+     *  <li>hostIP:hostPort containerPort</li>
+     *  <li>hostIP:hostPort containerPort/scheme</li>
      * </ul>
      * 
      * @throws IllegalArgumentException if any error occurs during parsing
@@ -38,12 +38,12 @@ public class PortBindingParser {
             String[] bindSplit = binding.trim().split(" ", 2);
             if(bindSplit.length != 2)
                 throw new IllegalArgumentException();
-            ExposedPort ep = bindSplit[0].contains("/") ? ExposedPort.parse(bindSplit[0].trim()) : ExposedPort.tcp(new Integer(bindSplit[0].trim()));
-            String[] hostBind = bindSplit[1].trim().split(":", 2);
+            ExposedPort ep = bindSplit[1].contains("/") ? ExposedPort.parse(bindSplit[1].trim()) : ExposedPort.tcp(new Integer(bindSplit[1].trim()));
+            String[] hostBind = bindSplit[0].trim().split(":", 2);
             Binding b = hostBind.length > 1 ? new Binding(hostBind[0], new Integer(hostBind[1])) : new Binding(new Integer(hostBind[0]));
             return new Ports(ep, b);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Port binding needs to be in format 'containerPort[/scheme] [hostIP:]hostPort'");
+            throw new IllegalArgumentException("Port binding needs to be in format '[hostIP:]hostPort containerPort[/scheme]'");
         }
     }
 
