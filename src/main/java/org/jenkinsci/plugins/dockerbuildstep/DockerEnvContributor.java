@@ -48,7 +48,9 @@ public class DockerEnvContributor extends EnvironmentContributor {
         for (EnvInvisibleAction action : envActions) {
             containerIds = containerIds.concat(action.getId()).concat(ID_SEPARATOR);
             envs.put(CONTAINER_IP_PREFIX + action.getHostName(), action.getIpAddress());
-            exportPortBindings(envs, action.getPortBindings());
+            if (action.hasPortBindings()) {
+                exportPortBindings(envs, action.getPortBindings());
+            }
         }
 
         containerIds = containerIds.substring(0, containerIds.length() - 1);

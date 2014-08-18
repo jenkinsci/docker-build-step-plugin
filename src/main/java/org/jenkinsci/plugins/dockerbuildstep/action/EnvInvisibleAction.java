@@ -51,6 +51,10 @@ public class EnvInvisibleAction extends InvisibleAction {
         return containerInfo.getNetworkSettings().getIpAddress();
     }
     
+    public boolean hasPortBindings() {
+        return containerInfo.getNetworkSettings().getPorts() != null;
+    }
+    
     public Map<ExposedPort, Binding> getPortBindings() {
         return containerInfo.getNetworkSettings().getPorts().getBindings();
     }
