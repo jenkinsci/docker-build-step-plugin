@@ -2,5 +2,5 @@
   This view is used to render the installed plugins page.
 -->
 <div>
-  This plugin allows to add various docker commands into you job as a build step.
+  This plugin allows to add various docker commands to your job as build steps.
 </div>
