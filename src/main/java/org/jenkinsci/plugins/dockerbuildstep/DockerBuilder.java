@@ -7,6 +7,7 @@ import hudson.Launcher;
 import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.remoting.Callable;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
@@ -22,7 +23,6 @@ import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand.DockerCommandDescriptor;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
-import org.jenkinsci.plugins.dockerbuildstep.util.PortBindingParser;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -52,7 +52,7 @@ public class DockerBuilder extends Builder {
 
     @Override
     public boolean perform(@SuppressWarnings("rawtypes") AbstractBuild build, Launcher launcher, BuildListener listener)
-            throws AbortException {
+            throws AbortException, IOException, InterruptedException {
 
         ConsoleLogger clog = new ConsoleLogger(listener);
 
@@ -63,7 +63,8 @@ public class DockerBuilder extends Builder {
         }
 
         try {
-            dockerCmd.execute(build, clog);
+            DockerCmdCallable callable = new DockerCmdCallable(dockerCmd, build, clog);
+            launcher.getChannel().call(callable);
         } catch (DockerException e) {
             clog.logError("command '" + dockerCmd.getDescriptor().getDisplayName() + "' failed: " + e.getMessage());
             LOGGER.severe("Failed to execute Docker command " + dockerCmd.getDescriptor().getDisplayName() + ": "
@@ -76,6 +77,32 @@ public class DockerBuilder extends Builder {
     @Override
     public DescriptorImpl getDescriptor() {
         return (DescriptorImpl) super.getDescriptor();
+    }
+
+    private static final class DockerCmdCallable implements Callable<Void, DockerException> {
+
+        private static final long serialVersionUID = 1L;
+        private final DockerCommand cmd;
+        private final AbstractBuild<?, ?> build;
+        private final ConsoleLogger console;
+
+        public DockerCmdCallable(DockerCommand cmd, AbstractBuild<?, ?> build, ConsoleLogger console) {
+            this.cmd = cmd;
+            this.build = build;
+            this.console = console;
+        }
+
+        // @Override
+        public Void call() throws DockerException {
+            try {
+                cmd.execute(build, console);
+            } catch (AbortException e) {
+                LOGGER.log(Level.INFO,
+                        String.format("Docker command %s was aborted", cmd.getDescriptor().getDisplayName()),
+                        e.getCause());
+            }
+            return null;
+        }
     }
 
     @Extension
@@ -94,27 +121,29 @@ public class DockerBuilder extends Builder {
             }
 
             try {
-                DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(versionOrNull(dockerVersion));
+                DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(
+                        versionOrNull(dockerVersion));
                 dockerClient = new DockerClient(dcb.build());
             } catch (DockerException e) {
                 LOGGER.warning("Cannot create Docker client: " + e.getCause());
             }
         }
 
-		/**
-		 * Ensures that version is either <code>null</code> or defined, i.e. holding
-		 * a non-empty string value. 
-		 */
-		private static String versionOrNull(String version) {
-			return version == null || version.isEmpty() ? null : version;
-		}
+        /**
+         * Ensures that version is either <code>null</code> or defined, i.e. holding a non-empty string value.
+         */
+        private static String versionOrNull(String version) {
+            return version == null || version.isEmpty() ? null : version;
+        }
 
-        public FormValidation doTestConnection(@QueryParameter String dockerUrl, @QueryParameter String dockerVersion) throws IOException, ServletException {
+        public FormValidation doTestConnection(@QueryParameter String dockerUrl, @QueryParameter String dockerVersion)
+                throws IOException, ServletException {
             LOGGER.fine(String.format("Trying to get client for %s and version %s", dockerUrl, dockerVersion));
             try {
-                DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(versionOrNull(dockerVersion));
+                DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(
+                        versionOrNull(dockerVersion));
                 dockerClient = new DockerClient(dcb.build());
-                if(dockerClient.execute(dockerClient.pingCmd()) != 200) {
+                if (dockerClient.execute(dockerClient.pingCmd()) != 200) {
                     return FormValidation.error("Cannot ping REST endpoint of " + dockerUrl);
                 }
             } catch (Exception e) {
@@ -139,13 +168,14 @@ public class DockerBuilder extends Builder {
             dockerVersion = formData.getString("dockerVersion");
             if (dockerUrl == null || dockerUrl.isEmpty()) {
                 LOGGER.severe("Docker URL is empty, Docker build test plugin cannot work without Docker URL being set up properly");
-                //JENKINS-23733 doen't block user to save the config if admin decides so
+                // JENKINS-23733 doen't block user to save the config if admin decides so
                 return true;
             }
 
             save();
             try {
-                DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(dockerVersion);
+                DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(
+                        dockerVersion);
                 dockerClient = new DockerClient(dcb.build());
             } catch (DockerException e) {
                 LOGGER.warning("Cannot create Docker client: " + e.getCause());
@@ -156,7 +186,7 @@ public class DockerBuilder extends Builder {
         public String getDockerUrl() {
             return dockerUrl;
         }
-        
+
         public String getDockerVersion() {
             return dockerVersion;
         }
@@ -168,7 +198,7 @@ public class DockerBuilder extends Builder {
         public DescriptorExtensionList<DockerCommand, DockerCommandDescriptor> getCmdDescriptors() {
             return DockerCommand.all();
         }
-        
+
     }
 
     private static Logger LOGGER = Logger.getLogger(DockerBuilder.class.getName());
