@@ -9,6 +9,7 @@ import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 
 import com.github.dockerjava.client.model.ContainerInspectResponse;
 import com.github.dockerjava.client.model.ExposedPort;
+import com.github.dockerjava.client.model.Ports;
 import com.github.dockerjava.client.model.Ports.Binding;
 
 /**
@@ -52,7 +53,8 @@ public class EnvInvisibleAction extends InvisibleAction {
     }
     
     public boolean hasPortBindings() {
-        return containerInfo.getNetworkSettings().getPorts() != null;
+        Ports ports = containerInfo.getNetworkSettings().getPorts(); 
+        return  ((ports !=  null) && (ports.getBindings() != null) && (!ports.getBindings().isEmpty()));
     }
     
     public Map<ExposedPort, Binding> getPortBindings() {
