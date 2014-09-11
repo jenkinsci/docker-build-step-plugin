@@ -47,7 +47,7 @@ public class KillCommand extends DockerCommand {
         DockerClient client = getClient();
         for (String id : ids) {
             id = id.trim();
-            client.execute(client.killContainerCmd(id));
+            client.killContainerCmd(id).exec();
             console.logInfo("killed container id " + id);
         }
     }

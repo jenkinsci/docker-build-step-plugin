@@ -28,9 +28,9 @@ public class StopAllCommand extends DockerCommand {
     public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
             throws DockerException {
         DockerClient client = getClient();
-        List<Container> containers = client.execute(client.listContainersCmd());
+        List<Container> containers = client.listContainersCmd().exec();
         for (Container c : containers) {
-            client.execute(client.stopContainerCmd(c.getId()));
+            client.stopContainerCmd(c.getId()).exec();
             console.logInfo("stopped container id " + c.getId());
         }
     }

@@ -86,13 +86,14 @@ public class StartCommand extends DockerCommand {
         // TODO check, if container exists and is stopped (probably catch exception)
         for (String id : ids) {
             id = id.trim();
-            client.execute(client.startContainerCmd(id)
+            client.startContainerCmd(id)
                     .withPublishAllPorts(publishAllPorts)
                     .withPortBindings(bindPorts)
-                    .withPrivileged(privileged));
+                    .withPrivileged(privileged)
+                    .exec();
             console.logInfo("started container id " + id);
 
-            InspectContainerResponse inspectResp = client.execute(client.inspectContainerCmd(id));
+            InspectContainerResponse inspectResp = client.inspectContainerCmd(id).exec();
             EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
             build.addAction(envAction);
         }
@@ -107,7 +108,7 @@ public class StartCommand extends DockerCommand {
     private void waitForPorts(String waitForPorts, DockerClient client, ConsoleLogger console) throws DockerException {
         Map<String, List<Integer>> containers = PortUtils.parsePorts(waitForPorts);
         for (String cId : containers.keySet()) {
-        	InspectContainerResponse inspectResp = client.execute(client.inspectContainerCmd(cId));
+        	InspectContainerResponse inspectResp = client.inspectContainerCmd(cId).exec();
             String ip = inspectResp.getNetworkSettings().getIpAddress();
             List<Integer> ports = containers.get(cId);
             for (Integer port : ports) {
