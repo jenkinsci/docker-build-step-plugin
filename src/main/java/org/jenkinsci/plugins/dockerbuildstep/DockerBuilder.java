@@ -22,7 +22,6 @@ import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand.DockerCommandDescriptor;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
-import org.jenkinsci.plugins.dockerbuildstep.util.PortBindingParser;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -102,22 +101,21 @@ public class DockerBuilder extends Builder {
             }
         }
 
-		/**
-		 * Ensures that version is either <code>null</code> or defined, i.e. holding
-		 * a non-empty string value. 
-		 */
-		private static String versionOrNull(String version) {
-			return version == null || version.isEmpty() ? null : version;
-		}
+        /**
+         * Ensures that version is either <code>null</code> or defined, i.e. holding
+         * a non-empty string value. 
+         */
+        private static String versionOrNull(String version) {
+            return version == null || version.isEmpty() ? null : version;
+        }
 
         public FormValidation doTestConnection(@QueryParameter String dockerUrl, @QueryParameter String dockerVersion) throws IOException, ServletException {
             LOGGER.fine(String.format("Trying to get client for %s and version %s", dockerUrl, dockerVersion));
             try {
-                DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(versionOrNull(dockerVersion));
+                DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl)
+                        .withVersion(versionOrNull(dockerVersion));
                 dockerClient = new DockerClientImpl(dcb.build());
-                if(dockerClient.execute(dockerClient.pingCmd()) != 200) {
-                    return FormValidation.error("Cannot ping REST endpoint of " + dockerUrl);
-                }
+                dockerClient.pingCmd().exec();
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, e.getMessage(), e);
                 return FormValidation.error("Something went wrong, cannot connect to " + dockerUrl + ", cause: "

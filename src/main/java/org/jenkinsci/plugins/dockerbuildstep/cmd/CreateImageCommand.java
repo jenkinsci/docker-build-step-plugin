@@ -18,7 +18,6 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.stream.JsonParsingException;
-import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
@@ -27,7 +26,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.DockerException;
-import com.sun.jersey.api.client.ClientResponse;
 
 /**
  * This command creates a new image from specified Dockerfile.
@@ -95,23 +93,13 @@ public class CreateImageCommand extends DockerCommand {
 
 			File docker = new File(expandedDockerFolder);
 
-			console.logInfo("Creating docker image from "
-					+ docker.getAbsolutePath());
+			console.logInfo("Creating docker image from " + docker.getAbsolutePath());
 
-			ClientResponse response = client.execute(client.buildImageCmd(docker).withTag(expandedImageTag));
-
-			if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-				throw new RuntimeException(
-						"Error while calling docker remote api: "
-								+ response.getEntity(String.class));
-			}
+			InputStream istream = client.buildImageCmd(docker).withTag(expandedImageTag).exec();
 			
 			final List<JsonObject> errors = new ArrayList<JsonObject>();
 
 			try {
-
-				InputStream istream = response.getEntityInputStream();
-
 				readJsonStream(istream, new JsonObjectCallback() {
 					public void callback(JsonObject json) {
 						if (json.containsKey("stream")) {
@@ -128,12 +116,11 @@ public class CreateImageCommand extends DockerCommand {
 				if (!errors.isEmpty()) {
 					build.setResult(Result.FAILURE);
 				} else {
-					console.logInfo("Sucessfully created image "
-							+ expandedImageTag);
+					console.logInfo("Sucessfully created image " + expandedImageTag);
 				}
 
 			} finally {
-				IOUtils.closeQuietly(response.getEntityInputStream());
+				IOUtils.closeQuietly(istream);
 			}
 
 		} catch (Exception e) {
@@ -194,7 +181,7 @@ public class CreateImageCommand extends DockerCommand {
 		try {
 			return filePath.exists();
 		} catch (Exception e) {
-			throw new DockerException(e);
+			throw new DockerException("Could not check file", 0, e);
 		}
 	}
 
