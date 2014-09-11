@@ -52,7 +52,7 @@ public class RestartCommand extends DockerCommand {
         DockerClient client = getClient();
         for(String id : ids) {
             id = id.trim();
-            client.execute(client.restartContainerCmd(id).withtTimeout(timeout));
+            client.restartContainerCmd(id).withtTimeout(timeout).exec();
             console.logInfo("restrted conatiner id " + id);
         }
     }

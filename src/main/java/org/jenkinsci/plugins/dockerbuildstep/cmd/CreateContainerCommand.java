@@ -65,14 +65,14 @@ public class CreateContainerCommand extends DockerCommand {
             cfgCmd.withCmd(new String[] { commandRes });
         }
         cfgCmd.withHostName(hostNameRes);
-        CreateContainerResponse resp = client.execute(cfgCmd);
+        CreateContainerResponse resp = cfgCmd.exec();
         console.logInfo("created container id " + resp.getId() + " (from image " + imageRes + ")");
 
         /*
          * if (resp.getWarnings() != null) { for (String warn : resp.getWarnings()) System.out.println("WARN: " + warn);
          * }
          */
-        InspectContainerResponse inspectResp = client.execute(client.inspectContainerCmd(resp.getId()));
+        InspectContainerResponse inspectResp = client.inspectContainerCmd(resp.getId()).exec();
         EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
         build.addAction(envAction);
     }

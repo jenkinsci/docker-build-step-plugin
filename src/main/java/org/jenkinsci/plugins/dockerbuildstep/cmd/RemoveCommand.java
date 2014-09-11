@@ -48,10 +48,10 @@ public class RemoveCommand extends DockerCommand {
         DockerClient client = getClient();
         for (String id : ids) {
             id = id.trim();
-            client.execute(client.killContainerCmd(id));
+            client.killContainerCmd(id).exec();
         }
         for (String id : ids) {
-            client.execute(client.removeContainerCmd(id));
+            client.removeContainerCmd(id).exec();
             console.logInfo("removed container id " + id);
         }
     }

@@ -45,13 +45,13 @@ public class StartByImageIdCommand extends DockerCommand {
         String imageIdRes = Resolver.buildVar(build, imageId);
         
         DockerClient client = getClient();
-        List<Container> containers = client.execute(client.listContainersCmd().withShowAll(true));
+        List<Container> containers = client.listContainersCmd().withShowAll(true).exec();
         for (Container c : containers) {
             if (imageIdRes.equalsIgnoreCase(c.getImage())) {
                 client.startContainerCmd(c.getId());
                 console.logInfo("started container id " + c.getId());
 
-                InspectContainerResponse inspectResp = client.execute(client.inspectContainerCmd(c.getId()));
+                InspectContainerResponse inspectResp = client.inspectContainerCmd(c.getId()).exec();
                 EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
                 build.addAction(envAction);
             }
