@@ -3,9 +3,9 @@ package org.jenkinsci.plugins.dockerbuildstep.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.github.dockerjava.client.model.ExposedPort;
-import com.github.dockerjava.client.model.Ports;
-import com.github.dockerjava.client.model.Ports.Binding;
+import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.Ports;
+import com.github.dockerjava.api.model.Ports.Binding;
 
 /**
  * Parser for port mapping definitions that define how to map docker ports to host ports

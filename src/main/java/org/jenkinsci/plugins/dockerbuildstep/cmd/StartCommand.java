@@ -16,10 +16,10 @@ import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
-import com.github.dockerjava.client.DockerClient;
-import com.github.dockerjava.client.DockerException;
-import com.github.dockerjava.client.model.ContainerInspectResponse;
-import com.github.dockerjava.client.model.Ports;
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.DockerException;
+import com.github.dockerjava.api.command.InspectContainerResponse;
+import com.github.dockerjava.api.model.Ports;
 
 /**
  * This command starts one or more Docker containers. It also exports some build environment variable like IP or started
@@ -92,7 +92,7 @@ public class StartCommand extends DockerCommand {
                     .withPrivileged(privileged));
             console.logInfo("started container id " + id);
 
-            ContainerInspectResponse inspectResp = client.execute(client.inspectContainerCmd(id));
+            InspectContainerResponse inspectResp = client.execute(client.inspectContainerCmd(id));
             EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
             build.addAction(envAction);
         }
@@ -107,7 +107,7 @@ public class StartCommand extends DockerCommand {
     private void waitForPorts(String waitForPorts, DockerClient client, ConsoleLogger console) throws DockerException {
         Map<String, List<Integer>> containers = PortUtils.parsePorts(waitForPorts);
         for (String cId : containers.keySet()) {
-            ContainerInspectResponse inspectResp = client.execute(client.inspectContainerCmd(cId));
+        	InspectContainerResponse inspectResp = client.execute(client.inspectContainerCmd(cId));
             String ip = inspectResp.getNetworkSettings().getIpAddress();
             List<Integer> ports = containers.get(cId);
             for (Integer port : ports) {

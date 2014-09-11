@@ -8,10 +8,9 @@ import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.github.dockerjava.client.DockerClient;
-import com.github.dockerjava.client.DockerException;
-import com.github.dockerjava.client.command.CommitCmd;
-import com.github.dockerjava.client.model.CommitConfig;
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.DockerException;
+import com.github.dockerjava.api.command.CommitCmd;
 
 /**
  * This command commits changes done in specified container and create new image from it.

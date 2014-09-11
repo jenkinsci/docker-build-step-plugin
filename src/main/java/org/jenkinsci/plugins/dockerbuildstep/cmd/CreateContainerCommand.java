@@ -8,12 +8,11 @@ import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.github.dockerjava.client.DockerClient;
-import com.github.dockerjava.client.DockerException;
-import com.github.dockerjava.client.command.CreateContainerCmd;
-import com.github.dockerjava.client.model.ContainerCreateResponse;
-import com.github.dockerjava.client.model.ContainerInspectResponse;
-import com.github.dockerjava.client.model.CreateContainerConfig;
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.DockerException;
+import com.github.dockerjava.api.command.CreateContainerCmd;
+import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.command.InspectContainerResponse;
 
 /**
  * This command creates new container from specified image.
@@ -66,14 +65,14 @@ public class CreateContainerCommand extends DockerCommand {
             cfgCmd.withCmd(new String[] { commandRes });
         }
         cfgCmd.withHostName(hostNameRes);
-        ContainerCreateResponse resp = client.execute(cfgCmd);
+        CreateContainerResponse resp = client.execute(cfgCmd);
         console.logInfo("created container id " + resp.getId() + " (from image " + imageRes + ")");
 
         /*
          * if (resp.getWarnings() != null) { for (String warn : resp.getWarnings()) System.out.println("WARN: " + warn);
          * }
          */
-        ContainerInspectResponse inspectResp = client.execute(client.inspectContainerCmd(resp.getId()));
+        InspectContainerResponse inspectResp = client.execute(client.inspectContainerCmd(resp.getId()));
         EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
         build.addAction(envAction);
     }

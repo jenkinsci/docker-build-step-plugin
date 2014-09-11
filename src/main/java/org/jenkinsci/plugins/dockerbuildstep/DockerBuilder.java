@@ -27,9 +27,10 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
-import com.github.dockerjava.client.Config.DockerClientConfigBuilder;
-import com.github.dockerjava.client.DockerClient;
-import com.github.dockerjava.client.DockerException;
+import com.github.dockerjava.core.DockerClientConfig.DockerClientConfigBuilder;
+import com.github.dockerjava.core.DockerClientImpl;
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.DockerException;
 
 /**
  * Build step which executes various Docker commands via Docker REST API.
@@ -95,7 +96,7 @@ public class DockerBuilder extends Builder {
 
             try {
                 DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(versionOrNull(dockerVersion));
-                dockerClient = new DockerClient(dcb.build());
+                dockerClient = new DockerClientImpl(dcb.build());
             } catch (DockerException e) {
                 LOGGER.warning("Cannot create Docker client: " + e.getCause());
             }
@@ -113,7 +114,7 @@ public class DockerBuilder extends Builder {
             LOGGER.fine(String.format("Trying to get client for %s and version %s", dockerUrl, dockerVersion));
             try {
                 DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(versionOrNull(dockerVersion));
-                dockerClient = new DockerClient(dcb.build());
+                dockerClient = new DockerClientImpl(dcb.build());
                 if(dockerClient.execute(dockerClient.pingCmd()) != 200) {
                     return FormValidation.error("Cannot ping REST endpoint of " + dockerUrl);
                 }
@@ -146,7 +147,7 @@ public class DockerBuilder extends Builder {
             save();
             try {
                 DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(dockerVersion);
-                dockerClient = new DockerClient(dcb.build());
+                dockerClient = new DockerClientImpl(dcb.build());
             } catch (DockerException e) {
                 LOGGER.warning("Cannot create Docker client: " + e.getCause());
             }
