@@ -6,8 +6,6 @@ import hudson.model.AbstractBuild;
 
 import java.util.List;
 
-import javax.ws.rs.core.Response;
-
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -15,7 +13,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.DockerException;
 import com.github.dockerjava.api.model.Image;
-import com.sun.jersey.api.client.ClientResponse;
 
 /**
  * This command pulls Docker image from a repository.
@@ -64,13 +61,7 @@ public class PullImageCommand extends DockerCommand {
         
         console.logInfo("Pulling image " + fromImageRes);
         DockerClient client = getClient();
-        ClientResponse resp = client.execute(client.pullImageCmd(fromImageRes).withTag(tagRes).withRegistry(registryRes));
-        if (Response.Status.Family.SUCCESSFUL.equals(resp.getStatusInfo().getFamily())) {
-            console.logInfo("Downloading ... ");
-        } else {
-            console.logError("Something went wrong, response code is " + resp.getStatus() + ". Failing the build ...");
-            throw new AbortException("Failed to pull Docker image name " + fromImageRes);
-        }
+        client.pullImageCmd(fromImageRes).withTag(tagRes).withRegistry(registryRes).exec();
 
         // wait for the image to be downloaded
         while (!isImagePulled()) {
@@ -87,7 +78,7 @@ public class PullImageCommand extends DockerCommand {
 
     private boolean isImagePulled() throws DockerException {
         DockerClient client = getClient();
-        List<Image> images = client.execute(client.listImagesCmd().withFilter(fromImage));
+        List<Image> images = client.listImagesCmd().withFilter(fromImage).exec();
         if (images.size() == 0) {
             return false;
         }
