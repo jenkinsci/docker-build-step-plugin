@@ -10,10 +10,10 @@ import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.github.dockerjava.client.DockerClient;
-import com.github.dockerjava.client.DockerException;
-import com.github.dockerjava.client.model.Container;
-import com.github.dockerjava.client.model.ContainerInspectResponse;
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.DockerException;
+import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.api.command.InspectContainerResponse;
 
 /**
  * This command starts all containers create from specified image ID. It also exports some build environment variable
@@ -51,7 +51,7 @@ public class StartByImageIdCommand extends DockerCommand {
                 client.startContainerCmd(c.getId());
                 console.logInfo("started container id " + c.getId());
 
-                ContainerInspectResponse inspectResp = client.execute(client.inspectContainerCmd(c.getId()));
+                InspectContainerResponse inspectResp = client.execute(client.inspectContainerCmd(c.getId()));
                 EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
                 build.addAction(envAction);
             }

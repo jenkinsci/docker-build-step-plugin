@@ -12,8 +12,8 @@ import java.util.Map;
 
 import org.jenkinsci.plugins.dockerbuildstep.action.EnvInvisibleAction;
 
-import com.github.dockerjava.client.model.ExposedPort;
-import com.github.dockerjava.client.model.Ports.Binding;
+import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.Ports.Binding;
 
 /**
  * This contributor adds various Docker relate variable like container IDs or IP addresses into build environment

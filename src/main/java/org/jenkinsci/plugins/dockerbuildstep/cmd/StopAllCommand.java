@@ -8,9 +8,9 @@ import java.util.List;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.github.dockerjava.client.DockerClient;
-import com.github.dockerjava.client.DockerException;
-import com.github.dockerjava.client.model.Container;
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.DockerException;
+import com.github.dockerjava.api.model.Container;
 
 /**
  * This command stop all Docker containers.

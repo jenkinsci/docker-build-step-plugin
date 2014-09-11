@@ -7,10 +7,10 @@ import java.util.Map;
 import org.jenkinsci.plugins.dockerbuildstep.DockerEnvContributor;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 
-import com.github.dockerjava.client.model.ContainerInspectResponse;
-import com.github.dockerjava.client.model.ExposedPort;
-import com.github.dockerjava.client.model.Ports;
-import com.github.dockerjava.client.model.Ports.Binding;
+import com.github.dockerjava.api.command.InspectContainerResponse;
+import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.Ports;
+import com.github.dockerjava.api.model.Ports.Binding;
 
 /**
  * Helper invisible action which is used for exchanging information between {@link DockerCommand}s and other object like
@@ -21,20 +21,20 @@ import com.github.dockerjava.client.model.Ports.Binding;
  */
 public class EnvInvisibleAction extends InvisibleAction {
 
-    private ContainerInspectResponse containerInfo;
+    private InspectContainerResponse containerInfo;
 
     public EnvInvisibleAction() {
     }
 
-    public EnvInvisibleAction(ContainerInspectResponse containerInfo) {
+    public EnvInvisibleAction(InspectContainerResponse containerInfo) {
         this.containerInfo = containerInfo;
     }
 
-    public ContainerInspectResponse getContainerInfo() {
+    public InspectContainerResponse getContainerInfo() {
         return containerInfo;
     }
 
-    public void setContainerInfo(ContainerInspectResponse containerInfo) {
+    public void setContainerInfo(InspectContainerResponse containerInfo) {
         this.containerInfo = containerInfo;
     }
 

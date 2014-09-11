@@ -4,9 +4,9 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import com.github.dockerjava.client.model.ExposedPort;
-import com.github.dockerjava.client.model.Ports;
-import com.github.dockerjava.client.model.Ports.Binding;
+import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.Ports;
+import com.github.dockerjava.api.model.Ports.Binding;
 
 /**
  *  Defines legal syntax for entering port bindings
