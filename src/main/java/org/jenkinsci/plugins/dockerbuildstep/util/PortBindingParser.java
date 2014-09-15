@@ -25,10 +25,10 @@ public class PortBindingParser {
      * @throws IllegalArgumentException if any error occurs during parsing
      */
     public static Ports parseBindings(String bindings) throws IllegalArgumentException {
-        if (bindings == null || bindings.isEmpty())
-            return null;
-
         Ports ports = new Ports();
+        if (bindings == null || bindings.isEmpty())
+            return ports;
+
         String[] bindLines = bindings.split("\\r?\\n");
         for (String bind : bindLines) {
             Ports binding = parseOneBinding(bind);
