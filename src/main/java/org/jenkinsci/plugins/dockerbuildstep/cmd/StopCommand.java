@@ -48,7 +48,7 @@ public class StopCommand extends DockerCommand {
         //TODO check, if container is actually running
         for (String id : ids) {
             id = id.trim();
-            client.stopContainerCmd(id);
+            client.stopContainerCmd(id).exec();
             console.logInfo("stopped container id " + id);
         }
     }
