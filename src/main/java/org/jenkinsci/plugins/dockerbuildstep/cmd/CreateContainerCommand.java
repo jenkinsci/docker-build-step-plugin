@@ -27,12 +27,14 @@ public class CreateContainerCommand extends DockerCommand {
     private final String image;
     private final String command;
     private final String hostName;
+	private final String envVars;
 
     @DataBoundConstructor
-    public CreateContainerCommand(String image, String command, String hostName) {
+    public CreateContainerCommand(String image, String command, String hostName, String envVars) {
         this.image = image;
         this.command = command;
         this.hostName = hostName;
+		this.envVars = envVars;
     }
 
     public String getImage() {
@@ -47,6 +49,10 @@ public class CreateContainerCommand extends DockerCommand {
         return hostName;
     }
 
+	public String getEnvVars() {
+		return envVars;
+	}
+	
     @Override
     public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
             throws DockerException {
@@ -58,6 +64,7 @@ public class CreateContainerCommand extends DockerCommand {
         String imageRes = Resolver.buildVar(build, image);
         String commandRes = Resolver.buildVar(build, command);
         String hostNameRes = Resolver.buildVar(build, hostName);
+        String envVarsRes = Resolver.buildVar(build, envVars);
         
         DockerClient client = getClient();
         CreateContainerCmd cfgCmd = client.createContainerCmd(imageRes);
@@ -65,6 +72,10 @@ public class CreateContainerCommand extends DockerCommand {
             cfgCmd.withCmd(new String[] { commandRes });
         }
         cfgCmd.withHostName(hostNameRes);
+		if(!envVarsRes.isEmpty()){
+			String[] envVarResSplitted = envVarsRes.split(",");
+			cfgCmd.withEnv(envVarResSplitted);
+		}
         CreateContainerResponse resp = cfgCmd.exec();
         console.logInfo("created container id " + resp.getId() + " (from image " + imageRes + ")");
 
