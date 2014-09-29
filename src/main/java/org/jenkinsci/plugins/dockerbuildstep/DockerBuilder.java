@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.dockerbuildstep;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import hudson.AbortException;
 import hudson.DescriptorExtensionList;
@@ -89,7 +91,7 @@ public class DockerBuilder extends Builder {
         public DescriptorImpl() {
             load();
 
-            if (dockerUrl == null || dockerUrl.isEmpty()) {
+            if (isEmpty(dockerUrl)) {
                 LOGGER.warning("Docker URL is not set, docker client won't be initialized");
                 return;
             }
@@ -134,7 +136,7 @@ public class DockerBuilder extends Builder {
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             dockerUrl = formData.getString("dockerUrl");
             dockerVersion = formData.getString("dockerVersion");
-            if (dockerUrl == null || dockerUrl.isEmpty()) {
+            if (isBlank(dockerUrl)) {
                 LOGGER.severe("Docker URL is empty, Docker build test plugin cannot work without Docker URL being set up properly");
                 //JENKINS-23733 doen't block user to save the config if admin decides so
                 return true;
