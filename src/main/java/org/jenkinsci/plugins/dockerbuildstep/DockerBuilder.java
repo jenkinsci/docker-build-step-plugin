@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.dockerbuildstep;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 import hudson.AbortException;
 import hudson.DescriptorExtensionList;
 import hudson.Extension;
@@ -94,27 +95,24 @@ public class DockerBuilder extends Builder {
             }
 
             try {
-                DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(versionOrNull(dockerVersion));
-                dockerClient = new DockerClientImpl(dcb.build());
+                dockerClient = createDockerClient(dockerUrl, dockerVersion);
             } catch (DockerException e) {
                 LOGGER.warning("Cannot create Docker client: " + e.getCause());
             }
         }
 
-        /**
-         * Ensures that version is either <code>null</code> or defined, i.e. holding
-         * a non-empty string value. 
-         */
-        private static String versionOrNull(String version) {
-            return version == null || version.isEmpty() ? null : version;
+        private static DockerClient createDockerClient(String dockerUrl, String dockerVersion) {
+            DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl);
+            if (isNotBlank(dockerVersion)) {
+                dcb.withVersion(dockerVersion.trim());
+            }
+            return new DockerClientImpl(dcb.build());
         }
 
         public FormValidation doTestConnection(@QueryParameter String dockerUrl, @QueryParameter String dockerVersion) throws IOException, ServletException {
             LOGGER.fine(String.format("Trying to get client for %s and version %s", dockerUrl, dockerVersion));
             try {
-                DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl)
-                        .withVersion(versionOrNull(dockerVersion));
-                dockerClient = new DockerClientImpl(dcb.build());
+                dockerClient = createDockerClient(dockerUrl, dockerVersion);
                 dockerClient.pingCmd().exec();
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, e.getMessage(), e);
@@ -144,8 +142,7 @@ public class DockerBuilder extends Builder {
 
             save();
             try {
-                DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(versionOrNull(dockerVersion));
-                dockerClient = new DockerClientImpl(dcb.build());
+                dockerClient = createDockerClient(dockerUrl, dockerVersion);
             } catch (DockerException e) {
                 LOGGER.warning("Cannot create Docker client: " + e.getCause());
             }
