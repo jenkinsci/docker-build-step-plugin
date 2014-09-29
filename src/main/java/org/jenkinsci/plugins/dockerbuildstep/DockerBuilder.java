@@ -144,7 +144,7 @@ public class DockerBuilder extends Builder {
 
             save();
             try {
-                DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(dockerVersion);
+                DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl).withVersion(versionOrNull(dockerVersion));
                 dockerClient = new DockerClientImpl(dcb.build());
             } catch (DockerException e) {
                 LOGGER.warning("Cannot create Docker client: " + e.getCause());
