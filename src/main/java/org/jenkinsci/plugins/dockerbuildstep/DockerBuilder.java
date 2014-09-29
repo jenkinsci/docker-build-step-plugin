@@ -114,7 +114,7 @@ public class DockerBuilder extends Builder {
         public FormValidation doTestConnection(@QueryParameter String dockerUrl, @QueryParameter String dockerVersion) throws IOException, ServletException {
             LOGGER.fine(String.format("Trying to get client for %s and version %s", dockerUrl, dockerVersion));
             try {
-                dockerClient = createDockerClient(dockerUrl, dockerVersion);
+                DockerClient dockerClient = createDockerClient(dockerUrl, dockerVersion);
                 dockerClient.pingCmd().exec();
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, e.getMessage(), e);
