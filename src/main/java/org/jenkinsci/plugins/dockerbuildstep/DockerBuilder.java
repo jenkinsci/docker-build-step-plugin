@@ -2,7 +2,6 @@ package org.jenkinsci.plugins.dockerbuildstep;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
 import hudson.AbortException;
 import hudson.DescriptorExtensionList;
 import hudson.Extension;
@@ -20,6 +19,7 @@ import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
@@ -30,7 +30,7 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import com.github.dockerjava.core.DockerClientConfig.DockerClientConfigBuilder;
-import com.github.dockerjava.core.DockerClientImpl;
+import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.DockerException;
 
@@ -104,11 +104,18 @@ public class DockerBuilder extends Builder {
         }
 
         private static DockerClient createDockerClient(String dockerUrl, String dockerVersion) {
-            DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl);
-            if (isNotBlank(dockerVersion)) {
-                dcb.withVersion(dockerVersion.trim());
+            DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl)
+                    .withVersion(dockerVersion);
+
+            // temporarily swap ClassLoader so that docker-java can find service implementations 
+            ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader(); 
+            Thread.currentThread().setContextClassLoader(Jenkins.getInstance().getPluginManager()
+                    .uberClassLoader); 
+            try {
+                return DockerClientBuilder.getInstance(dcb.build()).build();
+            } finally {
+                Thread.currentThread().setContextClassLoader(oldClassLoader); 
             }
-            return new DockerClientImpl(dcb.build());
         }
 
         public FormValidation doTestConnection(@QueryParameter String dockerUrl, @QueryParameter String dockerVersion) throws IOException, ServletException {
