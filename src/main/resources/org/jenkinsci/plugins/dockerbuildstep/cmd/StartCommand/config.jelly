@@ -1,5 +1,6 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
     xmlns:f="/lib/form">
+    <j:set var="descriptor" value="${instance.descriptor}" />
 
     <f:entry field="containerIds" title="Container ID(s)" description="Comma separated list of containers to be started.">
         <f:textbox />
@@ -14,7 +15,6 @@
         <f:entry field="portBindings" title="Port bindings">
             <f:textarea />
         </f:entry>
-        <j:set var="descriptor" value="${instance.descriptor}" />
         <f:validateButton title="${%Check syntax}" method="testPortBindings" with="portBindings" />
         
         <f:entry field="waitPorts" title="Wait for ports">
