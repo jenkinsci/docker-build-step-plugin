@@ -89,7 +89,7 @@ public class StartCommand extends DockerCommand {
         String bindMountsRes = Resolver.buildVar(build, bindMounts);
 
         List<String> ids = Arrays.asList(containerIdsRes.split(","));
-        Ports portBindings = PortBindingParser.parseBindings(portBindingsRes);
+        Ports portBindings = PortBindingParser.parse(portBindingsRes);
         Bind[] binds = BindParser.parse(bindMountsRes);
         DockerClient client = getClient();
 
@@ -145,7 +145,7 @@ public class StartCommand extends DockerCommand {
 
         public FormValidation doTestPortBindings(@QueryParameter String portBindings) {
             try {
-                PortBindingParser.parseBindings(portBindings);
+                PortBindingParser.parse(portBindings);
             } catch (IllegalArgumentException e) {
                 return FormValidation.error(e.getMessage());
             }
