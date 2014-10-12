@@ -149,7 +149,7 @@ public class StartCommand extends DockerCommand {
             } catch (IllegalArgumentException e) {
                 return FormValidation.error(e.getMessage());
             }
-            return FormValidation.ok();
+            return FormValidation.ok("OK");
         }
 
         public FormValidation doTestBindMounts(@QueryParameter String bindMounts) {
@@ -158,7 +158,7 @@ public class StartCommand extends DockerCommand {
             } catch (IllegalArgumentException e) {
                 return FormValidation.error(e.getMessage());
             }
-            return FormValidation.ok();
+            return FormValidation.ok("OK");
         }
     }
 
