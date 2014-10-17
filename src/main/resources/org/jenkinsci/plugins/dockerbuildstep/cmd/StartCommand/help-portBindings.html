@@ -1,5 +1,8 @@
 <div>
-  Specify how container ports are published by mapping them to ports and IP addresses of the docker host.
+  Specify how container ports are published by mapping them to ports and IP addresses 
+  of the docker host.
+  This setting corresponds to the <code>--publish</code> (<code>-p</code>) option 
+  of the <code>docker run</code> CLI command.
   <p>
   Enter one or more port binding, each on its own line.
   The syntax is <code>host container</code> where <code>host</code> is either 
@@ -7,7 +10,7 @@
   <code>container</code> is either <code>containerPort</code> or <code>containerPort/scheme</code>.
   <p>
   Alternatively, you can separate host and port with a colon (":"), thus using the same syntax 
-  as in the Docker CLI's <code>--publish</code> (<code>-p</code>) option.
+  as in the Docker CLI.
   <p>
   Examples
   <ul>

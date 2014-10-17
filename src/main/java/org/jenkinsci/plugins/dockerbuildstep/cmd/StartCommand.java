@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.jenkinsci.plugins.dockerbuildstep.action.EnvInvisibleAction;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
+import org.jenkinsci.plugins.dockerbuildstep.util.BindParser;
 import org.jenkinsci.plugins.dockerbuildstep.util.PortBindingParser;
 import org.jenkinsci.plugins.dockerbuildstep.util.PortUtils;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
@@ -19,11 +20,12 @@ import org.kohsuke.stapler.QueryParameter;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.DockerException;
 import com.github.dockerjava.api.command.InspectContainerResponse;
+import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.Ports;
 
 /**
- * This command starts one or more Docker containers. It also exports some build environment variable like IP or started
- * containers.
+ * This command starts one or more Docker containers.
+ * It also exports some build environment variables like IP or started containers.
  * 
  * @see http://docs.docker.com/reference/api/docker_remote_api_v1.13/#start-a-container
  * 
@@ -36,15 +38,17 @@ public class StartCommand extends DockerCommand {
     private final boolean publishAllPorts;
     private final String portBindings;
     private final String waitPorts;
+    private final String bindMounts;
     private final boolean privileged;
 
     @DataBoundConstructor
     public StartCommand(String containerIds, boolean publishAllPorts, String portBindings, String waitPorts,
-            boolean privileged) {
+            String bindMounts, boolean privileged) {
         this.containerIds = containerIds;
         this.publishAllPorts = publishAllPorts;
         this.portBindings = portBindings;
         this.waitPorts = waitPorts;
+        this.bindMounts = bindMounts;
         this.privileged = privileged;
     }
 
@@ -63,6 +67,10 @@ public class StartCommand extends DockerCommand {
     public String getWaitPorts() {
         return waitPorts;
     }
+    
+    public String getBindMounts() {
+        return bindMounts;
+    }
 
     public boolean getPrivileged() {
         return privileged;
@@ -78,9 +86,11 @@ public class StartCommand extends DockerCommand {
         // expand build and env. variable
         String containerIdsRes = Resolver.buildVar(build, containerIds);
         String portBindingsRes = Resolver.buildVar(build, portBindings);
+        String bindMountsRes = Resolver.buildVar(build, bindMounts);
 
         List<String> ids = Arrays.asList(containerIdsRes.split(","));
-        Ports bindPorts = PortBindingParser.parseBindings(portBindingsRes);
+        Ports portBindings = PortBindingParser.parse(portBindingsRes);
+        Bind[] binds = BindParser.parse(bindMountsRes);
         DockerClient client = getClient();
 
         // TODO check, if container exists and is stopped (probably catch exception)
@@ -88,7 +98,8 @@ public class StartCommand extends DockerCommand {
             id = id.trim();
             client.startContainerCmd(id)
                     .withPublishAllPorts(publishAllPorts)
-                    .withPortBindings(bindPorts)
+                    .withPortBindings(portBindings)
+                    .withBinds(binds)
                     .withPrivileged(privileged)
                     .exec();
             console.logInfo("started container id " + id);
@@ -134,11 +145,20 @@ public class StartCommand extends DockerCommand {
 
         public FormValidation doTestPortBindings(@QueryParameter String portBindings) {
             try {
-                PortBindingParser.parseBindings(portBindings);
+                PortBindingParser.parse(portBindings);
             } catch (IllegalArgumentException e) {
                 return FormValidation.error(e.getMessage());
             }
-            return FormValidation.ok();
+            return FormValidation.ok("OK");
+        }
+
+        public FormValidation doTestBindMounts(@QueryParameter String bindMounts) {
+            try {
+                BindParser.parse(bindMounts);
+            } catch (IllegalArgumentException e) {
+                return FormValidation.error(e.getMessage());
+            }
+            return FormValidation.ok("OK");
         }
     }
 
