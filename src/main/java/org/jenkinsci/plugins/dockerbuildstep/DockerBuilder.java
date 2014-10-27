@@ -112,7 +112,7 @@ public class DockerBuilder extends Builder {
             Thread.currentThread().setContextClassLoader(Jenkins.getInstance().getPluginManager()
                     .uberClassLoader); 
             try {
-                return DockerClientBuilder.getInstance(dcb.build()).build();
+                return DockerClientBuilder.getInstance(dcb).build();
             } finally {
                 Thread.currentThread().setContextClassLoader(oldClassLoader); 
             }
