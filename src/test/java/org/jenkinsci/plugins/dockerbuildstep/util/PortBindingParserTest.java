@@ -62,7 +62,7 @@ public class PortBindingParserTest {
     
     @Test
     public void parseEmptyString() {
-        Map<ExposedPort, Binding> bindings = PortBindingParser.parse("").getBindings();
+        Map<ExposedPort, Binding[]> bindings = PortBindingParser.parse("").getBindings();
         assertTrue("no binding", bindings.isEmpty());
     }
     
@@ -104,9 +104,9 @@ public class PortBindingParserTest {
     }
 
     private static void assertContainsBinding(Ports ports, ExposedPort exposedPort, Binding expectedBinding) {
-        Binding binding = ports.getBindings().get(exposedPort);
-        assertNotNull("no binding was created for " + exposedPort, binding);
-        assertEquals(expectedBinding, binding);
+        Binding[] bindings = ports.getBindings().get(exposedPort);
+        assertNotNull("no binding was created for " + exposedPort, bindings);
+        assertEquals(expectedBinding, bindings[0]);
     }
 
 }
