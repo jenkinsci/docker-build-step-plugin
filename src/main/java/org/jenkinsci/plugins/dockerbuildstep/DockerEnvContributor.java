@@ -62,7 +62,7 @@ public class DockerEnvContributor extends EnvironmentContributor {
         StringBuilder ports = new StringBuilder();
         for (ExposedPort hostPort : bindings.keySet()) {
             ports.append(hostPort.toString()).append(ID_SEPARATOR);
-            envs.put(PORT_BINDING_PREFIX + hostPort.getScheme().toUpperCase() + "_" + hostPort.getPort(),
+            envs.put(PORT_BINDING_PREFIX + hostPort.getProtocol().name() + "_" + hostPort.getPort(),
                     Integer.toString(bindings.get(hostPort).getHostPort()));
         }
         String bindPorts = ports.substring(0, ports.length() - 1).toString();

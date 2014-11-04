@@ -27,9 +27,9 @@ public class PortBindingParser {
      * Assumes one port binding per line in format
      * <ul> 
      *  <li>hostPort containerPort</li>
-     *  <li>hostPort containerPort/scheme</li>
+     *  <li>hostPort containerPort/protocol</li>
      *  <li>hostIP:hostPort containerPort</li>
-     *  <li>hostIP:hostPort containerPort/scheme</li>
+     *  <li>hostIP:hostPort containerPort/protocol</li>
      * </ul>
      * where host and container part can alternatively be delimited by a colon.
      * 
@@ -56,7 +56,7 @@ public class PortBindingParser {
                     createExposedPort(matcher.group("cPort"), matcher.group("protocol")), 
                     createBinding(matcher.group("hIp"), matcher.group("hPort")));
         } else {
-            throw new IllegalArgumentException("Port binding needs to be in format '[hostIP:]hostPort containerPort[/scheme]'");
+            throw new IllegalArgumentException("Port binding needs to be in format '[hostIP:]hostPort containerPort[/protocol]'");
         }
     }
     

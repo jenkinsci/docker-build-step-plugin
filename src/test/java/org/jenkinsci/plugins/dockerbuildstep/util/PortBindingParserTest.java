@@ -21,7 +21,7 @@ public class PortBindingParserTest {
     }
     
     @Test
-    public void noScheme_blank() {
+    public void noProtocol_blank() {
         assertCreatesBinding("127.0.0.1:80 8080", Ports.Binding("127.0.0.1", 80), ExposedPort.tcp(8080));
     }
     
@@ -41,7 +41,7 @@ public class PortBindingParserTest {
     }
     
     @Test
-    public void noScheme_colon() {
+    public void noProtocol_colon() {
         assertCreatesBinding("127.0.0.1:80:8080", Ports.Binding("127.0.0.1", 80), ExposedPort.tcp(8080));
     }
     
