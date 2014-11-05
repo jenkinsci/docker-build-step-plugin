@@ -21,7 +21,7 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.DockerException;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.Bind;
-import com.github.dockerjava.api.model.Ports;
+import com.github.dockerjava.api.model.PortBinding;
 
 /**
  * This command starts one or more Docker containers.
@@ -89,7 +89,7 @@ public class StartCommand extends DockerCommand {
         String bindMountsRes = Resolver.buildVar(build, bindMounts);
 
         List<String> ids = Arrays.asList(containerIdsRes.split(","));
-        Ports portBindings = PortBindingParser.parse(portBindingsRes);
+        PortBinding[] portBindings = PortBindingParser.parse(portBindingsRes);
         Bind[] binds = BindParser.parse(bindMountsRes);
         DockerClient client = getClient();
 
