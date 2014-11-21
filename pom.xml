@@ -1,15 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.jenkins-ci.plugins</groupId>
-		<artifactId>plugin</artifactId>
-		<version>1.554.1</version>
-	</parent>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.jenkins-ci.plugins</groupId>
+        <artifactId>plugin</artifactId>
+        <version>1.554.1</version>
+    </parent>
 
-	<groupId>org.jenkins-ci.plugins</groupId>
-	<artifactId>docker-build-step</artifactId>
-	<version>1.14-SNAPSHOT</version>
-	<packaging>hpi</packaging>
+    <groupId>org.jenkins-ci.plugins</groupId>
+    <artifactId>docker-build-step</artifactId>
+    <version>1.14-SNAPSHOT</version>
+    <packaging>hpi</packaging>
     <url>https://wiki.jenkins-ci.org/display/JENKINS/Docker+build+step+plugin</url>
 
     <developers>
@@ -23,48 +23,48 @@
         <connection>scm:git:git://github.com/jenkinsci/docker-build-step-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/docker-build-step-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/docker-build-step-plugin</url>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
-	<properties>
-		<version.docker.java>0.10.3</version.docker.java>
-	</properties>
+    <properties>
+        <version.docker.java>0.10.3</version.docker.java>
+    </properties>
 
-	<dependencies>
-		<dependency>
-			<groupId>com.github.docker-java</groupId>
-			<artifactId>docker-java</artifactId>
-			<version>${version.docker.java}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>javax.json</artifactId>
-			<version>1.0.4</version>
-		</dependency>
-	</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java</artifactId>
+            <version>${version.docker.java}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+            <version>1.0.4</version>
+        </dependency>
+    </dependencies>
 
-	<repositories>
-		<repository>
-			<id>repo.jenkins-ci.org</id>
-			<url>http://repo.jenkins-ci.org/public/</url>
-		</repository>
-	</repositories>
+    <repositories>
+        <repository>
+            <id>repo.jenkins-ci.org</id>
+            <url>http://repo.jenkins-ci.org/public/</url>
+        </repository>
+    </repositories>
 
-	<pluginRepositories>
-		<pluginRepository>
-			<id>repo.jenkins-ci.org</id>
-			<url>http://repo.jenkins-ci.org/public/</url>
-		</pluginRepository>
-	</pluginRepositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>repo.jenkins-ci.org</id>
+            <url>http://repo.jenkins-ci.org/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
 
-	<build>
-          <plugins>
+    <build>
+        <plugins>
             <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-release-plugin</artifactId>
-              <version>2.5</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5</version>
             </plugin>
-          </plugins>
-	</build>
-	
+        </plugins>
+    </build>
+
 </project>
