@@ -7,13 +7,17 @@ import hudson.model.EnvironmentContributor;
 import hudson.model.Run;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jenkinsci.plugins.dockerbuildstep.action.EnvInvisibleAction;
 
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.Ports.Binding;
+import com.google.common.base.Joiner;
 
 /**
  * This contributor adds various Docker relate variable like container IDs or IP addresses into build environment
@@ -40,22 +44,22 @@ public class DockerEnvContributor extends EnvironmentContributor {
             return;
         }
 
-        String containerIds = envs.get(CONTAINER_IDS_ENV_VAR, "");
-        if (!containerIds.equals("")) {
-            containerIds.concat(ID_SEPARATOR);
-        }
+        Set<String> containerIds = new LinkedHashSet<String>();
+        containerIds.addAll(Arrays.asList(envs.get(CONTAINER_IDS_ENV_VAR, "").split(ID_SEPARATOR)));
 
         for (EnvInvisibleAction action : envActions) {
-            containerIds = containerIds.concat(action.getId()).concat(ID_SEPARATOR);
+            containerIds.add(action.getId());
+
             envs.put(CONTAINER_IP_PREFIX + action.getHostName(), action.getIpAddress());
             if (action.hasPortBindings()) {
                 exportPortBindings(envs, action.getPortBindings());
             }
         }
 
-        containerIds = containerIds.substring(0, containerIds.length() - 1);
-        envs.put(CONTAINER_IDS_ENV_VAR, containerIds);
+        containerIds.remove(null);
+        containerIds.remove("");
 
+        envs.put(CONTAINER_IDS_ENV_VAR, Joiner.on(ID_SEPARATOR).join(containerIds));
     }
 
     private void exportPortBindings(EnvVars envs, Map<ExposedPort, Binding[]> bindings) {
