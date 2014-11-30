@@ -27,13 +27,15 @@ public class CreateContainerCommand extends DockerCommand {
     private final String image;
     private final String command;
     private final String hostName;
+    private final String containerName;
 	private final String envVars;
 
     @DataBoundConstructor
-    public CreateContainerCommand(String image, String command, String hostName, String envVars) {
+    public CreateContainerCommand(String image, String command, String hostName, String containerName, String envVars) {
         this.image = image;
         this.command = command;
         this.hostName = hostName;
+        this.containerName = containerName;
 		this.envVars = envVars;
     }
 
@@ -49,6 +51,10 @@ public class CreateContainerCommand extends DockerCommand {
         return hostName;
     }
 
+    public String getContainerName() {
+        return containerName;
+    }
+    
 	public String getEnvVars() {
 		return envVars;
 	}
@@ -64,6 +70,7 @@ public class CreateContainerCommand extends DockerCommand {
         String imageRes = Resolver.buildVar(build, image);
         String commandRes = Resolver.buildVar(build, command);
         String hostNameRes = Resolver.buildVar(build, hostName);
+        String containerNameRes = Resolver.buildVar(build, containerName);
         String envVarsRes = Resolver.buildVar(build, envVars);
         
         DockerClient client = getClient();
@@ -72,6 +79,7 @@ public class CreateContainerCommand extends DockerCommand {
             cfgCmd.withCmd(new String[] { commandRes });
         }
         cfgCmd.withHostName(hostNameRes);
+        cfgCmd.withName(containerNameRes);
 		if(!envVarsRes.isEmpty()){
 			String[] envVarResSplitted = envVarsRes.split(",");
 			cfgCmd.withEnv(envVarResSplitted);

@@ -10,6 +10,9 @@
     <f:entry field="hostName" title="Hostname">
         <f:textbox />
     </f:entry>
+    <f:entry field="containerName" title="Container name">
+        <f:textbox />
+    </f:entry>
 	<f:advanced align="left">
 		<f:entry field="envVars" title="Environment variables" description="Comma separated list of environment to be started. Example: var1=value1,var2=value2">
 			<f:textbox />
