@@ -20,6 +20,10 @@
         <f:entry field="waitPorts" title="Wait for ports">
             <f:textarea />
         </f:entry>
+        
+        <f:entry field="links" title="Links" description="Comma separated list of links. Example: name1:alias1,name1:alias2">
+            <f:textbox />
+        </f:entry>
 
         <f:entry field="bindMounts" title="Bind mounts">
             <f:textarea />

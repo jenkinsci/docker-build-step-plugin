@@ -11,6 +11,7 @@ import java.util.Map;
 import org.jenkinsci.plugins.dockerbuildstep.action.EnvInvisibleAction;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.BindParser;
+import org.jenkinsci.plugins.dockerbuildstep.util.LinkUtils;
 import org.jenkinsci.plugins.dockerbuildstep.util.PortBindingParser;
 import org.jenkinsci.plugins.dockerbuildstep.util.PortUtils;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
@@ -21,6 +22,7 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.DockerException;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.Bind;
+import com.github.dockerjava.api.model.Links;
 import com.github.dockerjava.api.model.PortBinding;
 
 /**
@@ -38,16 +40,18 @@ public class StartCommand extends DockerCommand {
     private final boolean publishAllPorts;
     private final String portBindings;
     private final String waitPorts;
+    private final String links;
     private final String bindMounts;
     private final boolean privileged;
 
     @DataBoundConstructor
     public StartCommand(String containerIds, boolean publishAllPorts, String portBindings, String waitPorts,
-            String bindMounts, boolean privileged) {
+            String links, String bindMounts, boolean privileged) {
         this.containerIds = containerIds;
         this.publishAllPorts = publishAllPorts;
         this.portBindings = portBindings;
         this.waitPorts = waitPorts;
+        this.links = links;
         this.bindMounts = bindMounts;
         this.privileged = privileged;
     }
@@ -68,6 +72,10 @@ public class StartCommand extends DockerCommand {
         return waitPorts;
     }
     
+    public String getLinks() {
+        return links;
+    }
+    
     public String getBindMounts() {
         return bindMounts;
     }
@@ -83,14 +91,10 @@ public class StartCommand extends DockerCommand {
             throw new IllegalArgumentException("At least one parameter is required");
         }
 
-        // expand build and env. variable
-        String containerIdsRes = Resolver.buildVar(build, containerIds);
-        String portBindingsRes = Resolver.buildVar(build, portBindings);
-        String bindMountsRes = Resolver.buildVar(build, bindMounts);
-
-        List<String> ids = Arrays.asList(containerIdsRes.split(","));
-        PortBinding[] portBindings = PortBindingParser.parse(portBindingsRes);
-        Bind[] binds = BindParser.parse(bindMountsRes);
+        List<String> ids = Arrays.asList(Resolver.buildVar(build, containerIds).split(","));
+        PortBinding[] portBindingsRes = PortBindingParser.parse(Resolver.buildVar(build, portBindings));
+        Links linksRes = LinkUtils.parseLinks(Resolver.buildVar(build, links));
+        Bind[] bindsRes = BindParser.parse(Resolver.buildVar(build, bindMounts));
         DockerClient client = getClient();
 
         // TODO check, if container exists and is stopped (probably catch exception)
@@ -98,8 +102,9 @@ public class StartCommand extends DockerCommand {
             id = id.trim();
             client.startContainerCmd(id)
                     .withPublishAllPorts(publishAllPorts)
-                    .withPortBindings(portBindings)
-                    .withBinds(binds)
+                    .withPortBindings(portBindingsRes)
+                    .withLinks(linksRes.getLinks())
+                    .withBinds(bindsRes)
                     .withPrivileged(privileged)
                     .exec();
             console.logInfo("started container id " + id);
