@@ -17,6 +17,9 @@
 		<f:entry field="envVars" title="Environment variables" description="Comma separated list of environment to be started. Example: var1=value1,var2=value2">
 			<f:textbox />
 		</f:entry>
+        <f:entry field="links" title="Links" description="Comma separated list of links. Example: name1:alias1,name1:alias2">
+            <f:textbox />
+        </f:entry>
 	</f:advanced>
 	
 	

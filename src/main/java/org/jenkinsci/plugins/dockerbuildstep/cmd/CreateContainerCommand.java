@@ -5,6 +5,7 @@ import hudson.model.AbstractBuild;
 
 import org.jenkinsci.plugins.dockerbuildstep.action.EnvInvisibleAction;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
+import org.jenkinsci.plugins.dockerbuildstep.util.LinkUtils;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -13,6 +14,8 @@ import com.github.dockerjava.api.DockerException;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
+import com.github.dockerjava.api.model.HostConfig;
+import com.github.dockerjava.api.model.Links;
 
 /**
  * This command creates new container from specified image.
@@ -28,15 +31,18 @@ public class CreateContainerCommand extends DockerCommand {
     private final String command;
     private final String hostName;
     private final String containerName;
-	private final String envVars;
+    private final String envVars;
+    private final String links;
 
     @DataBoundConstructor
-    public CreateContainerCommand(String image, String command, String hostName, String containerName, String envVars) {
+    public CreateContainerCommand(String image, String command, String hostName, String containerName, String envVars,
+            String links) throws IllegalArgumentException {
         this.image = image;
         this.command = command;
         this.hostName = hostName;
         this.containerName = containerName;
-		this.envVars = envVars;
+        this.envVars = envVars;
+        this.links = links;
     }
 
     public String getImage() {
@@ -54,11 +60,15 @@ public class CreateContainerCommand extends DockerCommand {
     public String getContainerName() {
         return containerName;
     }
-    
-	public String getEnvVars() {
-		return envVars;
-	}
-	
+
+    public String getEnvVars() {
+        return envVars;
+    }
+
+    public String getLinks() {
+        return links;
+    }
+
     @Override
     public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
             throws DockerException {
@@ -66,13 +76,14 @@ public class CreateContainerCommand extends DockerCommand {
         if (image == null || image.isEmpty()) {
             throw new IllegalArgumentException("At least one parameter is required");
         }
-        
+
         String imageRes = Resolver.buildVar(build, image);
         String commandRes = Resolver.buildVar(build, command);
         String hostNameRes = Resolver.buildVar(build, hostName);
         String containerNameRes = Resolver.buildVar(build, containerName);
         String envVarsRes = Resolver.buildVar(build, envVars);
-        
+        Links linksRes = LinkUtils.parseLinks(Resolver.buildVar(build, links));
+
         DockerClient client = getClient();
         CreateContainerCmd cfgCmd = client.createContainerCmd(imageRes);
         if (!commandRes.isEmpty()) {
@@ -80,10 +91,13 @@ public class CreateContainerCommand extends DockerCommand {
         }
         cfgCmd.withHostName(hostNameRes);
         cfgCmd.withName(containerNameRes);
-		if(!envVarsRes.isEmpty()){
-			String[] envVarResSplitted = envVarsRes.split(",");
-			cfgCmd.withEnv(envVarResSplitted);
-		}
+        HostConfig hc = new HostConfig();
+        hc.setLinks(new Links(linksRes.getLinks()));
+        cfgCmd.withHostConfig(hc);
+        if (!envVarsRes.isEmpty()) {
+            String[] envVarResSplitted = envVarsRes.split(",");
+            cfgCmd.withEnv(envVarResSplitted);
+        }
         CreateContainerResponse resp = cfgCmd.exec();
         console.logInfo("created container id " + resp.getId() + " (from image " + imageRes + ")");
 
