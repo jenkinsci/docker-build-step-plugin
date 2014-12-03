@@ -9,5 +9,9 @@
         <f:textbox default="$BUILD_NUMBER"/>
     </f:entry>
     
+    <f:entry field="noCache" title="Don't use the cache when building the image">
+        <f:checkbox />
+    </f:entry>
+    
     
 </j:jelly>
