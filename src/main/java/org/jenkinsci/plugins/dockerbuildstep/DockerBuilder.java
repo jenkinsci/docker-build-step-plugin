@@ -104,18 +104,11 @@ public class DockerBuilder extends Builder {
         }
 
         private static DockerClient createDockerClient(String dockerUrl, String dockerVersion) {
-            DockerClientConfigBuilder dcb = new DockerClientConfigBuilder().withUri(dockerUrl)
-                    .withVersion(dockerVersion);
-
-            // temporarily swap ClassLoader so that docker-java can find service implementations 
-            ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader(); 
-            Thread.currentThread().setContextClassLoader(Jenkins.getInstance().getPluginManager()
-                    .uberClassLoader); 
-            try {
-                return DockerClientBuilder.getInstance(dcb).build();
-            } finally {
-                Thread.currentThread().setContextClassLoader(oldClassLoader); 
-            }
+            DockerClientConfigBuilder configBuilder = new DockerClientConfigBuilder()
+                    .withUri(dockerUrl).withVersion(dockerVersion);
+            ClassLoader classLoader = Jenkins.getInstance().getPluginManager().uberClassLoader;
+            return DockerClientBuilder.getInstance(configBuilder)
+                    .withServiceLoaderClassLoader(classLoader).build();
         }
 
         public FormValidation doTestConnection(@QueryParameter String dockerUrl, @QueryParameter String dockerVersion) throws IOException, ServletException {
