@@ -78,7 +78,7 @@ public class PullImageCommand extends DockerCommand {
 
     private boolean isImagePulled() throws DockerException {
         DockerClient client = getClient();
-        List<Image> images = client.listImagesCmd().withFilters(fromImage).exec();
+        List<Image> images = client.listImagesCmd().withFilters(String.format("{\"%s\":[\"true\"]}", fromImage)).exec();
         if (images.size() == 0) {
             return false;
         }
