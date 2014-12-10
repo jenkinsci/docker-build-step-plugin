@@ -1,15 +1,4 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
     xmlns:f="/lib/form">
-
-    <j:set var="currCmd" value="${instance.dockerCmd}" />
-    <f:dropdownList name="dockerCmd" title="Docker command">
-        <j:forEach var="desc" items="${descriptor.cmdDescriptors}" varStatus="loop">
-            <f:dropdownListBlock title="${desc.displayName}" value="${loop.index}" selected="${desc==currCmd.descriptor}"
-                staplerClass="${desc.clazz.name}">
-                <j:set var="instance" value="${currCmd}" />
-                <st:include page="${desc.configPage}" from="${desc}" />
-            </f:dropdownListBlock>
-        </j:forEach>
-    </f:dropdownList>
-
+    <f:dropdownDescriptorSelector field="dockerCmd" title="Docker command" descriptors="${descriptor.cmdDescriptors}" />
 </j:jelly>

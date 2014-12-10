@@ -1,0 +1,11 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
+    xmlns:f="/lib/form" xmlns:c="/lib/credentials">
+
+    <st:include page="config-detail.jelly" optional="true" class="${descriptor.clazz}"/>
+
+    <j:if test="${descriptor.showCredentials()}">
+        <f:entry field="dockerCredentials">
+            <f:property propertyDescriptor="${descriptor.dockerCredConfigDescriptor}"/>
+        </f:entry>
+    </j:if>
+</j:jelly>
