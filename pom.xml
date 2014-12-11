@@ -27,7 +27,7 @@
     </scm>
 
     <properties>
-        <version.docker.java>0.10.4-SNAPSHOT</version.docker.java>
+        <version.docker.java>0.10.4</version.docker.java>
     </properties>
 
     <dependencies>
