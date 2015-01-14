@@ -5,4 +5,8 @@
         <f:textbox />
     </f:entry>
 
+    <f:entry field="ignoreIfNotFound" title="Ignore if not found" description="Do not fail this step if any of the containers are not found." >
+        <f:checkbox />
+    </f:entry>
+
 </j:jelly>
