@@ -54,17 +54,9 @@ public class RemoveCommand extends DockerCommand {
         List<String> ids = Arrays.asList(containerIdsRes.split(","));
         DockerClient client = getClient();
         for (String id : ids) {
-            id = id.trim();
+        	id = id.trim();
             try {
-                client.killContainerCmd(id).exec();
-            } catch (NotFoundException e) {
-                if (!ignoreIfNotFound) {
-                    throw e;
-                }
-            }
-        }
-        for (String id : ids) {
-            try {
+            	client.killContainerCmd(id).exec();
                 client.removeContainerCmd(id).exec();
                 console.logInfo("removed container id " + id);
             } catch (NotFoundException e) {
