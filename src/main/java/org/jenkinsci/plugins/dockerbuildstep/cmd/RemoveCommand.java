@@ -68,9 +68,11 @@ public class RemoveCommand extends DockerCommand {
                 client.removeContainerCmd(id).exec();
                 console.logInfo("removed container id " + id);
             } catch (NotFoundException e) {
-                console.logInfo("container not found " + id);
                 if (!ignoreIfNotFound) {
+                	console.logError(String.format("container '%s' not found ", id));
                     throw e;
+                } else {
+                	console.logInfo(String.format("container '%s' not found, but skipping this error is turned on, let's continue ... ", id));
                 }
             }
         }
