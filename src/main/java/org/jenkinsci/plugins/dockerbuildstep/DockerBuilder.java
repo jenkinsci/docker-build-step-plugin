@@ -14,13 +14,17 @@ import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.net.ssl.SSLContext;
 import javax.servlet.ServletException;
 
 import jenkins.model.Jenkins;
-
 import net.sf.json.JSONObject;
 
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
@@ -32,6 +36,7 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import com.github.dockerjava.core.DockerClientConfig.DockerClientConfigBuilder;
 import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.core.SSLConfig;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.DockerException;
 
@@ -105,8 +110,16 @@ public class DockerBuilder extends Builder {
         }
 
         private static DockerClient createDockerClient(String dockerUrl, String dockerVersion) {
+        	//TODO JENKINS-26512
+        	SSLConfig dummySSLConf = (new SSLConfig() {	
+				public SSLContext getSSLContext() throws KeyManagementException, UnrecoverableKeyException,
+						NoSuchAlgorithmException, KeyStoreException {
+					return null;
+				}
+			});
+        	
             DockerClientConfigBuilder configBuilder = new DockerClientConfigBuilder()
-                    .withUri(dockerUrl).withVersion(dockerVersion);
+                    .withUri(dockerUrl).withVersion(dockerVersion).withSSLConfig(dummySSLConf);
             ClassLoader classLoader = Jenkins.getInstance().getPluginManager().uberClassLoader;
             return DockerClientBuilder.getInstance(configBuilder)
                     .withServiceLoaderClassLoader(classLoader).build();
