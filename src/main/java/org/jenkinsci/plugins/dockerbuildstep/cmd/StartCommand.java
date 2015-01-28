@@ -128,13 +128,13 @@ public class StartCommand extends DockerCommand {
             String ip = inspectResp.getNetworkSettings().getIpAddress();
             List<Integer> ports = containers.get(cId);
             for (Integer port : ports) {
-                console.logInfo("Waiting for port " + port + " on " + ip + " (conatiner ID " + cId + ")");
+                console.logInfo("Waiting for port " + port + " on " + ip + " (container ID " + cId + ")");
                 boolean portReady = PortUtils.waitForPort(ip, port);
                 if (portReady) {
                     console.logInfo(ip + ":" + port + " ready");
                 } else {
                     // TODO fail the build, but make timeout configurable first
-                    console.logWarn(ip + ":" + port + " still not available (conatiner ID " + cId
+                    console.logWarn(ip + ":" + port + " still not available (container ID " + cId
                             + "), but build continues ...");
                 }
             }
