@@ -85,7 +85,7 @@ public class CreateImageCommand extends DockerCommand {
 
 		if (!exist(folder))
 			throw new IllegalArgumentException("configured dockerFolder '"
-					+ expandedDockerFolder + "' does no exist.");
+					+ expandedDockerFolder + "' does not exist.");
 
 		FilePath dockerFile = folder.child("Dockerfile");
 
