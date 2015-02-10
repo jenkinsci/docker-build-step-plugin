@@ -12,6 +12,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.DockerException;
+import com.github.dockerjava.api.NotFoundException;
 
 /**
  * This command removes specified Docker container(s).
@@ -24,14 +25,20 @@ import com.github.dockerjava.api.DockerException;
 public class RemoveCommand extends DockerCommand {
 
     private final String containerIds;
+    private final boolean ignoreIfNotFound;
 
     @DataBoundConstructor
-    public RemoveCommand(String containerIds) {
+    public RemoveCommand(String containerIds, boolean ignoreIfNotFound) {
         this.containerIds = containerIds;
+        this.ignoreIfNotFound = ignoreIfNotFound;
     }
 
     public String getContainerIds() {
         return containerIds;
+    }
+
+    public boolean getIgnoreIfNotFound() {
+        return ignoreIfNotFound;
     }
 
     @Override
@@ -47,12 +54,19 @@ public class RemoveCommand extends DockerCommand {
         List<String> ids = Arrays.asList(containerIdsRes.split(","));
         DockerClient client = getClient();
         for (String id : ids) {
-            id = id.trim();
-            client.killContainerCmd(id).exec();
-        }
-        for (String id : ids) {
-            client.removeContainerCmd(id).exec();
-            console.logInfo("removed container id " + id);
+        	id = id.trim();
+            try {
+            	client.killContainerCmd(id).exec();
+                client.removeContainerCmd(id).exec();
+                console.logInfo("removed container id " + id);
+            } catch (NotFoundException e) {
+                if (!ignoreIfNotFound) {
+                	console.logError(String.format("container '%s' not found ", id));
+                    throw e;
+                } else {
+                	console.logInfo(String.format("container '%s' not found, but skipping this error is turned on, let's continue ... ", id));
+                }
+            }
         }
     }
 
