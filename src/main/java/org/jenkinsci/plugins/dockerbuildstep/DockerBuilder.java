@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.dockerbuildstep;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isEmpty;
+
 import hudson.AbortException;
 import hudson.DescriptorExtensionList;
 import hudson.Extension;
@@ -40,6 +41,7 @@ import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.SSLConfig;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.DockerException;
+import com.github.dockerjava.api.model.AuthConfig;
 
 /**
  * Build step which executes various Docker commands via Docker REST API.
@@ -66,7 +68,7 @@ public class DockerBuilder extends Builder {
 
 		ConsoleLogger clog = new ConsoleLogger(listener);
 
-		if (getDescriptor().getDockerClient() == null) {
+		if (getDescriptor().getDockerClient(null) == null) {
 			clog.logError("docker client is not initialized, command '" + dockerCmd.getDescriptor().getDisplayName()
 					+ "' was aborted. Check Jenkins server log which Docker client wasn't initialized");
 			throw new AbortException("Docker client wasn't initialized.");
@@ -93,8 +95,6 @@ public class DockerBuilder extends Builder {
 
 		private String dockerUrl;
 		private String dockerVersion;
-		private transient DockerClient dockerClient;
-
 		public DescriptorImpl() {
 			load();
 
@@ -104,13 +104,14 @@ public class DockerBuilder extends Builder {
 			}
 
 			try {
-				dockerClient = createDockerClient(dockerUrl, dockerVersion);
+				createDockerClient(dockerUrl, dockerVersion, null);
 			} catch (DockerException e) {
 				LOGGER.warning("Cannot create Docker client: " + e.getCause());
 			}
 		}
 
-		private static DockerClient createDockerClient(String dockerUrl, String dockerVersion) {
+		private static DockerClient createDockerClient(String dockerUrl, String dockerVersion,
+				AuthConfig authConfig) {
 			// TODO JENKINS-26512
 			SSLConfig dummySSLConf = (new SSLConfig() {
 				public SSLContext getSSLContext() throws KeyManagementException, UnrecoverableKeyException,
@@ -120,16 +121,24 @@ public class DockerBuilder extends Builder {
 			});
 
 			DockerClientConfigBuilder configBuilder = new DockerClientConfigBuilder().withUri(dockerUrl)
-					.withVersion(dockerVersion).withSSLConfig(dummySSLConf);
+				.withVersion(dockerVersion).withSSLConfig(dummySSLConf)
+	     			// Each Docker command will create its own docker client, which means
+				// each client only needs 1 connection.
+				.withMaxTotalConnections(1).withMaxPerRouteConnections(1);
+			if (authConfig != null) {
+				configBuilder.withUsername(authConfig.getUsername())
+					.withEmail(authConfig.getEmail())
+					.withPassword(authConfig.getPassword())
+					.withServerAddress(authConfig.getServerAddress());
+			}
 			ClassLoader classLoader = Jenkins.getInstance().getPluginManager().uberClassLoader;
 			return DockerClientBuilder.getInstance(configBuilder).withServiceLoaderClassLoader(classLoader).build();
 		}
 
-		public FormValidation doTestConnection(@QueryParameter String dockerUrl, @QueryParameter String dockerVersion)
-				throws IOException, ServletException {
+		public FormValidation doTestConnection(@QueryParameter String dockerUrl, @QueryParameter String dockerVersion) {
 			LOGGER.fine(String.format("Trying to get client for %s and version %s", dockerUrl, dockerVersion));
 			try {
-				DockerClient dockerClient = createDockerClient(dockerUrl, dockerVersion);
+				DockerClient dockerClient = createDockerClient(dockerUrl, dockerVersion, null);
 				dockerClient.pingCmd().exec();
 			} catch (Exception e) {
 				LOGGER.log(Level.WARNING, e.getMessage(), e);
@@ -151,6 +160,7 @@ public class DockerBuilder extends Builder {
 		public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
 			dockerUrl = formData.getString("dockerUrl");
 			dockerVersion = formData.getString("dockerVersion");
+
 			if (isBlank(dockerUrl)) {
 				LOGGER.severe("Docker URL is empty, Docker build test plugin cannot work without Docker URL being set up properly");
 				// JENKINS-23733 doen't block user to save the config if admin decides so
@@ -158,8 +168,9 @@ public class DockerBuilder extends Builder {
 			}
 
 			save();
+
 			try {
-				dockerClient = createDockerClient(dockerUrl, dockerVersion);
+				createDockerClient(dockerUrl, dockerVersion, null);
 			} catch (DockerException e) {
 				LOGGER.warning("Cannot create Docker client: " + e.getCause());
 			}
@@ -174,8 +185,20 @@ public class DockerBuilder extends Builder {
 			return dockerVersion;
 		}
 
-		public DockerClient getDockerClient() {
-			return dockerClient;
+		public DockerClient getDockerClient(AuthConfig authConfig) {
+			// Reason to return a new DockerClient each time this function is called:
+			// - It is a legitimate scenario that different jobs or different build steps
+			//   in the same job may need to use one credential to connect to one 
+			//   docker registry but needs another credential to connect to another docker
+			//   registry.
+			// - Recent docker-java client made some changes so that it requires valid
+			//   AuthConfig to be provided when DockerClient is created for certain commands
+			//   when auth is needed. We don't have control on how docker-java client is
+			//   implemented.
+			// So to satisfy thread safety on the returned DockerClient
+			// (when different AuthConfig are are needed), it is better to return a new 
+			// instance each time this function is called.
+			return createDockerClient(dockerUrl, dockerVersion, authConfig);
 		}
 
 		public DescriptorExtensionList<DockerCommand, DockerCommandDescriptor> getCmdDescriptors() {

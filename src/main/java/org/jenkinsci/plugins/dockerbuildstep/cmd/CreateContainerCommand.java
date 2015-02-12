@@ -84,7 +84,7 @@ public class CreateContainerCommand extends DockerCommand {
         String envVarsRes = Resolver.buildVar(build, envVars);
         Links linksRes = LinkUtils.parseLinks(Resolver.buildVar(build, links));
 
-        DockerClient client = getClient();
+        DockerClient client = getClient(null);
         CreateContainerCmd cfgCmd = client.createContainerCmd(imageRes);
         if (!commandRes.isEmpty()) {
             cfgCmd.withCmd(new String[] { commandRes });

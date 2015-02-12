@@ -44,7 +44,7 @@ public class StartByImageIdCommand extends DockerCommand {
 
         String imageIdRes = Resolver.buildVar(build, imageId);
         
-        DockerClient client = getClient();
+        DockerClient client = getClient(null);
         List<Container> containers = client.listContainersCmd().withShowAll(true).exec();
         for (Container c : containers) {
             if (imageIdRes.equalsIgnoreCase(c.getImage())) {

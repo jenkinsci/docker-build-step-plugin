@@ -58,7 +58,7 @@ public abstract class DockerCommand implements Describable<DockerCommand>, Exten
         }
 
         AuthConfig authConfig = new AuthConfig();
-        authConfig.setServerAddress(dockerCredentials.getServerAddress());
+        authConfig.setServerAddress(dockerCredentials.getServerHost());
 
         StandardUsernamePasswordCredentials credentials = CredentialsMatchers
             .firstOrNull(
@@ -70,6 +70,11 @@ public abstract class DockerCommand implements Describable<DockerCommand>, Exten
         if (credentials != null) {
             authConfig.setUsername(credentials.getUsername());
             authConfig.setPassword(Secret.toString(credentials.getPassword()));
+            // TODO: email filed is not actually used by authentication, but
+            // Docker java client requires this field. Use a dummy value for now,
+            // Should extend a DockerCredentials from cloudbees credential type
+            // which can return email field.
+            authConfig.setEmail("dummy@dummy.com");
         }
         return authConfig;
     }
@@ -80,9 +85,9 @@ public abstract class DockerCommand implements Describable<DockerCommand>, Exten
     public abstract void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
             throws DockerException, AbortException;
 
-    protected static DockerClient getClient() {
+    protected static DockerClient getClient(AuthConfig authConfig) {
         return ((DockerBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(DockerBuilder.class))
-                .getDockerClient();
+                .getDockerClient(authConfig);
     }
 
     public DockerCommandDescriptor getDescriptor() {
