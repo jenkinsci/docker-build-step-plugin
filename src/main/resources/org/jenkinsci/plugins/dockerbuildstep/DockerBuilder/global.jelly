@@ -10,8 +10,8 @@
             <f:textbox />
         </f:entry>
     </f:advanced>
-    
-    <f:validateButton title="${%Test Connection}" progress="${%Testing...}" method="testConnection" with="dockerUrl,dockerVersion" />
+    <f:validateButton title="${%Test Connection}" progress="${%Testing...}" method="testConnection"
+         with="dockerUrl,dockerVersion" />
   </f:section>
 
 </j:jelly>

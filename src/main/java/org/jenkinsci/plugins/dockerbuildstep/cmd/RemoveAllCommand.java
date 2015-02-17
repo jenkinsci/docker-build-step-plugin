@@ -27,7 +27,7 @@ public class RemoveAllCommand extends DockerCommand {
     @Override
     public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
             throws DockerException {
-        DockerClient client = getClient();
+        DockerClient client = getClient(null);
         List<Container> containers = client.listContainersCmd().withShowAll(true).exec();
         for (Container container : containers) {
             client.killContainerCmd(container.getId()).exec();

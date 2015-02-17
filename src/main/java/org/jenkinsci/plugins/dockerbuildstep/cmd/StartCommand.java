@@ -95,7 +95,7 @@ public class StartCommand extends DockerCommand {
         PortBinding[] portBindingsRes = PortBindingParser.parse(Resolver.buildVar(build, portBindings));
         Links linksRes = LinkUtils.parseLinks(Resolver.buildVar(build, links));
         Bind[] bindsRes = BindParser.parse(Resolver.buildVar(build, bindMounts));
-        DockerClient client = getClient();
+        DockerClient client = getClient(null);
 
         // TODO check, if container exists and is stopped (probably catch exception)
         for (String id : ids) {

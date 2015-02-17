@@ -74,12 +74,8 @@ public class PullImageCommand extends DockerCommand {
                 Resolver.buildVar(build, tag));
 
         console.logInfo("Pulling image " + fromImageRes);
-        DockerClient client = getClient();
+        DockerClient client = getClient(getAuthConfig(build.getParent()));
         PullImageCmd pullImageCmd = client.pullImageCmd(fromImageRes);
-        AuthConfig authConfig = getAuthConfig(build.getParent());
-        if (authConfig != null) {
-            pullImageCmd.withAuthConfig(authConfig);
-        }
         InputStream inputStream = pullImageCmd.exec();
         CommandUtils.logCommandResult(inputStream, console,
                 "Failed to parse docker response when pulling image");
@@ -106,7 +102,7 @@ public class PullImageCommand extends DockerCommand {
     }
 
     private boolean isImagePulled(String fromImageRes) throws DockerException {
-        DockerClient client = getClient();
+        DockerClient client = getClient(null);
         // As of December 17, 2014, Docker list image command only support
         // one filter: dangling (true or fals).
         // See https://docs.docker.com/reference/commandline/cli/#filtering_1

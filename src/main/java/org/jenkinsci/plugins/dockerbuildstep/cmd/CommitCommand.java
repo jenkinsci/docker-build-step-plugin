@@ -60,8 +60,8 @@ public class CommitCommand extends DockerCommand {
         }
 
         String containerIdRes = Resolver.buildVar(build, containerId);
-        
-        DockerClient client = getClient();
+
+        DockerClient client = getClient(null);
         CommitCmd  commitCmd = client.commitCmd(containerIdRes).withRepository(repo).withTag(tag).withCmd(runCmd);
         String imageId = commitCmd.exec();
 

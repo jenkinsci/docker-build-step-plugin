@@ -41,7 +41,7 @@ public class StopByImageIdCommand extends DockerCommand {
 
         String imageIdRes = Resolver.buildVar(build, imageId);
         
-        DockerClient client = getClient();
+        DockerClient client = getClient(null);
         List<Container> containers = client.listContainersCmd().exec();
         for (Container c : containers) {
             if (imageIdRes.equalsIgnoreCase(c.getImage())) {

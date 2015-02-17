@@ -27,10 +27,15 @@
     </scm>
 
     <properties>
-        <version.docker.java>0.10.5-SNAPSHOT</version.docker.java>
+        <version.docker.java>1.0.0-SNAPSHOT</version.docker.java>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.3.6</version>
+        </dependency>
         <dependency>
             <groupId>com.github.docker-java</groupId>
             <artifactId>docker-java</artifactId>

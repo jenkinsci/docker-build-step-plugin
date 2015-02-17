@@ -50,7 +50,7 @@ public class ExecCreateCommand extends DockerCommand {
 		String commandRes = Resolver.buildVar(build, command);
 
 		List<String> ids = Arrays.asList(containerIdsRes.split(","));
-		DockerClient client = getClient();
+		DockerClient client = getClient(null);
 		for (String id : ids) {
 			id = id.trim();
 			ExecCreateCmdResponse res = client.execCreateCmd(id).withCmd(commandRes.split(" ")).exec();

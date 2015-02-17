@@ -22,9 +22,10 @@ import hudson.util.ListBoxModel;
 import hudson.Extension;
 
 import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.annotation.Nullable;
-import javax.ws.rs.core.UriBuilder;
 
 import hudson.model.AbstractDescribableImpl;
 
@@ -55,6 +56,21 @@ public class DockerCredConfig extends AbstractDescribableImpl<DockerCredConfig> 
         return serverAddress;
     }
 
+    public String getServerHost() {
+        try {
+            URI uri = new URI(serverAddress);
+            if (uri.getScheme() == null) {
+                throw new IllegalArgumentException(
+                    "Registry Server Addresses should contains URI scheme");
+            } else {
+                return uri.getHost();
+            }
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException(
+                "Invalid Registry Server Addresses: " + e.getMessage());
+        }
+    }
+
     @Extension
     public static class DescriptorImpl extends Descriptor<DockerCredConfig> {
 
@@ -79,12 +95,7 @@ public class DockerCredConfig extends AbstractDescribableImpl<DockerCredConfig> 
         }
 
         public String getDefaultServerAddress() {
-            int idxColonSlashSlash = AuthConfig.DEFAULT_SERVER_ADDRESS.indexOf("://");
-            if (idxColonSlashSlash == -1) {
-                return AuthConfig.DEFAULT_SERVER_ADDRESS;
-            }
-            return AuthConfig.DEFAULT_SERVER_ADDRESS.substring(
-                    idxColonSlashSlash + 3);
+            return AuthConfig.DEFAULT_SERVER_ADDRESS;
         }
     }
 }
