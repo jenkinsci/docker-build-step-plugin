@@ -20,6 +20,9 @@
         <f:entry field="links" title="Links" description="Comma separated list of links. Example: name1:alias1,name1:alias2">
             <f:textbox />
         </f:entry>
+		<f:entry field="exposedPorts" title="Exposed ports" description="Comma separated list of ports to be exposed. Example: 9000/tcp">
+			<f:textbox />
+		</f:entry>
 	</f:advanced>
 	
 	

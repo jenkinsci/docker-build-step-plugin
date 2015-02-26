@@ -14,6 +14,7 @@ import com.github.dockerjava.api.DockerException;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
+import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Links;
 
@@ -33,16 +34,18 @@ public class CreateContainerCommand extends DockerCommand {
     private final String containerName;
     private final String envVars;
     private final String links;
+    private final String exposedPorts;
 
     @DataBoundConstructor
     public CreateContainerCommand(String image, String command, String hostName, String containerName, String envVars,
-            String links) throws IllegalArgumentException {
+            String links, String exposedPorts) throws IllegalArgumentException {
         this.image = image;
         this.command = command;
         this.hostName = hostName;
         this.containerName = containerName;
         this.envVars = envVars;
         this.links = links;
+        this.exposedPorts = exposedPorts;
     }
 
     public String getImage() {
@@ -69,6 +72,10 @@ public class CreateContainerCommand extends DockerCommand {
         return links;
     }
 
+    public String getExposedPorts() {
+        return exposedPorts;
+    }
+
     @Override
     public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
             throws DockerException {
@@ -83,6 +90,7 @@ public class CreateContainerCommand extends DockerCommand {
         String containerNameRes = Resolver.buildVar(build, containerName);
         String envVarsRes = Resolver.buildVar(build, envVars);
         Links linksRes = LinkUtils.parseLinks(Resolver.buildVar(build, links));
+        String exposedPortsRes = Resolver.buildVar(build, exposedPorts);
 
         DockerClient client = getClient(null);
         CreateContainerCmd cfgCmd = client.createContainerCmd(imageRes);
@@ -97,6 +105,14 @@ public class CreateContainerCommand extends DockerCommand {
         if (!envVarsRes.isEmpty()) {
             String[] envVarResSplitted = envVarsRes.split(",");
             cfgCmd.withEnv(envVarResSplitted);
+        }
+        if (!exposedPortsRes.isEmpty()) {
+        	String[] exposedPortsSplitted = exposedPortsRes.split(",");
+        	ExposedPort[] ports = new ExposedPort[exposedPortsSplitted.length];
+        	for(int i = 0; i < ports.length; i++) {
+        		ports[i] = ExposedPort.parse(exposedPortsSplitted[i]);
+        	}
+            cfgCmd.withExposedPorts(ports);
         }
         CreateContainerResponse resp = cfgCmd.exec();
         console.logInfo("created container id " + resp.getId() + " (from image " + imageRes + ")");
