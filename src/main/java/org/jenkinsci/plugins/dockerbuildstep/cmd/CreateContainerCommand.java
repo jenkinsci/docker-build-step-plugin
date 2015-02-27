@@ -106,7 +106,7 @@ public class CreateContainerCommand extends DockerCommand {
             String[] envVarResSplitted = envVarsRes.split(",");
             cfgCmd.withEnv(envVarResSplitted);
         }
-        if (!exposedPortsRes.isEmpty()) {
+        if (exposedPortsRes != null && !exposedPortsRes.isEmpty()) {
         	String[] exposedPortsSplitted = exposedPortsRes.split(",");
         	ExposedPort[] ports = new ExposedPort[exposedPortsSplitted.length];
         	for(int i = 0; i < ports.length; i++) {
