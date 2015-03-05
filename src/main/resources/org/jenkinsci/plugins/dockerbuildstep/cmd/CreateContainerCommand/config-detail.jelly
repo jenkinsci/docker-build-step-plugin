@@ -23,8 +23,11 @@
 		<f:entry field="exposedPorts" title="Exposed ports" description="Comma separated list of ports to be exposed. Example: 9000/tcp">
 			<f:textbox />
 		</f:entry>
+		<f:entry field="cpuShares" title="CPU shares" description="CPU shares (relative weight)">
+			<f:textbox />
+		</f:entry>
+		<f:entry field="memoryLimit" title="Memory limit" description="Memory limit (format: number{optional unit}, where unit = b, k, m or g). Example: 1024m">
+			<f:textbox />
+		</f:entry>		
 	</f:advanced>
-	
-	
-    
 </j:jelly>
