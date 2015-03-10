@@ -41,4 +41,18 @@ public class CommandUtilsTest {
             assertEquals(output[i], CommandUtils.addLatestTagIfNeeded(input[i]));
         }
     }
+    
+    @Test
+    public void testSizeInBytes() {
+    	String[] input = {
+    			"64", "128b", "256k", "512m", "1g", "666a", "-9mb" 
+    	};
+    	long[] output = {
+    			64, 128, 262144, 536870912, 1073741824, -1, -1
+    	};
+        assertEquals("input length and output length differ!", input.length, output.length);
+        for (int i = 0; i < input.length; i++ ) {
+            assertEquals(output[i], CommandUtils.sizeInBytes(input[i]));
+        }
+    }
 }

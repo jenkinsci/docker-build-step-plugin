@@ -1,16 +1,21 @@
 package org.jenkinsci.plugins.dockerbuildstep.util;
 
-import com.github.dockerjava.api.DockerException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.sf.json.JSONObject;
 
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import com.github.dockerjava.api.DockerException;
 
 /**
  * Util class to for docker commands.
@@ -59,5 +64,25 @@ public class CommandUtils {
             return fullImageName;
         }
         return fullImageName + ":latest";
+    }
+    
+    public static long sizeInBytes(String size) {
+        long returnValue = -1;
+        Pattern patt = Pattern.compile("^([\\d.]+)([gmkb]?)$", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = patt.matcher(size);
+        Map<String, Integer> powerMap = new HashMap<String, Integer>();
+        powerMap.put("g", 3);
+        powerMap.put("m", 2);
+        powerMap.put("k", 1);
+        powerMap.put("b", 0);
+        if (matcher.find()) {
+          String number = matcher.group(1);
+          int pow = matcher.group(2) != null && matcher.group(2).length() > 0 ?
+        		  powerMap.get(matcher.group(2).toLowerCase()) : 0;
+          BigDecimal bytes = new BigDecimal(number);
+          bytes = bytes.multiply(BigDecimal.valueOf(1024).pow(pow));
+          returnValue = bytes.longValue();
+        }
+        return returnValue;
     }
 }
