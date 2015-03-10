@@ -34,6 +34,7 @@ public class DockerEnvContributor extends EnvironmentContributor {
 	public final String CONTAINER_IP_PREFIX = "DOCKER_IP_";
 	public final String PORT_BINDINGS_ENV_VAR = "DOCKER_HOST_BIND_PORTS";
 	public final String PORT_BINDING_PREFIX = "DOCKER_HOST_PORT_";
+	public final String HOST_SOCKET_PREFIX = "DOCKER_HOST_SOCKET_";
 
 	@Override
 	public void buildEnvironmentFor(@SuppressWarnings("rawtypes") Run r, EnvVars envs, TaskListener listener)
@@ -66,14 +67,17 @@ public class DockerEnvContributor extends EnvironmentContributor {
 		StringBuilder ports = new StringBuilder();
 		for (ExposedPort exposedPort : bindings.keySet()) {
 			ports.append(exposedPort.toString()).append(ID_SEPARATOR);
+			envs.put(PORT_BINDING_PREFIX + exposedPort.getProtocol().name() + "_" + exposedPort.getPort(),
+					Integer.toString(bindings.get(exposedPort)[0].getHostPort()));
+
 			StringBuilder portBinding = new StringBuilder();
 			String hostIp = bindings.get(exposedPort)[0].getHostIp();
 			if (hostIp != null && hostIp.length() > 0) {
 				portBinding.append(hostIp).append(":");
+				portBinding.append(Integer.toString(bindings.get(exposedPort)[0].getHostPort()));
+				envs.put(HOST_SOCKET_PREFIX + exposedPort.getProtocol().name() + "_" + exposedPort.getPort(),
+						portBinding.toString());
 			}
-			portBinding.append(Integer.toString(bindings.get(exposedPort)[0].getHostPort()));
-			envs.put(PORT_BINDING_PREFIX + exposedPort.getProtocol().name() + "_" + exposedPort.getPort(),
-					portBinding.toString());
 		}
 		String bindPorts = ports.substring(0, ports.length() - 1).toString();
 		envs.put(PORT_BINDINGS_ENV_VAR, bindPorts);
