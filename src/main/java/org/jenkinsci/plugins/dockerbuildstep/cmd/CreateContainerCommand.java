@@ -82,14 +82,14 @@ public class CreateContainerCommand extends DockerCommand {
     }
 
     public String getCpuShares() {
-		return cpuShares;
-	}
+        return cpuShares;
+    }
 
-	public String getMemoryLimit() {
-		return memoryLimit;
-	}
+    public String getMemoryLimit() {
+        return memoryLimit;
+    }
 
-	@Override
+    @Override
     public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
             throws DockerException {
         // TODO check it when submitting the form
@@ -122,32 +122,27 @@ public class CreateContainerCommand extends DockerCommand {
             cfgCmd.withEnv(envVarResSplitted);
         }
         if (exposedPortsRes != null && !exposedPortsRes.isEmpty()) {
-        	String[] exposedPortsSplitted = exposedPortsRes.split(",");
-        	ExposedPort[] ports = new ExposedPort[exposedPortsSplitted.length];
-        	for(int i = 0; i < ports.length; i++) {
-        		ports[i] = ExposedPort.parse(exposedPortsSplitted[i]);
-        	}
+            String[] exposedPortsSplitted = exposedPortsRes.split(",");
+            ExposedPort[] ports = new ExposedPort[exposedPortsSplitted.length];
+            for (int i = 0; i < ports.length; i++) {
+                ports[i] = ExposedPort.parse(exposedPortsSplitted[i]);
+            }
             cfgCmd.withExposedPorts(ports);
         }
         if (cpuSharesRes != null && !cpuSharesRes.isEmpty()) {
-        	cfgCmd.withCpuShares(Integer.parseInt(cpuSharesRes));
+            cfgCmd.withCpuShares(Integer.parseInt(cpuSharesRes));
         }
         if (memoryLimitRes != null && !memoryLimitRes.isEmpty()) {
-        	long ml = CommandUtils.sizeInBytes(memoryLimitRes);
-        	if (ml > -1) {
-        		cfgCmd.withMemoryLimit(ml);
-        	}
-        	else {
-        		console.logWarn("Unable to parse memory limit '" + memoryLimitRes + "', memory limit not enforced!");
-        	}
+            long ml = CommandUtils.sizeInBytes(memoryLimitRes);
+            if (ml > -1) {
+                cfgCmd.withMemoryLimit(ml);
+            } else {
+                console.logWarn("Unable to parse memory limit '" + memoryLimitRes + "', memory limit not enforced!");
+            }
         }
         CreateContainerResponse resp = cfgCmd.exec();
         console.logInfo("created container id " + resp.getId() + " (from image " + imageRes + ")");
 
-        /*
-         * if (resp.getWarnings() != null) { for (String warn : resp.getWarnings()) System.out.println("WARN: " + warn);
-         * }
-         */
         InspectContainerResponse inspectResp = client.inspectContainerCmd(resp.getId()).exec();
         EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
         build.addAction(envAction);
