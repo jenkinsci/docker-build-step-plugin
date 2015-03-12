@@ -4,10 +4,12 @@ import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.util.FormValidation;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.jenkinsci.plugins.dockerbuildstep.action.DockerContainerConsoleAction;
 import org.jenkinsci.plugins.dockerbuildstep.action.EnvInvisibleAction;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.BindParser;
@@ -43,10 +45,11 @@ public class StartCommand extends DockerCommand {
     private final String links;
     private final String bindMounts;
     private final boolean privileged;
+    private final String containerIdsLogging;
 
     @DataBoundConstructor
     public StartCommand(String containerIds, boolean publishAllPorts, String portBindings, String waitPorts,
-            String links, String bindMounts, boolean privileged) {
+            String links, String bindMounts, boolean privileged, String containerIdsLogging) {
         this.containerIds = containerIds;
         this.publishAllPorts = publishAllPorts;
         this.portBindings = portBindings;
@@ -54,6 +57,7 @@ public class StartCommand extends DockerCommand {
         this.links = links;
         this.bindMounts = bindMounts;
         this.privileged = privileged;
+        this.containerIdsLogging = containerIdsLogging;
     }
 
     public String getContainerIds() {
@@ -84,7 +88,11 @@ public class StartCommand extends DockerCommand {
         return privileged;
     }
 
-    @Override
+    public String getContainerIdsLogging() {
+		return containerIdsLogging;
+	}
+
+	@Override
     public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
             throws DockerException {
         if (containerIds == null || containerIds.isEmpty()) {
@@ -95,11 +103,19 @@ public class StartCommand extends DockerCommand {
         PortBinding[] portBindingsRes = PortBindingParser.parse(Resolver.buildVar(build, portBindings));
         Links linksRes = LinkUtils.parseLinks(Resolver.buildVar(build, links));
         Bind[] bindsRes = BindParser.parse(Resolver.buildVar(build, bindMounts));
+        List<String> logIds = Arrays.asList(Resolver.buildVar(build, containerIdsLogging).split(","));
+        
         DockerClient client = getClient(null);
-
+        
         // TODO check, if container exists and is stopped (probably catch exception)
         for (String id : ids) {
             id = id.trim();
+            
+            DockerContainerConsoleAction outAction = null;
+            if (logIds.contains(id)) {
+            	outAction = attachContainerOutput(build, id);
+            }
+
             client.startContainerCmd(id)
                     .withPublishAllPorts(publishAllPorts)
                     .withPortBindings(portBindingsRes)
@@ -110,6 +126,9 @@ public class StartCommand extends DockerCommand {
             console.logInfo("started container id " + id);
 
             InspectContainerResponse inspectResp = client.inspectContainerCmd(id).exec();
+            if (outAction != null) {
+            	outAction.setContainerName(inspectResp.getName());
+            }
             EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
             build.addAction(envAction);
         }

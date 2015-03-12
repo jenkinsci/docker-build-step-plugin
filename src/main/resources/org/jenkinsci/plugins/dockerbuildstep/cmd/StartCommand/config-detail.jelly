@@ -36,6 +36,10 @@ help file problem.
         <f:entry field="privileged" title="Extended privileges">
             <f:checkbox />
         </f:entry>
+
+	    <f:entry field="containerIdsLogging" title="Capture output from" description="Comma separated list of containers to attach to and capture output from.">
+	        <f:textbox />
+	    </f:entry>
     </f:advanced>
 
 </j:jelly>
