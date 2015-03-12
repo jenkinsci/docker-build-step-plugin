@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
+import java.io.IOException;
+
 import com.google.common.base.Strings;
 
 import hudson.AbortException;
@@ -19,10 +21,10 @@ import jenkins.model.Jenkins;
 
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
 import org.jenkinsci.plugins.dockerbuildstep.DockerCredConfig;
+import org.jenkinsci.plugins.dockerbuildstep.action.DockerContainerConsoleAction;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 
 import hudson.model.Job;
-
 import hudson.util.Secret;
 import hudson.security.ACL;
 
@@ -102,6 +104,20 @@ public abstract class DockerCommand implements Describable<DockerCommand>, Exten
       return "Info from DockerCommand";
     }
 
+    /**
+     * Only the first container started is attached!
+     */
+    protected static DockerContainerConsoleAction attachContainerOutput(@SuppressWarnings("rawtypes") AbstractBuild build, String containerId)
+    		throws DockerException {
+   		try {
+   			DockerContainerConsoleAction outAction = new DockerContainerConsoleAction(build, containerId).start(); 
+   			build.addAction(outAction);
+   			return outAction;
+		} catch (IOException e) {
+			throw new DockerException(e.getMessage(), 0);
+		}
+    }
+    
     public abstract static class DockerCommandDescriptor extends Descriptor<DockerCommand> {
         protected DockerCommandDescriptor(Class<? extends DockerCommand> clazz) {
             super(clazz);
