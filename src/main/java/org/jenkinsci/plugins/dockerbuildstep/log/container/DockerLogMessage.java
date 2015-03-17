@@ -28,23 +28,23 @@ import java.nio.ByteBuffer;
  * @see https://github.com/spotify/docker-client/blob/master/src/main/java/com/spotify/docker/client/LogMessage.java
  */
 public class DockerLogMessage {
-	final DockerLogStreamType stream;
-	final ByteBuffer content;
+    final DockerLogStreamType stream;
+    final ByteBuffer content;
 
-	public DockerLogMessage(final int streamId, final ByteBuffer content) {
-		this(DockerLogStreamType.of(streamId), content);
-	}
+    public DockerLogMessage(final int streamId, final ByteBuffer content) {
+        this(DockerLogStreamType.of(streamId), content);
+    }
 
-	public DockerLogMessage(final DockerLogStreamType stream, final ByteBuffer content) {
-		this.stream = checkNotNull(stream, "stream");
-		this.content = checkNotNull(content, "content");
-	}
+    public DockerLogMessage(final DockerLogStreamType stream, final ByteBuffer content) {
+        this.stream = checkNotNull(stream, "stream");
+        this.content = checkNotNull(content, "content");
+    }
 
-	public DockerLogStreamType stream() {
-		return stream;
-	}
+    public DockerLogStreamType stream() {
+        return stream;
+    }
 
-	public ByteBuffer content() {
-		return content.asReadOnlyBuffer();
-	}
+    public ByteBuffer content() {
+        return content.asReadOnlyBuffer();
+    }
 }

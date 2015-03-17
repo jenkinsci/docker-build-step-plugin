@@ -24,30 +24,28 @@ package org.jenkinsci.plugins.dockerbuildstep.log.container;
  * @see https://github.com/spotify/docker-client/blob/master/src/main/java/com/spotify/docker/client/LogMessage.java
  */
 public enum DockerLogStreamType {
-	STDIN(0),
-	STDOUT(1),
-	STDERR(2);
-	
-	private final int id;
+    STDIN(0), STDOUT(1), STDERR(2);
 
-	DockerLogStreamType(int id) {
-		this.id = id;
-	}
+    private final int id;
 
-	public int id() {
-		return id;
-	}
+    DockerLogStreamType(int id) {
+        this.id = id;
+    }
 
-	public static DockerLogStreamType of(final int id) {
-		switch (id) {
-		case 0:
-			return STDIN;
-		case 1:
-			return STDOUT;
-		case 2:
-			return STDERR;
-		default:
-			throw new IllegalArgumentException();
-		}
-	}
+    public int id() {
+        return id;
+    }
+
+    public static DockerLogStreamType of(final int id) {
+        switch (id) {
+        case 0:
+            return STDIN;
+        case 1:
+            return STDOUT;
+        case 2:
+            return STDERR;
+        default:
+            throw new IllegalArgumentException();
+        }
+    }
 }

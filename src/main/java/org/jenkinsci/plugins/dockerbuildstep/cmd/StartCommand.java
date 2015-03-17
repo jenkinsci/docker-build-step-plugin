@@ -28,8 +28,8 @@ import com.github.dockerjava.api.model.Links;
 import com.github.dockerjava.api.model.PortBinding;
 
 /**
- * This command starts one or more Docker containers.
- * It also exports some build environment variables like IP or started containers.
+ * This command starts one or more Docker containers. It also exports some build environment variables like IP or
+ * started containers.
  * 
  * @see http://docs.docker.com/reference/api/docker_remote_api_v1.13/#start-a-container
  * 
@@ -75,11 +75,11 @@ public class StartCommand extends DockerCommand {
     public String getWaitPorts() {
         return waitPorts;
     }
-    
+
     public String getLinks() {
         return links;
     }
-    
+
     public String getBindMounts() {
         return bindMounts;
     }
@@ -89,10 +89,10 @@ public class StartCommand extends DockerCommand {
     }
 
     public String getContainerIdsLogging() {
-		return containerIdsLogging;
-	}
+        return containerIdsLogging;
+    }
 
-	@Override
+    @Override
     public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
             throws DockerException {
         if (containerIds == null || containerIds.isEmpty()) {
@@ -104,30 +104,25 @@ public class StartCommand extends DockerCommand {
         Links linksRes = LinkUtils.parseLinks(Resolver.buildVar(build, links));
         Bind[] bindsRes = BindParser.parse(Resolver.buildVar(build, bindMounts));
         List<String> logIds = Arrays.asList(Resolver.buildVar(build, containerIdsLogging).split(","));
-        
+
         DockerClient client = getClient(null);
-        
+
         // TODO check, if container exists and is stopped (probably catch exception)
         for (String id : ids) {
             id = id.trim();
-            
+
             DockerContainerConsoleAction outAction = null;
             if (logIds.contains(id)) {
-            	outAction = attachContainerOutput(build, id);
+                outAction = attachContainerOutput(build, id);
             }
 
-            client.startContainerCmd(id)
-                    .withPublishAllPorts(publishAllPorts)
-                    .withPortBindings(portBindingsRes)
-                    .withLinks(linksRes.getLinks())
-                    .withBinds(bindsRes)
-                    .withPrivileged(privileged)
-                    .exec();
+            client.startContainerCmd(id).withPublishAllPorts(publishAllPorts).withPortBindings(portBindingsRes)
+                    .withLinks(linksRes.getLinks()).withBinds(bindsRes).withPrivileged(privileged).exec();
             console.logInfo("started container id " + id);
 
             InspectContainerResponse inspectResp = client.inspectContainerCmd(id).exec();
             if (outAction != null) {
-            	outAction.setContainerName(inspectResp.getName());
+                outAction.setContainerName(inspectResp.getName());
             }
             EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
             build.addAction(envAction);
@@ -143,7 +138,7 @@ public class StartCommand extends DockerCommand {
     private void waitForPorts(String waitForPorts, DockerClient client, ConsoleLogger console) throws DockerException {
         Map<String, List<Integer>> containers = PortUtils.parsePorts(waitForPorts);
         for (String cId : containers.keySet()) {
-        	InspectContainerResponse inspectResp = client.inspectContainerCmd(cId).exec();
+            InspectContainerResponse inspectResp = client.inspectContainerCmd(cId).exec();
             String ip = inspectResp.getNetworkSettings().getIpAddress();
             List<Integer> ports = containers.get(cId);
             for (Integer port : ports) {
