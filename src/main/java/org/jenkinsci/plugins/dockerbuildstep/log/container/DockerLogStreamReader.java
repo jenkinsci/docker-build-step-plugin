@@ -49,6 +49,7 @@ public class DockerLogStreamReader implements Closeable {
 
     public DockerLogMessage nextMessage() throws IOException {
         // Read header
+        //TODO header is sent only when TTY is disabled, when enabled, it sends raw stream without any headers
         final byte[] headerBytes = new byte[HEADER_SIZE];
         final int n = ByteStreams.read(stream, headerBytes, 0, HEADER_SIZE);
         if (n == 0) {
