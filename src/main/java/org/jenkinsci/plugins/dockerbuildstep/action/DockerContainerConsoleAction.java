@@ -104,7 +104,7 @@ public class DockerContainerConsoleAction extends TaskAction implements Serializ
     }
 
     public boolean isLogUpdated() {
-        return workerThread != null;
+        return (workerThread != null) && build.isLogUpdated();
     }
 
     public InputStream getLogInputStream() throws IOException {
@@ -160,14 +160,16 @@ public class DockerContainerConsoleAction extends TaskAction implements Serializ
 
         @Override
         protected void perform(final TaskListener listener) throws Exception {
-            DockerClient client = ((DockerBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(
-                    DockerBuilder.class)).getDockerClient(null);
-            InputStream is = client.attachContainerCmd(containerId).withFollowStream().withStdOut().withStdErr().exec();
-            DockerLogStreamReader reader = new DockerLogStreamReader(is);
-
-            OutputStreamWriter writer = new OutputStreamWriter(listener.getLogger(), Charsets.UTF_8);
-
+            DockerLogStreamReader reader = null;
+            OutputStreamWriter writer = null;
+            
             try {
+                DockerClient client = ((DockerBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(
+                        DockerBuilder.class)).getDockerClient(null);
+                InputStream is = client.attachContainerCmd(containerId).withFollowStream().withStdOut().withStdErr().exec();
+                reader = new DockerLogStreamReader(is);
+                writer = new OutputStreamWriter(listener.getLogger(), Charsets.UTF_8);
+                
                 while (!isInterrupted() && build.isBuilding()) {
                     process(reader, writer);
                     Thread.sleep(2000);
@@ -180,8 +182,8 @@ public class DockerContainerConsoleAction extends TaskAction implements Serializ
                 if (reader != null) {
                     reader.close();
                 }
+                workerThread = null;
             }
-            workerThread = null;
         }
 
         private void process(DockerLogStreamReader ls, OutputStreamWriter w) throws IOException {
