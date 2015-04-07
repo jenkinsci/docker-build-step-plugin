@@ -20,7 +20,7 @@ import com.github.dockerjava.api.DockerException;
 /**
  * Util class to for docker commands.
  *
- * @auther wzheng2310@gmail.com (Wei Zheng)
+ * @author wzheng2310@gmail.com (Wei Zheng)
  */
 public class CommandUtils {
     public static String imageFullNameFrom(String registry, String repoAndImg, String tag) {
