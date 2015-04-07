@@ -27,14 +27,18 @@
     </scm>
 
     <properties>
-        <version.docker.java>1.0.0</version.docker.java>
+        <version.apache.httpclient>4.3.6</version.apache.httpclient>
+        <version.docker.java>1.1.0</version.docker.java>
+        <version.glassfish.javax.json>1.0.4</version.glassfish.javax.json>
+        <version.jenkins.credentials>1.18</version.jenkins.credentials>
+        <version.maven.release>2.5</version.maven.release>
     </properties>
 
     <dependencies>
         <dependency> <!-- Overwrites transitive dependency, otherwise fails with java.lang.ClassNotFoundException: org.apache.http.config.Lookup-->
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.3.6</version>
+            <version>${version.apache.httpclient}</version>
         </dependency>
         <dependency>
             <groupId>com.github.docker-java</groupId>
@@ -44,12 +48,12 @@
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.json</artifactId>
-            <version>1.0.4</version>
+            <version>${version.glassfish.javax.json}</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>credentials</artifactId>
-            <version>1.18</version>
+            <version>${version.jenkins.credentials}</version>
         </dependency>
     </dependencies>
 
@@ -72,7 +76,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.5</version>
+                <version>${version.maven.release}</version>
             </plugin>
         </plugins>
     </build>
