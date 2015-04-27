@@ -60,9 +60,13 @@ public class CommitCommand extends DockerCommand {
         }
 
         String containerIdRes = Resolver.buildVar(build, containerId);
+        String repoRes = Resolver.buildVar(build, repo);
+        String tagRes = Resolver.buildVar(build, tag);
+        String runCmdRes = Resolver.buildVar(build, runCmd);
 
         DockerClient client = getClient(null);
-        CommitCmd  commitCmd = client.commitCmd(containerIdRes).withRepository(repo).withTag(tag).withCmd(runCmd);
+        CommitCmd commitCmd =
+                client.commitCmd(containerIdRes).withRepository(repoRes).withTag(tagRes).withCmd(runCmdRes);
         String imageId = commitCmd.exec();
 
         console.logInfo("Container " + containerIdRes + " commited as image " + imageId);
