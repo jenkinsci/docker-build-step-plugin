@@ -57,6 +57,22 @@ public class CommandUtils {
         }
     }
 
+    /**
+     * Log a streamed response that is not wrapped in JSON
+     */
+    public static void logCommandResultStream(InputStream inputStream,
+            ConsoleLogger console, String errMessage) {
+        BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
+        String line = null;
+        try {
+          while((line = in.readLine()) != null) {
+            console.logInfo(line);
+          }
+        } catch (IOException e) {
+          throw new DockerException(line == null ? errMessage : line, 200, e);
+        }
+    }
+
     public static String addLatestTagIfNeeded(String fullImageName) {
         // Assuming that the fullImageName is a valid name, the pattern is
         // enough to decide if it contains tag or not.

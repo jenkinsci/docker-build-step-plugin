@@ -3,10 +3,12 @@ package org.jenkinsci.plugins.dockerbuildstep.cmd;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
+import org.jenkinsci.plugins.dockerbuildstep.util.CommandUtils;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -53,11 +55,14 @@ public class ExecCreateAndStartCommand extends DockerCommand {
 		DockerClient client = getClient(null);
 		for (String id : ids) {
 			id = id.trim();
-			ExecCreateCmdResponse res = client.execCreateCmd(id).withCmd(commandRes.split(" ")).exec();
+			ExecCreateCmdResponse res = client.execCreateCmd(id).withCmd(commandRes.split(" ")).
+				withAttachStderr(true).withAttachStdout(true).exec();
 			console.logInfo(String.format("Exec command with ID '%s' created in container '%s' ", res.getId(), id));
-			client.execStartCmd(res.getId()).exec();
+
 			console.logInfo(String.format("Executing command with ID '%s'", res.getId()));
-			res.getId();
+			InputStream inputStream = client.execStartCmd(res.getId()).exec();
+			CommandUtils.logCommandResultStream(inputStream, console,
+				"Failed to parse docker response when exec start");
 		}
 
 	}
