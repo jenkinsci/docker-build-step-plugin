@@ -94,7 +94,7 @@ public class PushImageCommand extends DockerCommand {
         // command doesn't show any error. If you do a pull now, and if the pull succeeds,
         // you will override your local fresh image with a stale version.
 
-        console.logInfo("Done Pusing image " + imageRes);
+        console.logInfo("Done pushing image " + imageRes);
     }
 
     @Extension
