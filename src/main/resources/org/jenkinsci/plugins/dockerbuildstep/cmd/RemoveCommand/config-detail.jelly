@@ -9,6 +9,10 @@
         <f:entry field="ignoreIfNotFound" title="Ignore if not found" description="Do not fail this step if any of the containers are not found." >
             <f:checkbox />
         </f:entry>
+
+        <f:entry field="removeVolumes" title="Remove volumes" description="Remove the volumes associated with the container." >
+            <f:checkbox />
+        </f:entry>
     </f:advanced>
 
 </j:jelly>

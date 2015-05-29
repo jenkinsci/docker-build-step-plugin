@@ -5,4 +5,9 @@
         Kill and remove all conatiners
     </f:entry>
 
+    <f:advanced>
+        <f:entry field="removeVolumes" title="Remove volumes" description="Remove the volumes associated with the container." >
+            <f:checkbox />
+        </f:entry>
+    </f:advanced>
 </j:jelly>

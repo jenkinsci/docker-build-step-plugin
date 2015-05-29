@@ -48,10 +48,12 @@ public class DockerPostBuilder extends BuildStepDescriptor<Publisher> {
 	public static class DockerPostBuildStep extends Recorder {
 
 	    private final String containerIds;
+		private final boolean removeVolumes;
 
 	    @DataBoundConstructor
-	    public DockerPostBuildStep(String containerIds) {
-	        this.containerIds = containerIds;
+	    public DockerPostBuildStep(String containerIds, boolean removeVolumes) {
+			this.containerIds = containerIds;
+			this.removeVolumes = removeVolumes;
 	    }
 	
 		public BuildStepMonitor getRequiredMonitorService() {
@@ -81,7 +83,7 @@ public class DockerPostBuilder extends BuildStepDescriptor<Publisher> {
 				}
 			}			
 			
-			RemoveCommand removeCommand = new RemoveCommand(containerIds, true);
+			RemoveCommand removeCommand = new RemoveCommand(containerIds, true, removeVolumes);
 			removeCommand.execute(build, clog);
 			
 			return true;

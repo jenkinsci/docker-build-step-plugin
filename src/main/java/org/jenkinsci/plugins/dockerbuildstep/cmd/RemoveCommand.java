@@ -1,11 +1,13 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
+import com.github.dockerjava.api.command.RemoveContainerCmd;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -26,11 +28,13 @@ public class RemoveCommand extends DockerCommand {
 
     private final String containerIds;
     private final boolean ignoreIfNotFound;
+    private final boolean removeVolumes;
 
     @DataBoundConstructor
-    public RemoveCommand(String containerIds, boolean ignoreIfNotFound) {
+    public RemoveCommand(String containerIds, boolean ignoreIfNotFound, boolean removeVolumes) {
         this.containerIds = containerIds;
         this.ignoreIfNotFound = ignoreIfNotFound;
+        this.removeVolumes = removeVolumes;
     }
 
     public String getContainerIds() {
@@ -39,6 +43,10 @@ public class RemoveCommand extends DockerCommand {
 
     public boolean getIgnoreIfNotFound() {
         return ignoreIfNotFound;
+    }
+
+    public boolean getRemoveVolumes() {
+        return removeVolumes;
     }
 
     @Override
@@ -57,7 +65,7 @@ public class RemoveCommand extends DockerCommand {
         	id = id.trim();
             try {
             	client.killContainerCmd(id).exec();
-                client.removeContainerCmd(id).exec();
+                client.removeContainerCmd(id).withRemoveVolumes(removeVolumes).exec();
                 console.logInfo("removed container id " + id);
             } catch (NotFoundException e) {
                 if (!ignoreIfNotFound) {
