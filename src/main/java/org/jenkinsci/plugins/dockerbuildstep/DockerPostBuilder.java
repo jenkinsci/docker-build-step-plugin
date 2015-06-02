@@ -24,69 +24,66 @@ import com.github.dockerjava.api.NotFoundException;
 import com.github.dockerjava.api.NotModifiedException;
 
 /**
- * Post build step which stops and removes the Docker container. Use to cleanup container(s) in case of
- * a build failure.
- *
+ * Post build step which stops and removes the Docker container. Use to cleanup container(s) in case of a build failure.
+ * 
  */
 @Extension
 public class DockerPostBuilder extends BuildStepDescriptor<Publisher> {
 
-	public DockerPostBuilder() {
-		super(DockerPostBuildStep.class);
-	}
-	
-	@Override
-	public boolean isApplicable(@SuppressWarnings("rawtypes") Class<? extends AbstractProject> jobType) {
-		return FreeStyleProject.class.equals(jobType);
-	}
+    public DockerPostBuilder() {
+        super(DockerPostBuildStep.class);
+    }
 
-	@Override
-	public String getDisplayName() {
-		return "Stop and remove Docker container";
-	}
-	
-	public static class DockerPostBuildStep extends Recorder {
+    @Override
+    public boolean isApplicable(@SuppressWarnings("rawtypes") Class<? extends AbstractProject> jobType) {
+        return FreeStyleProject.class.equals(jobType);
+    }
 
-	    private final String containerIds;
-		private final boolean removeVolumes;
+    @Override
+    public String getDisplayName() {
+        return "Stop and remove Docker container";
+    }
 
-	    @DataBoundConstructor
-	    public DockerPostBuildStep(String containerIds, boolean removeVolumes) {
-			this.containerIds = containerIds;
-			this.removeVolumes = removeVolumes;
-	    }
-	
-		public BuildStepMonitor getRequiredMonitorService() {
-			return BuildStepMonitor.NONE;
-		}
+    public static class DockerPostBuildStep extends Recorder {
 
-		public String getContainerIds() {
-			return containerIds;
-		}
+        private final String containerIds;
+        private final boolean removeVolumes;
 
-		@Override
-		public boolean perform(@SuppressWarnings("rawtypes") AbstractBuild build, Launcher launcher,
-				BuildListener listener) throws InterruptedException, IOException {
-			ConsoleLogger clog = new ConsoleLogger(listener);
+        @DataBoundConstructor
+        public DockerPostBuildStep(String containerIds, boolean removeVolumes) {
+            this.containerIds = containerIds;
+            this.removeVolumes = removeVolumes;
+        }
 
-			List<String> ids = Arrays.asList(containerIds.split(","));
-			for (String id : ids) {
-				StopCommand stopCommand = new StopCommand(id);
-				try {
-					stopCommand.execute(build, clog);
-				}
-				catch (NotFoundException e) {
-					clog.logWarn("unable to stop container id " + id + ", container not found!");
-				}
-				catch (NotModifiedException e) {
-					// ignore, container already stopped
-				}
-			}			
-			
-			RemoveCommand removeCommand = new RemoveCommand(containerIds, true, removeVolumes);
-			removeCommand.execute(build, clog);
-			
-			return true;
-		}
-	}
+        public BuildStepMonitor getRequiredMonitorService() {
+            return BuildStepMonitor.NONE;
+        }
+
+        public String getContainerIds() {
+            return containerIds;
+        }
+
+        @Override
+        public boolean perform(@SuppressWarnings("rawtypes") AbstractBuild build, Launcher launcher,
+                BuildListener listener) throws InterruptedException, IOException {
+            ConsoleLogger clog = new ConsoleLogger(listener);
+
+            List<String> ids = Arrays.asList(containerIds.split(","));
+            for (String id : ids) {
+                StopCommand stopCommand = new StopCommand(id);
+                try {
+                    stopCommand.execute(build, clog);
+                } catch (NotFoundException e) {
+                    clog.logWarn("unable to stop container id " + id + ", container not found!");
+                } catch (NotModifiedException e) {
+                    // ignore, container already stopped
+                }
+            }
+
+            RemoveCommand removeCommand = new RemoveCommand(containerIds, true, removeVolumes);
+            removeCommand.execute(build, clog);
+
+            return true;
+        }
+    }
 }

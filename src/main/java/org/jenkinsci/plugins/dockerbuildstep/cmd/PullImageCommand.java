@@ -16,7 +16,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.DockerException;
 import com.github.dockerjava.api.command.PullImageCmd;
-import com.github.dockerjava.api.model.AuthConfig;
 import com.github.dockerjava.api.model.Image;
 
 /**
@@ -34,8 +33,7 @@ public class PullImageCommand extends DockerCommand {
     private final String registry;
 
     @DataBoundConstructor
-    public PullImageCommand(String fromImage, String tag, String registry,
-        DockerCredConfig dockerCredentials) {
+    public PullImageCommand(String fromImage, String tag, String registry, DockerCredConfig dockerCredentials) {
         super(dockerCredentials);
         this.fromImage = fromImage;
         this.tag = tag;
@@ -68,17 +66,14 @@ public class PullImageCommand extends DockerCommand {
         // it still goes to the default docker hub registry.
         // This seems to be a bug in docker daemon's implementation.
         // So we construct full image path/name here as a workaround.
-        String fromImageRes = CommandUtils.imageFullNameFrom(
-                Resolver.buildVar(build, registry),
-                Resolver.buildVar(build, fromImage),
-                Resolver.buildVar(build, tag));
+        String fromImageRes = CommandUtils.imageFullNameFrom(Resolver.buildVar(build, registry),
+                Resolver.buildVar(build, fromImage), Resolver.buildVar(build, tag));
 
         console.logInfo("Pulling image " + fromImageRes);
         DockerClient client = getClient(getAuthConfig(build.getParent()));
         PullImageCmd pullImageCmd = client.pullImageCmd(fromImageRes);
         InputStream inputStream = pullImageCmd.exec();
-        CommandUtils.logCommandResult(inputStream, console,
-                "Failed to parse docker response when pulling image");
+        CommandUtils.logCommandResult(inputStream, console, "Failed to parse docker response when pulling image");
 
         // wait for the image to be downloaded
         final int loopMaxCount = 3;
@@ -88,7 +83,7 @@ public class PullImageCommand extends DockerCommand {
         // has been pulled. Only a few iterations are good enough.
         while (!isImagePulled(fromImageRes)) {
             try {
-                if (++loopCount > loopMaxCount ) {
+                if (++loopCount > loopMaxCount) {
                     throw new DockerException("Can't find downloaded image " + fromImageRes, 200);
                 }
                 Thread.currentThread().sleep(15 * 1000); // wait 15 sec

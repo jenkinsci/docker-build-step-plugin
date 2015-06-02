@@ -1,13 +1,11 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
-import com.github.dockerjava.api.command.RemoveContainerCmd;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -56,23 +54,24 @@ public class RemoveCommand extends DockerCommand {
         if (containerIds == null || containerIds.isEmpty()) {
             throw new IllegalArgumentException("At least one parameter is required");
         }
-        
+
         String containerIdsRes = Resolver.buildVar(build, containerIds);
 
         List<String> ids = Arrays.asList(containerIdsRes.split(","));
         DockerClient client = getClient(null);
         for (String id : ids) {
-        	id = id.trim();
+            id = id.trim();
             try {
-            	client.killContainerCmd(id).exec();
+                client.killContainerCmd(id).exec();
                 client.removeContainerCmd(id).withRemoveVolumes(removeVolumes).exec();
                 console.logInfo("removed container id " + id);
             } catch (NotFoundException e) {
                 if (!ignoreIfNotFound) {
-                	console.logError(String.format("container '%s' not found ", id));
+                    console.logError(String.format("container '%s' not found ", id));
                     throw e;
                 } else {
-                	console.logInfo(String.format("container '%s' not found, but skipping this error is turned on, let's continue ... ", id));
+                    console.logInfo(String.format(
+                            "container '%s' not found, but skipping this error is turned on, let's continue ... ", id));
                 }
             }
         }

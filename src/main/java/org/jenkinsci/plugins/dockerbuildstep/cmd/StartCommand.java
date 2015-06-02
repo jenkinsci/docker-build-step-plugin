@@ -4,7 +4,6 @@ import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.util.FormValidation;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
