@@ -26,11 +26,13 @@ public class RemoveCommand extends DockerCommand {
 
     private final String containerIds;
     private final boolean ignoreIfNotFound;
+    private final boolean removeVolumes;
 
     @DataBoundConstructor
-    public RemoveCommand(String containerIds, boolean ignoreIfNotFound) {
+    public RemoveCommand(String containerIds, boolean ignoreIfNotFound, boolean removeVolumes) {
         this.containerIds = containerIds;
         this.ignoreIfNotFound = ignoreIfNotFound;
+        this.removeVolumes = removeVolumes;
     }
 
     public String getContainerIds() {
@@ -41,6 +43,10 @@ public class RemoveCommand extends DockerCommand {
         return ignoreIfNotFound;
     }
 
+    public boolean getRemoveVolumes() {
+        return removeVolumes;
+    }
+
     @Override
     public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
             throws DockerException {
@@ -48,23 +54,24 @@ public class RemoveCommand extends DockerCommand {
         if (containerIds == null || containerIds.isEmpty()) {
             throw new IllegalArgumentException("At least one parameter is required");
         }
-        
+
         String containerIdsRes = Resolver.buildVar(build, containerIds);
 
         List<String> ids = Arrays.asList(containerIdsRes.split(","));
         DockerClient client = getClient(null);
         for (String id : ids) {
-        	id = id.trim();
+            id = id.trim();
             try {
-            	client.killContainerCmd(id).exec();
-                client.removeContainerCmd(id).exec();
+                client.killContainerCmd(id).exec();
+                client.removeContainerCmd(id).withRemoveVolumes(removeVolumes).exec();
                 console.logInfo("removed container id " + id);
             } catch (NotFoundException e) {
                 if (!ignoreIfNotFound) {
-                	console.logError(String.format("container '%s' not found ", id));
+                    console.logError(String.format("container '%s' not found ", id));
                     throw e;
                 } else {
-                	console.logInfo(String.format("container '%s' not found, but skipping this error is turned on, let's continue ... ", id));
+                    console.logInfo(String.format(
+                            "container '%s' not found, but skipping this error is turned on, let's continue ... ", id));
                 }
             }
         }

@@ -20,8 +20,11 @@ import com.github.dockerjava.api.model.Container;
  */
 public class RemoveAllCommand extends DockerCommand {
 
+    private final boolean removeVolumes;
+
     @DataBoundConstructor
-    public RemoveAllCommand() {
+    public RemoveAllCommand(boolean removeVolumes) {
+        this.removeVolumes = removeVolumes;
     }
 
     @Override
@@ -31,7 +34,7 @@ public class RemoveAllCommand extends DockerCommand {
         List<Container> containers = client.listContainersCmd().withShowAll(true).exec();
         for (Container container : containers) {
             client.killContainerCmd(container.getId()).exec();
-            client.removeContainerCmd((container.getId())).exec();
+            client.removeContainerCmd((container.getId())).withRemoveVolumes(removeVolumes).exec();
             console.logInfo("removed container id " + container.getId());
         }
     }

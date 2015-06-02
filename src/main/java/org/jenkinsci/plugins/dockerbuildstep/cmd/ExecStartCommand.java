@@ -3,10 +3,12 @@ package org.jenkinsci.plugins.dockerbuildstep.cmd;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
+import org.jenkinsci.plugins.dockerbuildstep.util.CommandUtils;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -41,9 +43,10 @@ public class ExecStartCommand extends DockerCommand {
 
 		// TODO execute async on containers
 		for (String cmdId : cmdIds) {
-			client.execStartCmd(cmdId).exec();
 			console.logInfo(String.format("Executing command with ID '%s'", cmdId));
-			// TODO show output?
+			InputStream inputStream = client.execStartCmd(cmdId).exec();
+			CommandUtils.logCommandResultStream(inputStream, console,
+				"Failed to parse docker response when exec start");
 		}
 
 	}
