@@ -8,9 +8,7 @@ import hudson.AbortException;
 
 import com.cloudbees.plugins.credentials.CredentialsMatcher;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
-import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
-import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 
 import hudson.DescriptorExtensionList;
 import hudson.ExtensionPoint;
@@ -19,14 +17,15 @@ import hudson.model.AbstractBuild;
 import hudson.model.Descriptor;
 import jenkins.model.Jenkins;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.Charsets;
+import org.jenkinsci.plugins.docker.commons.credentials.DockerRegistryEndpoint;
+import org.jenkinsci.plugins.docker.commons.credentials.DockerRegistryToken;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
-import org.jenkinsci.plugins.dockerbuildstep.DockerCredConfig;
 import org.jenkinsci.plugins.dockerbuildstep.action.DockerContainerConsoleAction;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 
 import hudson.model.Job;
-import hudson.util.Secret;
-import hudson.security.ACL;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.DockerException;
@@ -40,43 +39,36 @@ import com.github.dockerjava.api.model.AuthConfig;
  */
 public abstract class DockerCommand implements Describable<DockerCommand>, ExtensionPoint {
 
-    private DockerCredConfig dockerCredentials;
+    private DockerRegistryEndpoint dockerRegistryEndpoint;
 
     public DockerCommand() {
         this(null);
     }
 
-    public DockerCommand(DockerCredConfig dockerCredentials) {
-        this.dockerCredentials = dockerCredentials;
+    public DockerCommand(DockerRegistryEndpoint dockerRegistryEndpoint) {
+        this.dockerRegistryEndpoint = dockerRegistryEndpoint;
     }
 
-    public DockerCredConfig getDockerCredentials() {
-        return dockerCredentials;
+    public DockerRegistryEndpoint getDockerRegistryEndpoint() {
+        return dockerRegistryEndpoint;
     }
 
-    public AuthConfig getAuthConfig(Job project) {
-        if (dockerCredentials == null || Strings.isNullOrEmpty(dockerCredentials.getCredentialsId())) {
-            return null;
-        }
+  public AuthConfig getAuthConfig(Job project) {
+    if (dockerRegistryEndpoint == null || Strings.isNullOrEmpty(dockerRegistryEndpoint.getCredentialsId())) {
+      return null;
+  }
 
         AuthConfig authConfig = new AuthConfig();
-        authConfig.setServerAddress(dockerCredentials.getServerHost());
+        authConfig.setServerAddress(dockerRegistryEndpoint.getUrl());
+        DockerRegistryToken token = this.dockerRegistryEndpoint.getToken(project);
+        if (token != null) {
+          String credentials = new String(Base64.decodeBase64(token.getToken()), Charsets.UTF_8);
+          String[] usernamePassword = credentials.split(":");
+          authConfig.setUsername(usernamePassword[0]);
+          authConfig.setPassword(usernamePassword[1]);
+          authConfig.setEmail(token.getEmail());
+      }
 
-        StandardUsernamePasswordCredentials credentials = CredentialsMatchers.firstOrNull(CredentialsProvider
-                .lookupCredentials(StandardUsernamePasswordCredentials.class, project, ACL.SYSTEM,
-                        URIRequirementBuilder.fromUri(dockerCredentials.getServerAddress()).build()),
-                CredentialsMatchers.allOf(CredentialsMatchers.withId(dockerCredentials.getCredentialsId()),
-                        CREDENTIALS_MATCHER));
-
-        if (credentials != null) {
-            authConfig.setUsername(credentials.getUsername());
-            authConfig.setPassword(Secret.toString(credentials.getPassword()));
-            // TODO: email filed is not actually used by authentication, but
-            // Docker java client requires this field. Use a dummy value for now,
-            // Should extend a DockerCredentials from cloudbees credential type
-            // which can return email field.
-            authConfig.setEmail("dummy@dummy.com");
-        }
         return authConfig;
     }
 
@@ -125,8 +117,8 @@ public abstract class DockerCommand implements Describable<DockerCommand>, Exten
         protected DockerCommandDescriptor() {
         }
 
-        public DockerCredConfig.DescriptorImpl getDockerCredConfigDescriptor() {
-            return (DockerCredConfig.DescriptorImpl) Jenkins.getInstance().getDescriptor(DockerCredConfig.class);
+        public DockerRegistryEndpoint.DescriptorImpl getDockerRegistryEndpointDescriptor() {
+          return (DockerRegistryEndpoint.DescriptorImpl) Jenkins.getInstance().getDescriptor(DockerRegistryEndpoint.class);
         }
 
         public String getInfoString() {
@@ -134,8 +126,8 @@ public abstract class DockerCommand implements Describable<DockerCommand>, Exten
         }
 
         // To make a subclass docker command support credentials, do the following steps:
-        // 1. In command's subclass, add DockerCredConfig dockerCredentials to its
-        // data bound constructor, then call super(dockerCredentials).
+        // 1. In command's subclass, add DockerRegistryEndpoint dockerRegistryEndpoint to its
+        // data bound constructor, then call super(dockerRegistryEndpoint).
         // 2. In command's subclass' descriptor, override showCredentials() and return true
         // 3. In command's subclass' exectue(...), do:
         // subclassCmd.withAuthconfig(getAuthConfig(build.getParent())
