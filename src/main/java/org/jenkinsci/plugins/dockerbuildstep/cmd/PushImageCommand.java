@@ -6,7 +6,7 @@ import com.github.dockerjava.api.command.PushImageCmd;
 import com.github.dockerjava.api.model.AuthConfig;
 
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.dockerbuildstep.DockerCredConfig;
+import org.jenkinsci.plugins.docker.commons.credentials.DockerRegistryEndpoint;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.CommandUtils;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
@@ -34,8 +34,8 @@ public class PushImageCommand extends DockerCommand {
 
     @DataBoundConstructor
     public PushImageCommand(String image, String tag, String registry,
-            DockerCredConfig dockerCredentials) {
-        super(dockerCredentials);
+        DockerRegistryEndpoint dockerRegistryEndpoint) {
+        super(dockerRegistryEndpoint);
         this.image = image;
         this.tag = tag;
         this.registry = registry;
