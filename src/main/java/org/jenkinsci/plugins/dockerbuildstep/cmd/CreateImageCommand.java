@@ -5,10 +5,11 @@ import hudson.FilePath;
 import hudson.model.Result;
 import hudson.model.AbstractBuild;
 
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -16,7 +17,6 @@ import java.util.List;
 
 import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.JsonReader;
 import javax.json.stream.JsonParsingException;
 
 import org.apache.commons.io.IOUtils;
@@ -112,9 +112,9 @@ public class CreateImageCommand extends DockerCommand {
 							console.log(json.getString("stream"));
 						} else if (json.containsKey("status")) {
 							console.log(json.getString("status"));
-						} else {
+						} else if(json.containsKey("errorDetail")){
 							errors.add(json);
-							console.logError(json.toString());
+							console.logError(json.getString("message"));
 						}
 					}
 				});
@@ -141,28 +141,20 @@ public class CreateImageCommand extends DockerCommand {
 
 	private void readJsonStream(InputStream istream, JsonObjectCallback callback)
 			throws IOException, UnsupportedEncodingException {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-		byte[] buffer = new byte[8192];
-		int count;
-		while ((count = istream.read(buffer)) > 0) {
-			baos.write(buffer, 0, count);
-			String s = new String(baos.toByteArray(), "UTF-8");
-			JsonReader reader = Json.createReader(new StringReader(s));
+		
+		final BufferedReader streamReader = new BufferedReader(new InputStreamReader(istream, "UTF-8")); 
+		String inputStr;
+		while ((inputStr = streamReader.readLine()) != null) {
 			JsonObject json = null;
-
 			try {
-				json = reader.readObject();
+				json = Json.createReader(new StringReader(inputStr)).readObject();
 			} catch (JsonParsingException e) {
 				// just ignore and continue
 				continue;
 			}
-
-			baos.close();
-			baos = new ByteArrayOutputStream();
-
 			callback.callback(json);
 		}
+		
 	}
 
 	private String expandEnvironmentVariables(String string,
