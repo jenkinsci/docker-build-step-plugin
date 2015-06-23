@@ -4,8 +4,9 @@
     <st:include page="config-detail.jelly" optional="true" class="${descriptor.clazz}"/>
 
     <j:if test="${descriptor.showCredentials()}">
-        <f:entry field="dockerCredentials">
-            <f:property propertyDescriptor="${descriptor.dockerCredConfigDescriptor}"/>
+        <f:entry field="dockerRegistryEndpoint">
+            <f:property propertyDescriptor="${descriptor.dockerRegistryEndpointDescriptor}"/>
+
         </f:entry>
     </j:if>
 </j:jelly>

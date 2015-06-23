@@ -7,7 +7,7 @@ import hudson.model.AbstractBuild;
 import java.io.InputStream;
 import java.util.List;
 
-import org.jenkinsci.plugins.dockerbuildstep.DockerCredConfig;
+import org.jenkinsci.plugins.docker.commons.credentials.DockerRegistryEndpoint;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.CommandUtils;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
@@ -33,8 +33,8 @@ public class PullImageCommand extends DockerCommand {
     private final String registry;
 
     @DataBoundConstructor
-    public PullImageCommand(String fromImage, String tag, String registry, DockerCredConfig dockerCredentials) {
-        super(dockerCredentials);
+    public PullImageCommand(String fromImage, String tag, String registry, DockerRegistryEndpoint dockerRegistryEndpoint) {
+        super(dockerRegistryEndpoint);
         this.fromImage = fromImage;
         this.tag = tag;
         this.registry = registry;
