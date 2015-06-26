@@ -1,35 +1,33 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
-import java.io.IOException;
-
-import com.google.common.base.Strings;
-
 import hudson.AbortException;
-
-import com.cloudbees.plugins.credentials.CredentialsMatcher;
-import com.cloudbees.plugins.credentials.CredentialsMatchers;
-import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
-
 import hudson.DescriptorExtensionList;
 import hudson.ExtensionPoint;
 import hudson.model.Describable;
 import hudson.model.AbstractBuild;
 import hudson.model.Descriptor;
+import hudson.model.Job;
+
+import java.io.IOException;
+
 import jenkins.model.Jenkins;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.Charsets;
-import org.jenkinsci.plugins.docker.commons.credentials.DockerRegistryEndpoint;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerRegistryToken;
+import org.jenkinsci.plugins.docker.commons.credentials.DockerRegistryEndpoint;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
+import org.jenkinsci.plugins.dockerbuildstep.DockerCredConfig;
 import org.jenkinsci.plugins.dockerbuildstep.action.DockerContainerConsoleAction;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 
-import hudson.model.Job;
-
+import com.cloudbees.plugins.credentials.CredentialsMatcher;
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.DockerException;
 import com.github.dockerjava.api.model.AuthConfig;
+import com.google.common.base.Strings;
 
 /**
  * Parent class of all Docker commands.
@@ -40,6 +38,8 @@ import com.github.dockerjava.api.model.AuthConfig;
 public abstract class DockerCommand implements Describable<DockerCommand>, ExtensionPoint {
 
     private DockerRegistryEndpoint dockerRegistryEndpoint;
+    @Deprecated
+    private DockerCredConfig dockerCredentials;
 
     public DockerCommand() {
         this(null);
@@ -51,6 +51,14 @@ public abstract class DockerCommand implements Describable<DockerCommand>, Exten
 
     public DockerRegistryEndpoint getDockerRegistryEndpoint() {
         return dockerRegistryEndpoint;
+    }
+    
+    protected Object readResolve() {
+        if (dockerCredentials != null) {
+            this.dockerRegistryEndpoint = new DockerRegistryEndpoint(dockerCredentials.getServerAddress(), dockerCredentials.getCredentialsId());
+            this.dockerCredentials = null;
+        }
+        return this;
     }
 
   public AuthConfig getAuthConfig(Job project) {
