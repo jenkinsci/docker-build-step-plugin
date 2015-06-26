@@ -1,9 +1,10 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.DockerException;
-import com.github.dockerjava.api.command.PushImageCmd;
-import com.github.dockerjava.api.model.AuthConfig;
+import hudson.AbortException;
+import hudson.Extension;
+import hudson.model.AbstractBuild;
+
+import java.io.InputStream;
 
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerRegistryEndpoint;
@@ -12,12 +13,9 @@ import org.jenkinsci.plugins.dockerbuildstep.util.CommandUtils;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import hudson.Extension;
-
-import java.io.InputStream;
-
-import hudson.AbortException;
-import hudson.model.AbstractBuild;
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.DockerException;
+import com.github.dockerjava.api.command.PushImageCmd;
 
 /**
  * This command pulls Docker image from a repository.

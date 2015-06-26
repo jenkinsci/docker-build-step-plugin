@@ -52,30 +52,32 @@ public abstract class DockerCommand implements Describable<DockerCommand>, Exten
     public DockerRegistryEndpoint getDockerRegistryEndpoint() {
         return dockerRegistryEndpoint;
     }
-    
+
+    @SuppressWarnings("deprecation")
     protected Object readResolve() {
         if (dockerCredentials != null) {
-            this.dockerRegistryEndpoint = new DockerRegistryEndpoint(dockerCredentials.getServerAddress(), dockerCredentials.getCredentialsId());
+            this.dockerRegistryEndpoint = new DockerRegistryEndpoint(dockerCredentials.getServerAddress(),
+                    dockerCredentials.getCredentialsId());
             this.dockerCredentials = null;
         }
         return this;
     }
 
-  public AuthConfig getAuthConfig(Job project) {
-    if (dockerRegistryEndpoint == null || Strings.isNullOrEmpty(dockerRegistryEndpoint.getCredentialsId())) {
-      return null;
-  }
+    public AuthConfig getAuthConfig(Job<?, ?> project) {
+        if (dockerRegistryEndpoint == null || Strings.isNullOrEmpty(dockerRegistryEndpoint.getCredentialsId())) {
+            return null;
+        }
 
         AuthConfig authConfig = new AuthConfig();
         authConfig.setServerAddress(dockerRegistryEndpoint.getUrl());
         DockerRegistryToken token = this.dockerRegistryEndpoint.getToken(project);
         if (token != null) {
-          String credentials = new String(Base64.decodeBase64(token.getToken()), Charsets.UTF_8);
-          String[] usernamePassword = credentials.split(":");
-          authConfig.setUsername(usernamePassword[0]);
-          authConfig.setPassword(usernamePassword[1]);
-          authConfig.setEmail(token.getEmail());
-      }
+            String credentials = new String(Base64.decodeBase64(token.getToken()), Charsets.UTF_8);
+            String[] usernamePassword = credentials.split(":");
+            authConfig.setUsername(usernamePassword[0]);
+            authConfig.setPassword(usernamePassword[1]);
+            authConfig.setEmail(token.getEmail());
+        }
 
         return authConfig;
     }
@@ -126,7 +128,8 @@ public abstract class DockerCommand implements Describable<DockerCommand>, Exten
         }
 
         public DockerRegistryEndpoint.DescriptorImpl getDockerRegistryEndpointDescriptor() {
-          return (DockerRegistryEndpoint.DescriptorImpl) Jenkins.getInstance().getDescriptor(DockerRegistryEndpoint.class);
+            return (DockerRegistryEndpoint.DescriptorImpl) Jenkins.getInstance().getDescriptor(
+                    DockerRegistryEndpoint.class);
         }
 
         public String getInfoString() {

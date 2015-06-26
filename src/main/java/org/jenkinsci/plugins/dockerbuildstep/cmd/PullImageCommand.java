@@ -86,7 +86,7 @@ public class PullImageCommand extends DockerCommand {
                 if (++loopCount > loopMaxCount) {
                     throw new DockerException("Can't find downloaded image " + fromImageRes, 200);
                 }
-                Thread.currentThread().sleep(15 * 1000); // wait 15 sec
+                Thread.sleep(15 * 1000); // wait 15 sec
             } catch (InterruptedException e) {
                 // TODO log
                 throw new AbortException("Download of Docker image name " + fromImageRes + " was interrupted");
