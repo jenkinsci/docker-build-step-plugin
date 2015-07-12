@@ -171,7 +171,7 @@ public class CreateImageCommand extends DockerCommand {
 			DockerCommandDescriptor {
 		@Override
 		public String getDisplayName() {
-			return "Create image";
+			return "Create/build image";
 		}
 	}
 
