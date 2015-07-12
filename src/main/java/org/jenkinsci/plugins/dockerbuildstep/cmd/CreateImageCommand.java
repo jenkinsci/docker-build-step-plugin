@@ -40,12 +40,14 @@ public class CreateImageCommand extends DockerCommand {
 	private final String dockerFolder;
 	private final String imageTag;
 	private final boolean noCache;
+	private final boolean rm;
 
 	@DataBoundConstructor
-	public CreateImageCommand(String dockerFolder, String imageTag, boolean noCache) {
+	public CreateImageCommand(String dockerFolder, String imageTag, boolean noCache, boolean rm) {
 		this.dockerFolder = dockerFolder;
 		this.imageTag = imageTag;
 		this.noCache = noCache;
+		this.rm = rm;
 	}
 
 	public String getDockerFolder() {
@@ -58,6 +60,10 @@ public class CreateImageCommand extends DockerCommand {
 	
 	public boolean isNoCache() {
 		return noCache;
+	}
+	
+	public boolean isRm() {
+	    return rm;
 	}
 
 	@Override
@@ -101,7 +107,7 @@ public class CreateImageCommand extends DockerCommand {
 
 			console.logInfo("Creating docker image from " + docker.getAbsolutePath());
 
-			InputStream istream = client.buildImageCmd(docker).withTag(expandedImageTag).withNoCache(noCache).exec();
+			InputStream istream = client.buildImageCmd(docker).withTag(expandedImageTag).withNoCache(noCache).withRemove(rm).exec();
 			
 			final List<JsonObject> errors = new ArrayList<JsonObject>();
 

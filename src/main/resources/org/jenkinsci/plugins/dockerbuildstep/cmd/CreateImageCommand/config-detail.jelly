@@ -1,17 +1,22 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
-    xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
     <f:entry field="dockerFolder" title="Build context folder">
-        <f:textbox default="$WORKSPACE/docker"/>
+        <f:textbox default="$WORKSPACE/docker" />
     </f:entry>
-    
+
     <f:entry field="imageTag" title="Tag of the resulting docker image">
-        <f:textbox default="$BUILD_NUMBER"/>
+        <f:textbox default="$BUILD_NUMBER" />
     </f:entry>
-    
-    <f:entry field="noCache" title="Don't use the cache when building the image">
-        <f:checkbox />
-    </f:entry>
-    
-    
+
+    <f:advanced align="left">
+        <f:entry field="noCache" title="Don't use the cache when building the image">
+            <f:checkbox />
+        </f:entry>
+        
+        <f:entry field="rm" title="Remove intermediate containers after a successful build">
+            <f:checkbox />
+        </f:entry>
+    </f:advanced>
+
+
 </j:jelly>
