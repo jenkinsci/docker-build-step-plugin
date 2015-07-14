@@ -99,7 +99,7 @@ public class CreateImageCommand extends DockerCommand {
 			throw new IllegalArgumentException("configured dockerFolder '"
 					+ folder + "' does not contain a Dockerfile.");
 
-		DockerClient client = getClient(null);
+		DockerClient client = getClient(build, null);
 
 		try {
 

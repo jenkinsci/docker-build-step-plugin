@@ -88,9 +88,9 @@ public abstract class DockerCommand implements Describable<DockerCommand>, Exten
     public abstract void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
             throws DockerException, AbortException;
 
-    protected static DockerClient getClient(AuthConfig authConfig) {
+    protected static DockerClient getClient(AbstractBuild<?,?> build, AuthConfig authConfig) {
         return ((DockerBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(DockerBuilder.class))
-                .getDockerClient(authConfig);
+                .getDockerClient(build, authConfig);
     }
 
     public DockerCommandDescriptor getDescriptor() {

@@ -28,6 +28,7 @@ import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand.DockerCommandDescriptor;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
+import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -64,7 +65,7 @@ public class DockerBuilder extends Builder {
 
 		ConsoleLogger clog = new ConsoleLogger(listener);
 
-		if (getDescriptor().getDockerClient(null) == null) {
+		if (getDescriptor().getDockerClient(build, null) == null) {
 			clog.logError("docker client is not initialized, command '" + dockerCmd.getDescriptor().getDisplayName()
 					+ "' was aborted. Check Jenkins server log which Docker client wasn't initialized");
 			throw new AbortException("Docker client wasn't initialized.");
@@ -100,8 +101,8 @@ public class DockerBuilder extends Builder {
 			}
 
 			try {
-				createDockerClient(dockerUrl, dockerVersion, null);
-			} catch (DockerException e) {
+			    getDockerClient(null, null);
+			} catch (Exception e) {
 				LOGGER.warning("Cannot create Docker client: " + e.getCause());
 			}
 		}
@@ -134,7 +135,7 @@ public class DockerBuilder extends Builder {
 		public FormValidation doTestConnection(@QueryParameter String dockerUrl, @QueryParameter String dockerVersion) {
 			LOGGER.fine(String.format("Trying to get client for %s and version %s", dockerUrl, dockerVersion));
 			try {
-				DockerClient dockerClient = createDockerClient(dockerUrl, dockerVersion, null);
+				DockerClient dockerClient = getDockerClient(null, null);
 				dockerClient.pingCmd().exec();
 			} catch (Exception e) {
 				LOGGER.log(Level.WARNING, e.getMessage(), e);
@@ -166,8 +167,8 @@ public class DockerBuilder extends Builder {
 			save();
 
 			try {
-				createDockerClient(dockerUrl, dockerVersion, null);
-			} catch (DockerException e) {
+			    getDockerClient(null, null);
+			} catch (Exception e) {
 				LOGGER.warning("Cannot create Docker client: " + e.getCause());
 			}
 			return super.configure(req, formData);
@@ -182,21 +183,27 @@ public class DockerBuilder extends Builder {
 		}
 
 		public DockerClient getDockerClient(AuthConfig authConfig) {
-			// Reason to return a new DockerClient each time this function is called:
-			// - It is a legitimate scenario that different jobs or different build steps
-			//   in the same job may need to use one credential to connect to one 
-			//   docker registry but needs another credential to connect to another docker
-			//   registry.
-			// - Recent docker-java client made some changes so that it requires valid
-			//   AuthConfig to be provided when DockerClient is created for certain commands
-			//   when auth is needed. We don't have control on how docker-java client is
-			//   implemented.
-			// So to satisfy thread safety on the returned DockerClient
-			// (when different AuthConfig are are needed), it is better to return a new 
-			// instance each time this function is called.
-			return createDockerClient(dockerUrl, dockerVersion, authConfig);
+		    // Reason to return a new DockerClient each time this function is called:
+            // - It is a legitimate scenario that different jobs or different build steps
+            //   in the same job may need to use one credential to connect to one 
+            //   docker registry but needs another credential to connect to another docker
+            //   registry.
+            // - Recent docker-java client made some changes so that it requires valid
+            //   AuthConfig to be provided when DockerClient is created for certain commands
+            //   when auth is needed. We don't have control on how docker-java client is
+            //   implemented.
+            // So to satisfy thread safety on the returned DockerClient
+            // (when different AuthConfig are are needed), it is better to return a new 
+            // instance each time this function is called.
+            return createDockerClient(dockerUrl, dockerVersion, authConfig);
+        }
+		
+		public DockerClient getDockerClient(AbstractBuild<?,?> build, AuthConfig authConfig) {
+		    String dockerUrlRes = build == null ? Resolver.envVar(dockerUrl) : Resolver.buildVar(build, dockerUrl);
+		    String dockerVersionRes = build == null ? Resolver.envVar(dockerVersion) : Resolver.buildVar(build, dockerVersion);
+			return createDockerClient(dockerUrlRes, dockerVersionRes, authConfig);
 		}
-
+		
 		public DescriptorExtensionList<DockerCommand, DockerCommandDescriptor> getCmdDescriptors() {
 			return DockerCommand.all();
 		}

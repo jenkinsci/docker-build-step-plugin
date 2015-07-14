@@ -52,7 +52,7 @@ public class ExecCreateAndStartCommand extends DockerCommand {
 		String commandRes = Resolver.buildVar(build, command);
 
 		List<String> ids = Arrays.asList(containerIdsRes.split(","));
-		DockerClient client = getClient(null);
+		DockerClient client = getClient(build, null);
 		for (String id : ids) {
 			id = id.trim();
 			ExecCreateCmdResponse res = client.execCreateCmd(id).withCmd(commandRes.split(" ")).

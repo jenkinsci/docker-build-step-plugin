@@ -66,7 +66,7 @@ public class PushImageCommand extends DockerCommand {
             null);
 
         console.logInfo("Pushing image " + imageRes);
-        DockerClient client = getClient(getAuthConfig(build.getParent()));
+        DockerClient client = getClient(build, getAuthConfig(build.getParent()));
         PushImageCmd pushImageCmd = client.pushImageCmd(imageRes).withTag(
                 Resolver.buildVar(build, tag));
 

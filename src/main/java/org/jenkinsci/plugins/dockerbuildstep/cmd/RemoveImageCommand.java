@@ -58,7 +58,7 @@ public class RemoveImageCommand extends DockerCommand {
 		final String imageNameRes = Resolver.buildVar(build, imageName);
 		final String imageIdRes = Resolver.buildVar(build, imageId);
 		
-		DockerClient client = getClient(null);
+		DockerClient client = getClient(build, null);
 		try {
 			if (imageIdRes == null || imageIdRes.isEmpty()) {
 				client.removeImageCmd(imageNameRes).exec();

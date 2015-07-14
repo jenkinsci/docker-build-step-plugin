@@ -70,7 +70,7 @@ public class PullImageCommand extends DockerCommand {
                 Resolver.buildVar(build, fromImage), Resolver.buildVar(build, tag));
 
         console.logInfo("Pulling image " + fromImageRes);
-        DockerClient client = getClient(getAuthConfig(build.getParent()));
+        DockerClient client = getClient(build, getAuthConfig(build.getParent()));
         PullImageCmd pullImageCmd = client.pullImageCmd(fromImageRes);
         InputStream inputStream = pullImageCmd.exec();
         CommandUtils.logCommandResult(inputStream, console, "Failed to parse docker response when pulling image");
@@ -81,7 +81,7 @@ public class PullImageCommand extends DockerCommand {
         // When the above InputStream finishes, the image should have already been
         // downloaded, so we don't need to infinitely loop and check if the image
         // has been pulled. Only a few iterations are good enough.
-        while (!isImagePulled(fromImageRes)) {
+        while (!isImagePulled(build, fromImageRes)) {
             try {
                 if (++loopCount > loopMaxCount) {
                     throw new DockerException("Can't find downloaded image " + fromImageRes, 200);
@@ -96,8 +96,8 @@ public class PullImageCommand extends DockerCommand {
         console.logInfo("Done");
     }
 
-    private boolean isImagePulled(String fromImageRes) throws DockerException {
-        DockerClient client = getClient(null);
+    private boolean isImagePulled(AbstractBuild<?,?> build, String fromImageRes) throws DockerException {
+        DockerClient client = getClient(build, null);
         // As of December 17, 2014, Docker list image command only support
         // one filter: dangling (true or fals).
         // See https://docs.docker.com/reference/commandline/cli/#filtering_1

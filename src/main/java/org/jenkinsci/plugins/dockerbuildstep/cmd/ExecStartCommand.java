@@ -39,7 +39,7 @@ public class ExecStartCommand extends DockerCommand {
 
 		String commandIdsRes = Resolver.buildVar(build, commandIds);
 		List<String> cmdIds = Arrays.asList(commandIdsRes.split(","));
-		DockerClient client = getClient(null);
+		DockerClient client = getClient(build, null);
 
 		// TODO execute async on containers
 		for (String cmdId : cmdIds) {

@@ -107,7 +107,7 @@ public class CreateContainerCommand extends DockerCommand {
         String cpuSharesRes = Resolver.buildVar(build, cpuShares);
         String memoryLimitRes = Resolver.buildVar(build, memoryLimit);
 
-        DockerClient client = getClient(null);
+        DockerClient client = getClient(build, null);
         CreateContainerCmd cfgCmd = client.createContainerCmd(imageRes);
         if (!commandRes.isEmpty()) {
             cfgCmd.withCmd(new String[] { commandRes });

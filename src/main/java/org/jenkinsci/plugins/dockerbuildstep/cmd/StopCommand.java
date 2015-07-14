@@ -44,7 +44,7 @@ public class StopCommand extends DockerCommand {
         String containerIdsRes = Resolver.buildVar(build, containerIds);
         
         List<String> ids = Arrays.asList(containerIdsRes.split(","));
-        DockerClient client = getClient(null);
+        DockerClient client = getClient(build, null);
         //TODO check, if container is actually running
         for (String id : ids) {
             id = id.trim();

@@ -32,5 +32,9 @@ public class Resolver {
         return resolved;
     }
     
+    public static String envVar(final String toResolve) {
+        return Util.replaceMacro(toResolve, System.getenv());
+    }
+    
     private static final Logger LOG = Logger.getLogger(Resolver.class.getName());
 }

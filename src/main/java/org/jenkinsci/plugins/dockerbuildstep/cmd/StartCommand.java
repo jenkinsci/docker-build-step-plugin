@@ -104,7 +104,7 @@ public class StartCommand extends DockerCommand {
         Bind[] bindsRes = BindParser.parse(Resolver.buildVar(build, bindMounts));
         List<String> logIds = Arrays.asList(Resolver.buildVar(build, containerIdsLogging).split(","));
 
-        DockerClient client = getClient(null);
+        DockerClient client = getClient(build, null);
 
         // TODO check, if container exists and is stopped (probably catch exception)
         for (String id : ids) {

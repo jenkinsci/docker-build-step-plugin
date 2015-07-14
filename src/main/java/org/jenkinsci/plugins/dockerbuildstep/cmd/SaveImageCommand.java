@@ -97,7 +97,7 @@ public class SaveImageCommand extends DockerCommand {
 					"Destination is not a valid path");
 		}
 		
-		final DockerClient client = getClient(null);
+		final DockerClient client = getClient(build, null);
 		try {
 			console.logInfo(String
 					.format("Started save image '%s' ... ",
