@@ -1,0 +1,19 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
+    xmlns:f="/lib/form">
+
+    <f:entry field="image" title="Name of the image to tag (repository/image:tag)">
+        <f:textbox />
+    </f:entry>
+    <f:entry field="repository" title="Docker registry URL">
+        <f:textbox />
+    </f:entry>
+    <f:entry field="tag" title="The tag to set">
+        <f:textbox />
+    </f:entry>
+
+    <f:advanced>
+        <f:entry field="ignoreIfNotFound" title="Ignore if not found" description="Do not fail this step if the container is not found." >
+            <f:checkbox />
+        </f:entry>
+    </f:advanced>
+</j:jelly>
