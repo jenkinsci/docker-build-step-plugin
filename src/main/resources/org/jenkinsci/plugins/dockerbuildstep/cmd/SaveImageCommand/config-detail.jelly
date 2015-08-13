@@ -1,0 +1,26 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
+    xmlns:f="/lib/form">
+
+    <f:entry field="imageName" title="Image" description="Image to be saved." >
+        <f:textbox />
+    </f:entry>
+    
+    <f:entry field="imageTag" title="Image Tag" description="Tag associated with image." >
+        <f:textbox />
+    </f:entry>
+    
+    <f:entry field="destination" title="Destination Folder" description="Destination Folder where the image to be saved." >
+        <f:textbox />
+    </f:entry>
+    
+    <f:entry field="filename" title="File Name" description="File Name for the archive." >
+        <f:textbox />
+    </f:entry>
+    
+    <f:advanced>
+        <f:entry field="ignoreIfNotFound" title="Ignore if not found" description="Do not fail this step if the image is not found." >
+            <f:checkbox />
+        </f:entry>
+    </f:advanced>
+
+</j:jelly>
