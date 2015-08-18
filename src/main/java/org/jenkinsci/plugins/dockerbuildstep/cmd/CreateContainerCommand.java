@@ -110,7 +110,7 @@ public class CreateContainerCommand extends DockerCommand {
         DockerClient client = getClient(build, null);
         CreateContainerCmd cfgCmd = client.createContainerCmd(imageRes);
         if (!commandRes.isEmpty()) {
-            cfgCmd.withCmd(new String[] { commandRes });
+            cfgCmd.withCmd(commandRes.split(" "));
         }
         cfgCmd.withHostName(hostNameRes);
         cfgCmd.withName(containerNameRes);
