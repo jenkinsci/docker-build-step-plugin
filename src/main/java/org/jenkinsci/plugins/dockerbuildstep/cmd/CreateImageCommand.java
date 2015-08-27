@@ -120,7 +120,7 @@ public class CreateImageCommand extends DockerCommand {
 							console.log(json.getString("status"));
 						} else if(json.containsKey("errorDetail")){
 							errors.add(json);
-							console.logError(json.getString("message"));
+							console.logError(json.containsKey("message") ? json.getString("message") : json.getString("errorDetail"));
 						}
 					}
 				});
