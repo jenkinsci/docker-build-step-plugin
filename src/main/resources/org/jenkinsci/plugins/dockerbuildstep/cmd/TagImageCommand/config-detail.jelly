@@ -4,7 +4,7 @@
     <f:entry field="image" title="Name of the image to tag (repository/image:tag)">
         <f:textbox />
     </f:entry>
-    <f:entry field="repository" title="Docker registry URL">
+    <f:entry field="repository" title="Target repository of the new tag">
         <f:textbox />
     </f:entry>
     <f:entry field="tag" title="The tag to set">
