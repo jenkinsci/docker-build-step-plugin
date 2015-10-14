@@ -150,7 +150,7 @@ public class DockerBuilder extends Builder {
 		}
 
 		public String getDisplayName() {
-			return "Execute Docker container";
+			return "Execute Docker command";
 		}
 
 		@Override
