@@ -21,14 +21,16 @@ public class TagImageCommand extends DockerCommand {
     private final String repository;
     private final String tag;
     private final boolean ignoreIfNotFound;
+    private final boolean withForce;
 
     @DataBoundConstructor
     public TagImageCommand(final String image, final String repository, final String tag,
-                           final boolean ignoreIfNotFound) {
+                           final boolean ignoreIfNotFound, final boolean withForce) {
         this.image = image;
         this.repository = repository;
         this.tag = tag;
         this.ignoreIfNotFound = ignoreIfNotFound;
+        this.withForce = withForce;
     }
 
     public String getImage() {
@@ -45,6 +47,10 @@ public class TagImageCommand extends DockerCommand {
 
     public boolean getIgnoreIfNotFound() {
         return ignoreIfNotFound;
+    }
+
+    public boolean getWithForce() {
+        return withForce;
     }
 
     @Override
@@ -68,7 +74,7 @@ public class TagImageCommand extends DockerCommand {
 
         DockerClient client = getClient(build, null);
         try {
-                client.tagImageCmd(imageRes, repositoryRes, tagRes).exec();
+                client.tagImageCmd(imageRes, repositoryRes, tagRes).withForce(withForce).exec();
                 console.logInfo("Tagged image " + imageRes + " in " + repositoryRes + " as " + tagRes);
 
         } catch (NotFoundException e) {

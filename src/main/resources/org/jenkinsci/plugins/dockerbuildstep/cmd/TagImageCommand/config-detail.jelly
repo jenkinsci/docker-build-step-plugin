@@ -15,5 +15,8 @@
         <f:entry field="ignoreIfNotFound" title="Ignore if not found" description="Do not fail this step if the container is not found." >
             <f:checkbox />
         </f:entry>
+        <f:entry field="withForce" title="With force" description="Replace tag if it exists." >
+            <f:checkbox />
+        </f:entry>
     </f:advanced>
 </j:jelly>
