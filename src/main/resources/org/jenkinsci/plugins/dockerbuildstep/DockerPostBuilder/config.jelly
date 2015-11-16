@@ -9,6 +9,10 @@
         <f:entry field="removeVolumes" title="Remove volumes" description="Remove the volumes associated with the container." >
             <f:checkbox />
         </f:entry>
+        
+        <f:entry field="force" title="Force remove" description="Force the removal of a running container (uses SIGKILL)." >
+            <f:checkbox />
+        </f:entry>
     </f:advanced>
 
 </j:jelly>
