@@ -29,6 +29,10 @@ public class RemoveAllCommand extends DockerCommand {
         this.force = force;
     }
 
+    public boolean isRemoveVolumes() {
+        return removeVolumes;
+    }
+
     public boolean isForce() {
         return force;
     }

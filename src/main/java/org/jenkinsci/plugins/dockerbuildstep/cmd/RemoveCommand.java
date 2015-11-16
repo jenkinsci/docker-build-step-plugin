@@ -45,10 +45,10 @@ public class RemoveCommand extends DockerCommand {
         return ignoreIfNotFound;
     }
 
-    public boolean getRemoveVolumes() {
+    public boolean isRemoveVolumes() {
         return removeVolumes;
     }
-    
+
     public boolean isForce() {
         return force;
     }

@@ -65,6 +65,10 @@ public class DockerPostBuilder extends BuildStepDescriptor<Publisher> {
             return containerIds;
         }
 
+        public boolean isRemoveVolumes() {
+            return removeVolumes;
+        }
+
         public boolean isForce() {
             return force;
         }
