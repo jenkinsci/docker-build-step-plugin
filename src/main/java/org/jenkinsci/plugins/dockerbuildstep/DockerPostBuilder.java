@@ -37,7 +37,7 @@ public class DockerPostBuilder extends BuildStepDescriptor<Publisher> {
 
     @Override
     public boolean isApplicable(@SuppressWarnings("rawtypes") Class<? extends AbstractProject> jobType) {
-        return FreeStyleProject.class.equals(jobType) || MatrixProject.class.equals(jobType);;
+        return FreeStyleProject.class.equals(jobType) || MatrixProject.class.equals(jobType);
     }
 
     @Override
