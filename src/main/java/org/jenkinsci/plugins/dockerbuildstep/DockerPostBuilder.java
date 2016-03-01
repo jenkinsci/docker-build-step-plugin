@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.dockerbuildstep;
 
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.matrix.MatrixProject;
 import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -36,7 +37,7 @@ public class DockerPostBuilder extends BuildStepDescriptor<Publisher> {
 
     @Override
     public boolean isApplicable(@SuppressWarnings("rawtypes") Class<? extends AbstractProject> jobType) {
-        return FreeStyleProject.class.equals(jobType);
+        return FreeStyleProject.class.equals(jobType) || MatrixProject.class.equals(jobType);;
     }
 
     @Override
