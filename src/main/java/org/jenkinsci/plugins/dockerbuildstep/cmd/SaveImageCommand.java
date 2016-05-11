@@ -105,7 +105,7 @@ public class SaveImageCommand extends DockerCommand {
 			final OutputStream output = new FileOutputStream(new File(
 					destinationRes + "/" + filenameRes));
 
-			IOUtils.copy(client.saveImageCmd(imageNameRes).withTag(imageTagRes)
+			IOUtils.copy(client.saveImageCmd(imageNameRes + ":" + imageTagRes)
 					.exec(), output);
 
 			IOUtils.closeQuietly(output);
