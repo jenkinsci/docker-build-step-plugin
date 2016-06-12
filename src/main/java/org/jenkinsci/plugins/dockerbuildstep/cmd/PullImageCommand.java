@@ -1,5 +1,9 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
+import com.github.dockerjava.api.model.PullResponseItem;
+import com.github.dockerjava.api.model.PushResponseItem;
+import com.github.dockerjava.core.command.PullImageResultCallback;
+import com.github.dockerjava.core.command.PushImageResultCallback;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
@@ -53,7 +57,7 @@ public class PullImageCommand extends DockerCommand {
     }
 
     @Override
-    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
+    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build,final ConsoleLogger console)
             throws DockerException, AbortException {
         // TODO check it when submitting the form
         if (fromImage == null || fromImage.isEmpty()) {
@@ -72,8 +76,20 @@ public class PullImageCommand extends DockerCommand {
         console.logInfo("Pulling image " + fromImageRes);
         DockerClient client = getClient(build, getAuthConfig(build.getParent()));
         PullImageCmd pullImageCmd = client.pullImageCmd(fromImageRes);
-        InputStream inputStream = pullImageCmd.exec();
-        CommandUtils.logCommandResult(inputStream, console, "Failed to parse docker response when pulling image");
+        PullImageResultCallback callback = new PullImageResultCallback() {
+            @Override
+            public void onNext(PullResponseItem item) {
+                console.logInfo(item.toString());
+                super.onNext(item);
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                console.logError("Failed to pulling image"+throwable.getMessage());
+                super.onError(throwable);
+            }
+        };
+        pullImageCmd.exec(callback);
 
         // wait for the image to be downloaded
         final int loopMaxCount = 3;

@@ -28,7 +28,7 @@
 
     <properties>
         <version.apache.httpclient>4.3.6</version.apache.httpclient>
-        <version.docker.java>1.4.0</version.docker.java>
+        <version.docker.java>2.2.3</version.docker.java>
         <version.jenkins.docker-commons>1.2</version.jenkins.docker-commons>
         <version.glassfish.javax.json>1.0.4</version.glassfish.javax.json>
         <version.jenkins.credentials>1.22</version.jenkins.credentials>

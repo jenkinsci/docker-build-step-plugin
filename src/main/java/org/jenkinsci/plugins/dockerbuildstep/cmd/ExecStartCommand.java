@@ -1,5 +1,9 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
+import com.github.dockerjava.api.model.Frame;
+import com.github.dockerjava.api.model.PushResponseItem;
+import com.github.dockerjava.core.command.ExecStartResultCallback;
+import com.github.dockerjava.core.command.PushImageResultCallback;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 
@@ -29,7 +33,7 @@ public class ExecStartCommand extends DockerCommand {
 	}
 
 	@Override
-	public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
+	public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, final ConsoleLogger console)
 			throws DockerException {
 
 		if (commandIds == null || commandIds.isEmpty()) {
@@ -44,9 +48,20 @@ public class ExecStartCommand extends DockerCommand {
 		// TODO execute async on containers
 		for (String cmdId : cmdIds) {
 			console.logInfo(String.format("Executing command with ID '%s'", cmdId));
-			InputStream inputStream = client.execStartCmd(cmdId).exec();
-			CommandUtils.logCommandResultStream(inputStream, console,
-				"Failed to parse docker response when exec start");
+            ExecStartResultCallback callback = new ExecStartResultCallback() {
+                @Override
+                public void onNext(Frame item) {
+                    console.logInfo(item.toString());
+                    super.onNext(item);
+                }
+
+                @Override
+                public void onError(Throwable throwable) {
+                    console.logError("Failed to exec start:"+throwable.getMessage());
+                    super.onError(throwable);
+                }
+            };
+			client.execStartCmd(cmdId).exec(callback);
 		}
 
 	}

@@ -1,11 +1,13 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.DockerException;
+import com.github.dockerjava.api.command.PushImageCmd;
+import com.github.dockerjava.api.model.PushResponseItem;
+import com.github.dockerjava.core.command.PushImageResultCallback;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
-
-import java.io.InputStream;
-
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerRegistryEndpoint;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
@@ -13,17 +15,11 @@ import org.jenkinsci.plugins.dockerbuildstep.util.CommandUtils;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.DockerException;
-import com.github.dockerjava.api.command.PushImageCmd;
-
 /**
  * This command pulls Docker image from a repository.
- * 
- * @see https://docs.docker.com/reference/api/docker_remote_api_v1.13/#push-an-image-on-the-registry
- * 
+ *
  * @author wzheng2310@gmail.com (Wei Zheng)
- * 
+ * @see https://docs.docker.com/reference/api/docker_remote_api_v1.13/#push-an-image-on-the-registry
  */
 public class PushImageCommand extends DockerCommand {
     private final String image;
@@ -32,7 +28,7 @@ public class PushImageCommand extends DockerCommand {
 
     @DataBoundConstructor
     public PushImageCommand(String image, String tag, String registry,
-        DockerRegistryEndpoint dockerRegistryEndpoint) {
+                            DockerRegistryEndpoint dockerRegistryEndpoint) {
         super(dockerRegistryEndpoint);
         this.image = image;
         this.tag = tag;
@@ -52,27 +48,37 @@ public class PushImageCommand extends DockerCommand {
     }
 
     @Override
-    public void execute(AbstractBuild build, ConsoleLogger console) throws DockerException,
-        AbortException {
+    public void execute(AbstractBuild build, final ConsoleLogger console) throws DockerException,
+            AbortException {
         if (!StringUtils.isNotBlank(image)) {
             throw new IllegalArgumentException("Image name must be provided");
         }
-  
+
         // Don't include tag in the image name. Docker daemon can't handle it.
         // put tag in query string parameter.
         String imageRes = CommandUtils.imageFullNameFrom(
-            Resolver.buildVar(build, registry),
-            Resolver.buildVar(build, image),
-            null);
+                Resolver.buildVar(build, registry),
+                Resolver.buildVar(build, image),
+                null);
 
         console.logInfo("Pushing image " + imageRes);
-        DockerClient client = getClient(build, getAuthConfig(build.getParent()));
+        final DockerClient client = getClient(build, getAuthConfig(build.getParent()));
         PushImageCmd pushImageCmd = client.pushImageCmd(imageRes).withTag(
                 Resolver.buildVar(build, tag));
+        PushImageResultCallback callback = new PushImageResultCallback() {
+            @Override
+            public void onNext(PushResponseItem item) {
+                console.logInfo(item.toString());
+                super.onNext(item);
+            }
 
-        InputStream inputStream = pushImageCmd.exec();
-        CommandUtils.logCommandResult(inputStream, console,
-                "Failed to parse docker response when push image");
+            @Override
+            public void onError(Throwable throwable) {
+                console.logError("Failed to push image:"+throwable.getMessage());
+                super.onError(throwable);
+            }
+        };
+        pushImageCmd.exec(callback);
 
         // Why the code doesn't verify now if the image has been pushed to the
         // registry/repository:

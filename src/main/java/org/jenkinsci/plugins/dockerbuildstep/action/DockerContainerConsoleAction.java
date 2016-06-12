@@ -1,34 +1,22 @@
 package org.jenkinsci.plugins.dockerbuildstep.action;
 
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.AttachContainerCmd;
+import com.github.dockerjava.api.model.Frame;
+import com.github.dockerjava.core.command.AttachContainerResultCallback;
+import com.google.common.base.Charsets;
+import com.jcraft.jzlib.GZIPInputStream;
 import hudson.console.AnnotatedLargeText;
-import hudson.model.Item;
-import hudson.model.TaskListener;
-import hudson.model.TaskThread;
-import hudson.model.AbstractBuild;
-import hudson.model.TaskAction;
+import hudson.model.*;
 import hudson.security.ACL;
 import hudson.security.Permission;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.Serializable;
-
 import jenkins.model.Jenkins;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.jelly.XMLOutput;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
-import org.jenkinsci.plugins.dockerbuildstep.log.container.DockerLogMessage;
 import org.jenkinsci.plugins.dockerbuildstep.log.container.DockerLogStreamReader;
 
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.AttachContainerCmd;
-import com.google.common.base.Charsets;
-import com.jcraft.jzlib.GZIPInputStream;
+import java.io.*;
 
 /**
  * Jenkins action to add a 'Console Output' like page for the Docker container output. Container output is gathered
@@ -162,19 +150,35 @@ public class DockerContainerConsoleAction extends TaskAction implements Serializ
         protected void perform(final TaskListener listener) throws Exception {
             DockerLogStreamReader reader = null;
             OutputStreamWriter writer = null;
-            
             try {
+                writer = new OutputStreamWriter(listener.getLogger(), Charsets.UTF_8);
+                final OutputStreamWriter finalWriter = writer;
+                AttachContainerResultCallback callback = new AttachContainerResultCallback() {
+                    @Override
+                    public void onNext(Frame item) {
+                        try {
+                            finalWriter.append(item.toString());
+                            finalWriter.flush();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        super.onNext(item);
+                    }
+
+                    @Override
+                    public void onError(Throwable throwable) {
+                        try {
+                            finalWriter.append(throwable.getMessage());
+                            finalWriter.flush();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        super.onError(throwable);
+                    }
+                };
                 DockerClient client = ((DockerBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(
                         DockerBuilder.class)).getDockerClient(build, null);
-                InputStream is = client.attachContainerCmd(containerId).withFollowStream().withStdOut().withStdErr().exec();
-                reader = new DockerLogStreamReader(is);
-                writer = new OutputStreamWriter(listener.getLogger(), Charsets.UTF_8);
-                
-                while (!isInterrupted() && build.isBuilding()) {
-                    process(reader, writer);
-                    Thread.sleep(2000);
-                }
-                process(reader, writer);
+                client.attachContainerCmd(containerId).withFollowStream().withStdOut().withStdErr().exec(callback);
             } finally {
                 if (writer != null) {
                     writer.close();
@@ -183,14 +187,6 @@ public class DockerContainerConsoleAction extends TaskAction implements Serializ
                     reader.close();
                 }
                 workerThread = null;
-            }
-        }
-
-        private void process(DockerLogStreamReader ls, OutputStreamWriter w) throws IOException {
-            DockerLogMessage m;
-            while ((m = ls.nextMessage()) != null) {
-                w.append(Charsets.UTF_8.decode(m.content()));
-                w.flush();
             }
         }
     }
