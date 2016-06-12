@@ -1,31 +1,25 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
-import hudson.Extension;
-import hudson.model.AbstractBuild;
-
-import org.jenkinsci.plugins.dockerbuildstep.action.EnvInvisibleAction;
-import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
-import org.jenkinsci.plugins.dockerbuildstep.util.CommandUtils;
-import org.jenkinsci.plugins.dockerbuildstep.util.LinkUtils;
-import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
-import org.kohsuke.stapler.DataBoundConstructor;
-
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.DockerException;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
-import com.github.dockerjava.api.model.ExposedPort;
-import com.github.dockerjava.api.model.HostConfig;
-import com.github.dockerjava.api.model.Links;
+import com.github.dockerjava.api.model.*;
+import hudson.Extension;
+import hudson.model.AbstractBuild;
+import hudson.util.FormValidation;
+import org.jenkinsci.plugins.dockerbuildstep.action.EnvInvisibleAction;
+import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
+import org.jenkinsci.plugins.dockerbuildstep.util.*;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 
 /**
  * This command creates new container from specified image.
- * 
- * @see http://docs.docker.com/reference/api/docker_remote_api_v1.13/#create-a-container
- * 
+ *
  * @author vjuranek
- * 
+ * @see http://docs.docker.com/reference/api/docker_remote_api_v1.13/#create-a-container
  */
 public class CreateContainerCommand extends DockerCommand {
 
@@ -38,10 +32,17 @@ public class CreateContainerCommand extends DockerCommand {
     private final String exposedPorts;
     private final String cpuShares;
     private final String memoryLimit;
+    private final String dns;
+    private final boolean publishAllPorts;
+    private final String portBindings;
+    private final String bindMounts;
+    private final boolean privileged;
 
     @DataBoundConstructor
     public CreateContainerCommand(String image, String command, String hostName, String containerName, String envVars,
-            String links, String exposedPorts, String cpuShares, String memoryLimit) throws IllegalArgumentException {
+                                  String links, String exposedPorts, String cpuShares, String memoryLimit, String dns,
+                                  boolean publishAllPorts, String portBindings,
+                                  String bindMounts, boolean privileged) throws IllegalArgumentException {
         this.image = image;
         this.command = command;
         this.hostName = hostName;
@@ -51,6 +52,11 @@ public class CreateContainerCommand extends DockerCommand {
         this.exposedPorts = exposedPorts;
         this.cpuShares = cpuShares;
         this.memoryLimit = memoryLimit;
+        this.dns = dns;
+        this.publishAllPorts = publishAllPorts;
+        this.portBindings = portBindings;
+        this.bindMounts = bindMounts;
+        this.privileged = privileged;
     }
 
     public String getImage() {
@@ -89,6 +95,27 @@ public class CreateContainerCommand extends DockerCommand {
         return memoryLimit;
     }
 
+    public String getDns() {
+        return dns;
+    }
+
+    public boolean getPublishAllPorts() {
+        return publishAllPorts;
+    }
+
+    public String getPortBindings() {
+        return portBindings;
+    }
+
+    public String getBindMounts() {
+        return bindMounts;
+    }
+
+    public boolean getPrivileged() {
+        return privileged;
+    }
+
+
     @Override
     public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
             throws DockerException {
@@ -115,8 +142,7 @@ public class CreateContainerCommand extends DockerCommand {
         cfgCmd.withHostName(hostNameRes);
         cfgCmd.withName(containerNameRes);
         HostConfig hc = new HostConfig();
-        hc.setLinks(new Links(linksRes.getLinks()));
-        cfgCmd.withHostConfig(hc);
+        cfgCmd.withLinks(linksRes.getLinks());
         if (!envVarsRes.isEmpty()) {
             String[] envVarResSplitted = envVarsRes.split(",");
             cfgCmd.withEnv(envVarResSplitted);
@@ -140,7 +166,27 @@ public class CreateContainerCommand extends DockerCommand {
                 console.logWarn("Unable to parse memory limit '" + memoryLimitRes + "', memory limit not enforced!");
             }
         }
-        CreateContainerResponse resp = cfgCmd.exec();
+        if (dns != null && !dns.isEmpty()) {
+            console.logInfo("set dns: " + dns);
+            String[] dnsArray = dns.split(",");
+            if (dnsArray == null || dnsArray.length == 0) {
+                cfgCmd.withDns(dns);
+            } else {
+                cfgCmd.withDns(dnsArray);
+            }
+        }
+        if (portBindings != null && !portBindings.isEmpty()) {
+            console.logInfo("set portBindings: " + portBindings);
+            PortBinding[] portBindingsRes = PortBindingParser.parse(Resolver.buildVar(build, portBindings));
+            cfgCmd.withPortBindings(portBindingsRes);
+        }
+
+        if (bindMounts != null && !bindMounts.isEmpty()) {
+            console.logInfo("set portBindings: " + bindMounts);
+            Bind[] bindsRes = BindParser.parse(Resolver.buildVar(build, bindMounts));
+            cfgCmd.withBinds(bindsRes);
+        }
+        CreateContainerResponse resp = cfgCmd.withPublishAllPorts(publishAllPorts).withPrivileged(privileged).exec();
         console.logInfo("created container id " + resp.getId() + " (from image " + imageRes + ")");
 
         InspectContainerResponse inspectResp = client.inspectContainerCmd(resp.getId()).exec();
@@ -153,6 +199,24 @@ public class CreateContainerCommand extends DockerCommand {
         @Override
         public String getDisplayName() {
             return "Create container";
+        }
+
+        public FormValidation doTestPortBindings(@QueryParameter String portBindings) {
+            try {
+                PortBindingParser.parse(portBindings);
+            } catch (IllegalArgumentException e) {
+                return FormValidation.error(e.getMessage());
+            }
+            return FormValidation.ok("OK");
+        }
+
+        public FormValidation doTestBindMounts(@QueryParameter String bindMounts) {
+            try {
+                BindParser.parse(bindMounts);
+            } catch (IllegalArgumentException e) {
+                return FormValidation.error(e.getMessage());
+            }
+            return FormValidation.ok("OK");
         }
     }
 
