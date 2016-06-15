@@ -127,7 +127,6 @@ public class DockerBuilder extends Builder {
             ClassLoader classLoader = Jenkins.getInstance().getPluginManager().uberClassLoader;
             // using jaxrs/jersey implementation here (netty impl is also available)
             DockerCmdExecFactory dockerCmdExecFactory = new DockerCmdExecFactoryImpl()
-                    .withReadTimeout(1000)
                     .withConnectTimeout(1000)
                     .withMaxTotalConnections(1)
                     .withMaxPerRouteConnections(1);
