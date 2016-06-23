@@ -14,9 +14,10 @@
         <f:textbox />
     </f:entry>
 	<f:advanced align="left">
-		<f:entry field="envVars" title="Environment variables" description="Comma separated list of environment to be started. Example: var1=value1,var2=value2">
-			<f:textbox />
+		<f:entry field="envVars" title="Environment variables" description="/n|/r separated list of environment to be started. Example: var1=value1 /n|/r var2=value2">
+			<f:textarea />
 		</f:entry>
+		<f:validateButton title="${%Check syntax}" method="testEnvVars" with="envVars" />
         <f:entry field="links" title="Links" description="Comma separated list of links. Example: name1:alias1,name1:alias2">
             <f:textbox />
         </f:entry>
@@ -30,6 +31,9 @@
 			<f:textbox />
 		</f:entry>		
 		<f:entry field="dns" title="DNS" description="Option --dns:Comma separated list of links. Example: dns1,dns2,...">
+			<f:textbox />
+		</f:entry>
+		<f:entry field="extraHosts" title="Extra Hosts" description="Option --add-host:Comma separated list of add-Host.Add hostnames to /etc/hosts in the container. Example: central.maven.org:185.31.18.209,repo1.maven.org:185.31.18.209,...">
 			<f:textbox />
 		</f:entry>
 		<f:entry field="publishAllPorts" title="Publish all ports">

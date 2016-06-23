@@ -19,7 +19,7 @@ import org.kohsuke.stapler.QueryParameter;
  * This command creates new container from specified image.
  *
  * @author vjuranek
- * @see http://docs.docker.com/reference/api/docker_remote_api_v1.13/#create-a-container
+ * @see @Link:http//docs.docker.com/reference/api/docker_remote_api_v1.13/#create-a-container
  */
 public class CreateContainerCommand extends DockerCommand {
 
@@ -33,6 +33,7 @@ public class CreateContainerCommand extends DockerCommand {
     private final String cpuShares;
     private final String memoryLimit;
     private final String dns;
+    private final String extraHosts;
     private final boolean publishAllPorts;
     private final String portBindings;
     private final String bindMounts;
@@ -41,7 +42,7 @@ public class CreateContainerCommand extends DockerCommand {
     @DataBoundConstructor
     public CreateContainerCommand(String image, String command, String hostName, String containerName, String envVars,
                                   String links, String exposedPorts, String cpuShares, String memoryLimit, String dns,
-                                  boolean publishAllPorts, String portBindings,
+                                  String extraHosts, boolean publishAllPorts, String portBindings,
                                   String bindMounts, boolean privileged) throws IllegalArgumentException {
         this.image = image;
         this.command = command;
@@ -53,6 +54,7 @@ public class CreateContainerCommand extends DockerCommand {
         this.cpuShares = cpuShares;
         this.memoryLimit = memoryLimit;
         this.dns = dns;
+        this.extraHosts = extraHosts;
         this.publishAllPorts = publishAllPorts;
         this.portBindings = portBindings;
         this.bindMounts = bindMounts;
@@ -97,6 +99,18 @@ public class CreateContainerCommand extends DockerCommand {
 
     public String getDns() {
         return dns;
+    }
+
+    public String getExtraHosts() {
+        return extraHosts;
+    }
+
+    public boolean isPublishAllPorts() {
+        return publishAllPorts;
+    }
+
+    public boolean isPrivileged() {
+        return privileged;
     }
 
     public boolean getPublishAllPorts() {
@@ -144,8 +158,8 @@ public class CreateContainerCommand extends DockerCommand {
         HostConfig hc = new HostConfig();
         cfgCmd.withLinks(linksRes.getLinks());
         if (!envVarsRes.isEmpty()) {
-            String[] envVarResSplitted = envVarsRes.split(",");
-            cfgCmd.withEnv(envVarResSplitted);
+            String[] encVarResSlitted = envVarsRes.split("\\r?\\n");
+            cfgCmd.withEnv(encVarResSlitted);
         }
         if (exposedPortsRes != null && !exposedPortsRes.isEmpty()) {
             String[] exposedPortsSplitted = exposedPortsRes.split(",");
@@ -175,6 +189,16 @@ public class CreateContainerCommand extends DockerCommand {
                 cfgCmd.withDns(dnsArray);
             }
         }
+        if (extraHosts != null && !extraHosts.isEmpty()) {
+            console.logInfo("set extraHosts: " + extraHosts);
+            String[] extraHostsArray = extraHosts.split(",");
+            if (extraHostsArray == null || extraHostsArray.length == 0) {
+                cfgCmd.withExtraHosts(extraHosts);
+            } else {
+                cfgCmd.withExtraHosts(extraHostsArray);
+            }
+        }
+
         if (portBindings != null && !portBindings.isEmpty()) {
             console.logInfo("set portBindings: " + portBindings);
             PortBinding[] portBindingsRes = PortBindingParser.parse(Resolver.buildVar(build, portBindings));
@@ -213,6 +237,15 @@ public class CreateContainerCommand extends DockerCommand {
         public FormValidation doTestBindMounts(@QueryParameter String bindMounts) {
             try {
                 BindParser.parse(bindMounts);
+            } catch (IllegalArgumentException e) {
+                return FormValidation.error(e.getMessage());
+            }
+            return FormValidation.ok("OK");
+        }
+
+        public FormValidation doTestEnvVars(@QueryParameter String envVars) {
+            try {
+               envVars.split("\\r?\\n");
             } catch (IllegalArgumentException e) {
                 return FormValidation.error(e.getMessage());
             }
