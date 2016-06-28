@@ -38,12 +38,13 @@ public class CreateContainerCommand extends DockerCommand {
     private final String portBindings;
     private final String bindMounts;
     private final boolean privileged;
+    private final boolean alwaysRestart;
 
     @DataBoundConstructor
     public CreateContainerCommand(String image, String command, String hostName, String containerName, String envVars,
                                   String links, String exposedPorts, String cpuShares, String memoryLimit, String dns,
                                   String extraHosts, boolean publishAllPorts, String portBindings,
-                                  String bindMounts, boolean privileged) throws IllegalArgumentException {
+                                  String bindMounts, boolean privileged, boolean alwaysRestart) throws IllegalArgumentException {
         this.image = image;
         this.command = command;
         this.hostName = hostName;
@@ -59,6 +60,7 @@ public class CreateContainerCommand extends DockerCommand {
         this.portBindings = portBindings;
         this.bindMounts = bindMounts;
         this.privileged = privileged;
+        this.alwaysRestart = alwaysRestart;
     }
 
     public String getImage() {
@@ -129,6 +131,9 @@ public class CreateContainerCommand extends DockerCommand {
         return privileged;
     }
 
+    public boolean isAlwaysRestart() {
+        return alwaysRestart;
+    }
 
     @Override
     public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
@@ -210,6 +215,9 @@ public class CreateContainerCommand extends DockerCommand {
             Bind[] bindsRes = BindParser.parse(Resolver.buildVar(build, bindMounts));
             cfgCmd.withBinds(bindsRes);
         }
+        if (alwaysRestart) {
+            cfgCmd.withRestartPolicy(RestartPolicy.alwaysRestart());
+        }
         CreateContainerResponse resp = cfgCmd.withPublishAllPorts(publishAllPorts).withPrivileged(privileged).exec();
         console.logInfo("created container id " + resp.getId() + " (from image " + imageRes + ")");
 
@@ -245,7 +253,7 @@ public class CreateContainerCommand extends DockerCommand {
 
         public FormValidation doTestEnvVars(@QueryParameter String envVars) {
             try {
-               envVars.split("\\r?\\n");
+                envVars.split("\\r?\\n");
             } catch (IllegalArgumentException e) {
                 return FormValidation.error(e.getMessage());
             }

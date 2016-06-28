@@ -50,6 +50,9 @@
 		<f:entry field="privileged" title="Extended privileges">
 			<f:checkbox />
 		</f:entry>
+		<f:entry field="alwaysRestart" title="always restart">
+			<f:checkbox />
+		</f:entry>
 
 	</f:advanced>
 </j:jelly>
