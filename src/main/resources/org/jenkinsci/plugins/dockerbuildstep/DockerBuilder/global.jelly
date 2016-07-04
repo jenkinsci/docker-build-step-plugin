@@ -9,9 +9,12 @@
         <f:entry field="dockerVersion" title="Docker version">
             <f:textbox />
         </f:entry>
+        <f:entry field="dockerCertPath" title="cert file path">
+            <f:textbox />
+        </f:entry>
     </f:advanced>
     <f:validateButton title="${%Test Connection}" progress="${%Testing...}" method="testConnection"
-         with="dockerUrl,dockerVersion" />
+         with="dockerUrl,dockerVersion,dockerCertPath" />
   </f:section>
 
 </j:jelly>

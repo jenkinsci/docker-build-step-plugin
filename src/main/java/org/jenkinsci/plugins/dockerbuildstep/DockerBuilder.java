@@ -6,6 +6,7 @@ import com.github.dockerjava.api.command.DockerCmdExecFactory;
 import com.github.dockerjava.api.model.AuthConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig.DockerClientConfigBuilder;
+import com.github.dockerjava.core.LocalDirectorySSLConfig;
 import com.github.dockerjava.core.SSLConfig;
 import com.github.dockerjava.jaxrs.DockerCmdExecFactoryImpl;
 import hudson.AbortException;
@@ -90,6 +91,7 @@ public class DockerBuilder extends Builder {
 
         private String dockerUrl;
         private String dockerVersion;
+        private String dockerCertPath;
 
         public DescriptorImpl() {
             load();
@@ -106,7 +108,7 @@ public class DockerBuilder extends Builder {
             }
         }
 
-        private static DockerClient createDockerClient(String dockerUrl, String dockerVersion,
+        private static DockerClient createDockerClient(String dockerUrl, String dockerVersion, String dockerCertPath,
                                                        AuthConfig authConfig) {
             // TODO JENKINS-26512
             SSLConfig dummySSLConf = (new SSLConfig() {
@@ -115,6 +117,10 @@ public class DockerBuilder extends Builder {
                     return null;
                 }
             });
+
+            if (dockerCertPath != null) {
+                dummySSLConf = new LocalDirectorySSLConfig(dockerCertPath);
+            }
 
             DockerClientConfigBuilder configBuilder = new DockerClientConfigBuilder().withUri(dockerUrl)
                     .withVersion(dockerVersion).withSSLConfig(dummySSLConf);
@@ -133,9 +139,12 @@ public class DockerBuilder extends Builder {
             return DockerClientBuilder.getInstance(configBuilder).withDockerCmdExecFactory(dockerCmdExecFactory).build();
         }
 
-        public FormValidation doTestConnection(@QueryParameter String dockerUrl, @QueryParameter String dockerVersion) {
-            LOGGER.fine(String.format("Trying to get client for %s and version %s", dockerUrl, dockerVersion));
+        public FormValidation doTestConnection(@QueryParameter String dockerUrl, @QueryParameter String dockerVersion, @QueryParameter String dockerCertPath) {
+            LOGGER.fine(String.format("Trying to get client for %s and version %s and cert path %s", dockerUrl, dockerVersion, dockerCertPath));
             try {
+                this.dockerUrl = dockerUrl;
+                this.dockerVersion = dockerVersion;
+                this.dockerCertPath = dockerCertPath;
                 DockerClient dockerClient = getDockerClient(null, null);
                 dockerClient.pingCmd().exec();
             } catch (Exception e) {
@@ -158,6 +167,7 @@ public class DockerBuilder extends Builder {
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             dockerUrl = formData.getString("dockerUrl");
             dockerVersion = formData.getString("dockerVersion");
+            dockerCertPath = formData.getString("dockerCertPath");
 
             if (isBlank(dockerUrl)) {
                 LOGGER.severe("Docker URL is empty, Docker build test plugin cannot work without Docker URL being set up properly");
@@ -196,13 +206,14 @@ public class DockerBuilder extends Builder {
             // So to satisfy thread safety on the returned DockerClient
             // (when different AuthConfig are are needed), it is better to return a new 
             // instance each time this function is called.
-            return createDockerClient(dockerUrl, dockerVersion, authConfig);
+            return createDockerClient(dockerUrl, dockerVersion, dockerCertPath, authConfig);
         }
 
         public DockerClient getDockerClient(AbstractBuild<?, ?> build, AuthConfig authConfig) {
             String dockerUrlRes = build == null ? Resolver.envVar(dockerUrl) : Resolver.buildVar(build, dockerUrl);
             String dockerVersionRes = build == null ? Resolver.envVar(dockerVersion) : Resolver.buildVar(build, dockerVersion);
-            return createDockerClient(dockerUrlRes, dockerVersionRes, authConfig);
+            String dockerCertPathRes = build == null ? Resolver.envVar(dockerCertPath) : Resolver.buildVar(build, dockerCertPath);
+            return createDockerClient(dockerUrlRes, dockerVersionRes, dockerCertPathRes, authConfig);
         }
 
         public DescriptorExtensionList<DockerCommand, DockerCommandDescriptor> getCmdDescriptors() {
