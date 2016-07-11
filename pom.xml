@@ -62,11 +62,6 @@
             <artifactId>docker-commons</artifactId>
             <version>${version.jenkins.docker-commons}</version>
         </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>matrix-project</artifactId>
-            <version>${version.matrix-project}</version>
-        </dependency>
     </dependencies>
 
     <repositories>
