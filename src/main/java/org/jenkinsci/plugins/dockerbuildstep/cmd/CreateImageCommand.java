@@ -101,7 +101,8 @@ public class CreateImageCommand extends DockerCommand {
                     super.onError(throwable);
                 }
             };
-            client.buildImageCmd(docker).withTag(expandedImageTag).withNoCache(noCache).withRemove(rm).exec(callback);
+            BuildImageResultCallback result = client.buildImageCmd(docker).withTag(expandedImageTag).withNoCache(noCache).withRemove(rm).exec(callback);
+            console.logInfo("Build image id:" + result.awaitImageId());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

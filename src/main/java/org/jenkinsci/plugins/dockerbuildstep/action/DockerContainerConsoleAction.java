@@ -178,7 +178,7 @@ public class DockerContainerConsoleAction extends TaskAction implements Serializ
                 };
                 DockerClient client = ((DockerBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(
                         DockerBuilder.class)).getDockerClient(build, null);
-                client.attachContainerCmd(containerId).withFollowStream().withStdOut().withStdErr().exec(callback);
+                client.attachContainerCmd(containerId).withFollowStream().withStdOut().withStdErr().exec(callback).awaitCompletion();
             } finally {
                 if (writer != null) {
                     writer.close();

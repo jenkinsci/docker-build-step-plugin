@@ -68,7 +68,11 @@ public class ExecCreateAndStartCommand extends DockerCommand {
                     super.onError(throwable);
                 }
             };
-            client.execStartCmd(res.getId()).exec(callback);
+            try {
+                client.execStartCmd(res.getId()).exec(callback).awaitCompletion();
+            } catch (InterruptedException e) {
+                console.logError("Failed to exec start:" + e.getMessage());
+            }
         }
 
     }

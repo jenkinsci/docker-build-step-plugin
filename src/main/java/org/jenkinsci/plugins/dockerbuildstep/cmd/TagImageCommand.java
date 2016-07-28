@@ -74,9 +74,9 @@ public class TagImageCommand extends DockerCommand {
 
         DockerClient client = getClient(build, null);
         try {
-                client.tagImageCmd(imageRes, repositoryRes, tagRes).withForce(withForce).exec();
-                console.logInfo("Tagged image " + imageRes + " in " + repositoryRes + " as " + tagRes);
-
+            console.logInfo("start tagging image " + imageRes + " in " + repositoryRes + " as " + tagRes);
+            client.tagImageCmd(imageRes, repositoryRes, tagRes).withForce(withForce).exec();
+            console.logInfo("Tagged image " + imageRes + " in " + repositoryRes + " as " + tagRes);
         } catch (NotFoundException e) {
             if (!ignoreIfNotFound) {
                 console.logError(String.format("image '%s' not found ",

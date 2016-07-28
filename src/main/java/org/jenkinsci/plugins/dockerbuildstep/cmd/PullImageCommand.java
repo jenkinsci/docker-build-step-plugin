@@ -24,11 +24,11 @@ import com.github.dockerjava.api.model.Image;
 
 /**
  * This command pulls Docker image from a repository.
- * 
+ *
  * @see http://docs.docker.com/reference/api/docker_remote_api_v1.13/#create-an-image
- * 
+ *
  * @author vjuranek
- * 
+ *
  */
 public class PullImageCommand extends DockerCommand {
 
@@ -89,47 +89,8 @@ public class PullImageCommand extends DockerCommand {
                 super.onError(throwable);
             }
         };
-        pullImageCmd.exec(callback);
-
-        // wait for the image to be downloaded
-        final int loopMaxCount = 3;
-        int loopCount = 0;
-        // When the above InputStream finishes, the image should have already been
-        // downloaded, so we don't need to infinitely loop and check if the image
-        // has been pulled. Only a few iterations are good enough.
-        while (!isImagePulled(build, fromImageRes)) {
-            try {
-                if (++loopCount > loopMaxCount) {
-                    throw new DockerException("Can't find downloaded image " + fromImageRes, 200);
-                }
-                Thread.sleep(15 * 1000); // wait 15 sec
-            } catch (InterruptedException e) {
-                // TODO log
-                throw new AbortException("Download of Docker image name " + fromImageRes + " was interrupted");
-            }
-        }
-
+        pullImageCmd.exec(callback).awaitSuccess();
         console.logInfo("Done");
-    }
-
-    private boolean isImagePulled(AbstractBuild<?,?> build, String fromImageRes) throws DockerException {
-        DockerClient client = getClient(build, null);
-        // As of December 17, 2014, Docker list image command only support
-        // one filter: dangling (true or fals).
-        // See https://docs.docker.com/reference/commandline/cli/#filtering_1
-        // So there is no way to specify the image in the list image command.
-        List<Image> images = client.listImagesCmd().exec();
-
-        String imageWithLatestTagIfNeeded = CommandUtils.addLatestTagIfNeeded(fromImageRes);
-        for (Image img : images) {
-            for (String repoTag : img.getRepoTags()) {
-                if (imageWithLatestTagIfNeeded.equals(repoTag)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
     @Extension

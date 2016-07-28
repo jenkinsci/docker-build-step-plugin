@@ -78,26 +78,7 @@ public class PushImageCommand extends DockerCommand {
                 super.onError(throwable);
             }
         };
-        pushImageCmd.exec(callback);
-
-        // Why the code doesn't verify now if the image has been pushed to the
-        // registry/repository:
-        // 1. search image command doesn't support auth yet, so there is no way to
-        //    see if images have been pushed successfully by examining the repository,
-        //    if the repository is a private one.
-        // 2. If the registry is a private one, it is not searchable, because docker
-        //    search is for docker hub only.
-        // 3. Even if the docker hub repository is public, I am not sure how fast
-        //    that docker hub will index the newly pushed image and make it searchable.
-        //
-        // Another option to verify is to do a pull after push.
-        // But since the image is already available locally when you do a push,
-        // a pull isn't a very good idea (let's say the image in the repository
-        // is stale and you want to update it by a push,
-        // but the push for some reason failed but the InputStream returned by push
-        // command doesn't show any error. If you do a pull now, and if the pull succeeds,
-        // you will override your local fresh image with a stale version.
-
+        pushImageCmd.exec(callback).awaitSuccess();
         console.logInfo("Done pushing image " + imageRes);
     }
 
