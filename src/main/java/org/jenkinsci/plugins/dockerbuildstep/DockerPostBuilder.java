@@ -21,8 +21,8 @@ import org.jenkinsci.plugins.dockerbuildstep.cmd.StopCommand;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.github.dockerjava.api.NotFoundException;
-import com.github.dockerjava.api.NotModifiedException;
+import com.github.dockerjava.api.exception.NotFoundException;
+import com.github.dockerjava.api.exception.NotModifiedException;
 
 /**
  * Post build step which stops and removes the Docker container. Use to cleanup container(s) in case of a build failure.

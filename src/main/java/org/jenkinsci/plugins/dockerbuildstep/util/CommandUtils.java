@@ -15,7 +15,7 @@ import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 
-import com.github.dockerjava.api.DockerException;
+import com.github.dockerjava.api.exception.DockerException;
 
 /**
  * Util class to for docker commands.

@@ -18,49 +18,49 @@ public class PortBindingParserTest {
     @Test
     public void fullDefinition_blank() {
         assertCreatesBindings("127.0.0.1:80 8080/tcp",
-                new PortBinding(Ports.Binding("127.0.0.1", 80), TCP_8080));
+                new PortBinding(Ports.Binding.bindIpAndPort("127.0.0.1", 80), TCP_8080));
     }
     
     @Test
     public void noProtocol_blank() {
         assertCreatesBindings("127.0.0.1:80 8080",
-                new PortBinding(Ports.Binding("127.0.0.1", 80), TCP_8080));
+                new PortBinding(Ports.Binding.bindIpAndPort("127.0.0.1", 80), TCP_8080));
     }
     
     @Test
     public void noHostIp_blank() {
         assertCreatesBindings("80 8080/tcp",
-                new PortBinding(Ports.Binding(80), TCP_8080));
+                new PortBinding(Ports.Binding.bindPort(80), TCP_8080));
     }
     
     @Test
     public void portsOnly_blank() {
         assertCreatesBindings("80 8080",
-                new PortBinding(Ports.Binding(80), TCP_8080));
+                new PortBinding(Ports.Binding.bindPort(80), TCP_8080));
     }
     
     @Test
     public void fullDefinition_colon() {
         assertCreatesBindings("127.0.0.1:80:8080/tcp",
-                new PortBinding(Ports.Binding("127.0.0.1", 80), TCP_8080));
+                new PortBinding(Ports.Binding.bindIpAndPort("127.0.0.1", 80), TCP_8080));
     }
     
     @Test
     public void noProtocol_colon() {
         assertCreatesBindings("127.0.0.1:80:8080",
-                new PortBinding(Ports.Binding("127.0.0.1", 80), TCP_8080));
+                new PortBinding(Ports.Binding.bindIpAndPort("127.0.0.1", 80), TCP_8080));
     }
     
     @Test
     public void noHostIp_colon() {
         assertCreatesBindings("80:8080/tcp",
-                new PortBinding(Ports.Binding(80), TCP_8080));
+                new PortBinding(Ports.Binding.bindPort(80), TCP_8080));
     }
     
     @Test
     public void portsOnly_colon() {
         assertCreatesBindings("80:8080",
-                new PortBinding(Ports.Binding(80), TCP_8080));
+                new PortBinding(Ports.Binding.bindPort(80), TCP_8080));
     }
     
     @Test(expected = IllegalArgumentException.class)
@@ -77,19 +77,19 @@ public class PortBindingParserTest {
     @Test
     public void exposedUdpPort() {
         assertCreatesBindings("80 8080/udp",
-                new PortBinding(Ports.Binding(80), ExposedPort.udp(8080)));
+                new PortBinding(Ports.Binding.bindPort(80), ExposedPort.udp(8080)));
     }
     
     @Test
     public void dynamicHostPort_blank() {
         assertCreatesBindings("127.0.0.1: 8080",
-                new PortBinding(Ports.Binding("127.0.0.1", null), TCP_8080));
+                new PortBinding(Ports.Binding.bindIp("127.0.0.1"), TCP_8080));
     }
     
     @Test
     public void dynamicHostPort_colon() {
         assertCreatesBindings("127.0.0.1::8080",
-                new PortBinding(Ports.Binding("127.0.0.1", null), TCP_8080));
+                new PortBinding(Ports.Binding.bindIp("127.0.0.1"), TCP_8080));
     }
     
     @Test
@@ -104,8 +104,8 @@ public class PortBindingParserTest {
     
     private void twoBindings(String input) {
         assertCreatesBindings(input,
-                new PortBinding(Ports.Binding(80), ExposedPort.tcp(8080)), 
-                new PortBinding(Ports.Binding(81), ExposedPort.tcp(8081))); 
+                new PortBinding(Ports.Binding.bindPort(80), ExposedPort.tcp(8080)),
+                new PortBinding(Ports.Binding.bindPort(81), ExposedPort.tcp(8081)));
     }
     
     private static void assertCreatesBindings(String input, PortBinding... expected) {

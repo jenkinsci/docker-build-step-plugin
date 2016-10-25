@@ -1,8 +1,8 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.DockerException;
-import com.github.dockerjava.api.NotFoundException;
+import com.github.dockerjava.api.exception.DockerException;
+import com.github.dockerjava.api.exception.NotFoundException;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;

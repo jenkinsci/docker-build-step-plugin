@@ -1,7 +1,7 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.DockerException;
+import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
@@ -180,7 +180,7 @@ public class CreateContainerCommand extends DockerCommand {
         if (memoryLimitRes != null && !memoryLimitRes.isEmpty()) {
             long ml = CommandUtils.sizeInBytes(memoryLimitRes);
             if (ml > -1) {
-                cfgCmd.withMemoryLimit(ml);
+                cfgCmd.withMemory(ml);
             } else {
                 console.logWarn("Unable to parse memory limit '" + memoryLimitRes + "', memory limit not enforced!");
             }

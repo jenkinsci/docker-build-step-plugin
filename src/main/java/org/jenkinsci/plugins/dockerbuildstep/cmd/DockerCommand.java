@@ -25,7 +25,7 @@ import com.cloudbees.plugins.credentials.CredentialsMatcher;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.DockerException;
+import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.model.AuthConfig;
 import com.google.common.base.Strings;
 
@@ -69,14 +69,14 @@ public abstract class DockerCommand implements Describable<DockerCommand>, Exten
         }
 
         AuthConfig authConfig = new AuthConfig();
-        authConfig.setServerAddress(dockerRegistryEndpoint.getUrl());
+        authConfig.withRegistryAddress(dockerRegistryEndpoint.getUrl());
         DockerRegistryToken token = this.dockerRegistryEndpoint.getToken(project);
         if (token != null) {
             String credentials = new String(Base64.decodeBase64(token.getToken()), Charsets.UTF_8);
             String[] usernamePassword = credentials.split(":");
-            authConfig.setUsername(usernamePassword[0]);
-            authConfig.setPassword(usernamePassword[1]);
-            authConfig.setEmail(token.getEmail());
+            authConfig.withUsername(usernamePassword[0]);
+            authConfig.withPassword(usernamePassword[1]);
+            authConfig.withEmail(token.getEmail());
         }
 
         return authConfig;

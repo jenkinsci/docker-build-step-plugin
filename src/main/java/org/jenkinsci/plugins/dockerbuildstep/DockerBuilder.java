@@ -1,11 +1,11 @@
 package org.jenkinsci.plugins.dockerbuildstep;
 
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.DockerException;
+import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.command.DockerCmdExecFactory;
 import com.github.dockerjava.api.model.AuthConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
-import com.github.dockerjava.core.DockerClientConfig.DockerClientConfigBuilder;
+import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.LocalDirectorySSLConfig;
 import com.github.dockerjava.core.SSLConfig;
 import com.github.dockerjava.jaxrs.DockerCmdExecFactoryImpl;
@@ -121,14 +121,14 @@ public class DockerBuilder extends Builder {
             if (dockerCertPath != null) {
                 dummySSLConf = new LocalDirectorySSLConfig(dockerCertPath);
             }
-
-            DockerClientConfigBuilder configBuilder = new DockerClientConfigBuilder().withUri(dockerUrl)
-                    .withVersion(dockerVersion).withSSLConfig(dummySSLConf);
+            
+            DefaultDockerClientConfig.Builder configBuilder = new DefaultDockerClientConfig.Builder().withDockerHost(dockerUrl)
+                    .withApiVersion(dockerVersion).withCustomSslConfig(dummySSLConf);
             if (authConfig != null) {
-                configBuilder.withUsername(authConfig.getUsername())
-                        .withEmail(authConfig.getEmail())
-                        .withPassword(authConfig.getPassword())
-                        .withServerAddress(authConfig.getServerAddress());
+                configBuilder.withRegistryUsername(authConfig.getUsername())
+                        .withRegistryEmail(authConfig.getEmail())
+                        .withRegistryPassword(authConfig.getPassword())
+                        .withRegistryUrl(authConfig.getRegistryAddress());
             }
             ClassLoader classLoader = Jenkins.getInstance().getPluginManager().uberClassLoader;
             // using jaxrs/jersey implementation here (netty impl is also available)
