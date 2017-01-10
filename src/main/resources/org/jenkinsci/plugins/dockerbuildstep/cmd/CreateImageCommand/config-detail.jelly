@@ -8,11 +8,15 @@
         <f:textbox default="$BUILD_NUMBER" />
     </f:entry>
 
+    <f:entry field="dockerfile" title="Filename of dockerfile">
+        <f:textbox default="Dockerfile" />
+    </f:entry>
+
     <f:advanced align="left">
         <f:entry field="noCache" title="Don't use the cache when building the image">
             <f:checkbox />
         </f:entry>
-        
+
         <f:entry field="rm" title="Remove intermediate containers after a successful build">
             <f:checkbox />
         </f:entry>

@@ -25,12 +25,14 @@ public class CreateImageCommand extends DockerCommand {
     private final String imageTag;
     private final boolean noCache;
     private final boolean rm;
+    private final String dockerfile;
 
     @DataBoundConstructor
-    public CreateImageCommand(String dockerFolder, String imageTag, boolean noCache, boolean rm) {
+    public CreateImageCommand(String dockerFolder, String imageTag, boolean noCache, boolean rm, String dockerfile) {
         this.dockerFolder = dockerFolder;
         this.imageTag = imageTag;
         this.noCache = noCache;
+        this.dockerfile = dockerfile;
         this.rm = rm;
     }
 
@@ -48,6 +50,10 @@ public class CreateImageCommand extends DockerCommand {
 
     public boolean isRm() {
         return rm;
+    }
+
+    public boolean getDockerfilePath() {
+        return dockerfile;
     }
 
     @Override
@@ -77,7 +83,12 @@ public class CreateImageCommand extends DockerCommand {
             throw new IllegalArgumentException("configured dockerFolder '"
                     + expandedDockerFolder + "' does not exist.");
 
-        FilePath dockerFile = folder.child("Dockerfile");
+        if (dockerfile != null) {
+          FilePath dockerFile = folder.child(dockerfile);
+        } else {
+          FilePath dockerFile = folder.child("Dockerfile");
+        }
+
 
         if (!exist(dockerFile))
             throw new IllegalArgumentException("configured dockerFolder '"
