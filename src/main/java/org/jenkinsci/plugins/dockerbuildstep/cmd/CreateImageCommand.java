@@ -71,11 +71,9 @@ public class CreateImageCommand extends DockerCommand {
         String dockerFolderRes = Resolver.buildVar(build, dockerFolder);
         String imageTagRes = Resolver.buildVar(build, imageTag);
 
-        String expandedDockerFolder = expandEnvironmentVariables(dockerFolderRes,
-                build, console);
+        String expandedDockerFolder = Resolver.buildVar(build, dockerFolderRes);
 
-        String expandedImageTag = expandEnvironmentVariables(imageTagRes, build,
-                console);
+        String expandedImageTag = Resolver.buildVar(build, imageTagRes);
 
         FilePath folder = new FilePath(new File(expandedDockerFolder));
 
@@ -108,16 +106,6 @@ public class CreateImageCommand extends DockerCommand {
             };
             BuildImageResultCallback result = client.buildImageCmd(docker).withTag(expandedImageTag).withNoCache(noCache).withRemove(rm).exec(callback);
             console.logInfo("Build image id:" + result.awaitImageId());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    private String expandEnvironmentVariables(String string,
-                                              @SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console) {
-        try {
-            return build.getEnvironment(console.getListener()).expand(string);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
