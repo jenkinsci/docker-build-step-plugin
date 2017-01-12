@@ -47,7 +47,7 @@ public class CreateImageCommand extends DockerCommand {
     public String getDockerFile() {
         return dockerFile;
     }
-    
+
     public boolean isNoCache() {
         return noCache;
     }
@@ -57,8 +57,8 @@ public class CreateImageCommand extends DockerCommand {
     }
 
     @Override
-    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build,
-                        final ConsoleLogger console) throws DockerException {
+    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, final ConsoleLogger console)
+            throws DockerException {
 
         if (dockerFolder == null) {
             throw new IllegalArgumentException("dockerFolder is not configured");
@@ -78,12 +78,13 @@ public class CreateImageCommand extends DockerCommand {
         FilePath folder = new FilePath(new File(expandedDockerFolder));
 
         if (!exist(folder))
-            throw new IllegalArgumentException("configured dockerFolder '"
-                    + expandedDockerFolder + "' does not exist.");
+            throw new IllegalArgumentException(
+                    "configured dockerFolder '" + expandedDockerFolder + "' does not exist.");
 
         String dockerFileRes = dockerFile == null ? "Dockerfile" : Resolver.buildVar(build, dockerFile);
         if (!exist(folder.child(dockerFileRes))) {
-            throw new IllegalArgumentException(String.format("Configured Docker file '%s' does not exist.", dockerFileRes));
+            throw new IllegalArgumentException(
+                    String.format("Configured Docker file '%s' does not exist.", dockerFileRes));
         }
 
         DockerClient client = getClient(build, null);
@@ -104,7 +105,8 @@ public class CreateImageCommand extends DockerCommand {
                     super.onError(throwable);
                 }
             };
-            BuildImageResultCallback result = client.buildImageCmd(docker).withTag(expandedImageTag).withNoCache(noCache).withRemove(rm).exec(callback);
+            BuildImageResultCallback result = client.buildImageCmd(docker).withTag(expandedImageTag)
+                    .withNoCache(noCache).withRemove(rm).exec(callback);
             console.logInfo("Build image id:" + result.awaitImageId());
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -112,8 +114,7 @@ public class CreateImageCommand extends DockerCommand {
     }
 
     @Extension
-    public static class CreateImageCommandDescriptor extends
-            DockerCommandDescriptor {
+    public static class CreateImageCommandDescriptor extends DockerCommandDescriptor {
         @Override
         public String getDisplayName() {
             return "Create/build image";
