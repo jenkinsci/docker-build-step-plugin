@@ -23,16 +23,16 @@ public class CreateImageCommand extends DockerCommand {
 
     private final String dockerFolder;
     private final String imageTag;
+    private final String dockerFile;
     private final boolean noCache;
     private final boolean rm;
-    private final String dockerfile;
 
     @DataBoundConstructor
-    public CreateImageCommand(String dockerFolder, String imageTag, boolean noCache, boolean rm, String dockerfile) {
+    public CreateImageCommand(String dockerFolder, String imageTag, String dockerFile, boolean noCache, boolean rm) {
         this.dockerFolder = dockerFolder;
         this.imageTag = imageTag;
+        this.dockerFile = dockerFile;
         this.noCache = noCache;
-        this.dockerfile = dockerfile;
         this.rm = rm;
     }
 
@@ -44,16 +44,16 @@ public class CreateImageCommand extends DockerCommand {
         return imageTag;
     }
 
+    public String getDockerFile() {
+        return dockerFile;
+    }
+    
     public boolean isNoCache() {
         return noCache;
     }
 
     public boolean isRm() {
         return rm;
-    }
-
-    public boolean getDockerfilePath() {
-        return dockerfile;
     }
 
     @Override
@@ -83,21 +83,15 @@ public class CreateImageCommand extends DockerCommand {
             throw new IllegalArgumentException("configured dockerFolder '"
                     + expandedDockerFolder + "' does not exist.");
 
-        if (dockerfile != null) {
-          FilePath dockerFile = folder.child(dockerfile);
-        } else {
-          FilePath dockerFile = folder.child("Dockerfile");
+        String dockerFileRes = dockerFile == null ? "Dockerfile" : Resolver.buildVar(build, dockerFile);
+        if (!exist(folder.child(dockerFileRes))) {
+            throw new IllegalArgumentException(String.format("Configured Docker file '%s' does not exist.", dockerFileRes));
         }
-
-
-        if (!exist(dockerFile))
-            throw new IllegalArgumentException("configured dockerFolder '"
-                    + folder + "' does not contain a Dockerfile.");
 
         DockerClient client = getClient(build, null);
 
         try {
-            File docker = new File(expandedDockerFolder);
+            File docker = new File(expandedDockerFolder, dockerFileRes);
             console.logInfo("Creating docker image from " + docker.getAbsolutePath());
             BuildImageResultCallback callback = new BuildImageResultCallback() {
                 @Override
