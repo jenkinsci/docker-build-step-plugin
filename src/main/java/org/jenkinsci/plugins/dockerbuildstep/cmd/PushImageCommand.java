@@ -59,7 +59,7 @@ public class PushImageCommand extends DockerCommand {
         String imageRes = CommandUtils.imageFullNameFrom(
                 Resolver.buildVar(build, registry),
                 Resolver.buildVar(build, image),
-                tag);
+                Resolver.buildVar(build, tag));
 
         console.logInfo("Pushing image " + imageRes);
         final DockerClient client = getClient(build, getAuthConfig(build.getParent()));
