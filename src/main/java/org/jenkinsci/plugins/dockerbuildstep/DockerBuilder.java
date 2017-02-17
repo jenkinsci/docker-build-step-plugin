@@ -193,6 +193,10 @@ public class DockerBuilder extends Builder {
             return dockerVersion;
         }
 
+        public String getDockerCertPath() {
+            return dockerCertPath;
+        }
+
         public DockerClient getDockerClient(AuthConfig authConfig) {
             // Reason to return a new DockerClient each time this function is called:
             // - It is a legitimate scenario that different jobs or different build steps
