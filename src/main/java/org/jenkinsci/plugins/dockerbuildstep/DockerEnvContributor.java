@@ -22,9 +22,9 @@ import com.google.common.base.Joiner;
 /**
  * This contributor adds various Docker relate variable like container IDs or IP addresses into build environment
  * variables.
- * 
+ *
  * @author vjuranek
- * 
+ *
  */
 @Extension
 public class DockerEnvContributor extends EnvironmentContributor {
@@ -67,14 +67,18 @@ public class DockerEnvContributor extends EnvironmentContributor {
 		StringBuilder ports = new StringBuilder();
 		for (ExposedPort exposedPort : bindings.keySet()) {
 			ports.append(exposedPort.toString()).append(ID_SEPARATOR);
+			Binding[] exposedPortBinding = bindings.get(exposedPort);
+			if (exposedPortBinding == null) {
+				continue;
+			}
 			envs.put(PORT_BINDING_PREFIX + exposedPort.getProtocol().name() + "_" + exposedPort.getPort(),
-					bindings.get(exposedPort)[0].getHostPortSpec());
+					exposedPortBinding[0].getHostPortSpec());
 
 			StringBuilder portBinding = new StringBuilder();
-			String hostIp = bindings.get(exposedPort)[0].getHostIp();
+			String hostIp = exposedPortBinding[0].getHostIp();
 			if (hostIp != null && hostIp.length() > 0) {
 				portBinding.append(hostIp).append(":");
-				portBinding.append(bindings.get(exposedPort)[0].getHostPortSpec());
+				portBinding.append(exposedPortBinding[0].getHostPortSpec());
 				envs.put(HOST_SOCKET_PREFIX + exposedPort.getProtocol().name() + "_" + exposedPort.getPort(),
 						portBinding.toString());
 			}
