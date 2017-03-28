@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.BuildImageCmd;
 import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.model.BuildResponseItem;
 import com.github.dockerjava.core.command.BuildImageResultCallback;
@@ -12,6 +13,8 @@ import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This command creates a new image from specified Dockerfile.
@@ -26,13 +29,15 @@ public class CreateImageCommand extends DockerCommand {
     private final String dockerFile;
     private final boolean noCache;
     private final boolean rm;
+    private final String buildArgs;
 
     @DataBoundConstructor
-    public CreateImageCommand(String dockerFolder, String imageTag, String dockerFile, boolean noCache, boolean rm) {
+    public CreateImageCommand(String dockerFolder, String imageTag, String dockerFile, boolean noCache, boolean rm, String buildArgs) {
         this.dockerFolder = dockerFolder;
         this.imageTag = imageTag;
         this.dockerFile = dockerFile;
         this.noCache = noCache;
+        this.buildArgs = buildArgs;
         this.rm = rm;
     }
 
@@ -56,6 +61,10 @@ public class CreateImageCommand extends DockerCommand {
         return rm;
     }
 
+    public String getBuildArgs() {
+        return buildArgs;
+    }
+
     @Override
     public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, final ConsoleLogger console)
             throws DockerException {
@@ -66,6 +75,20 @@ public class CreateImageCommand extends DockerCommand {
 
         if (imageTag == null) {
             throw new IllegalArgumentException("imageTag is not configured");
+        }
+        final Map<String, String> buildArgsMap = new HashMap<String, String>();
+
+        if (buildArgs != null) {
+            console.logInfo("Parsing buildArgs: " + buildArgs);
+            String[] split = Resolver.buildVar(build, buildArgs).split(",|;");
+            for (String arg : split) {
+                String[] pair = arg.split("=");
+                if (pair.length == 2) {
+                    buildArgsMap.put(pair[0].trim(), pair[1].trim());
+                } else {
+                    console.logError("Invalid format for " + arg + ". Buildargs should be formatted as key=value");
+                }
+            }
         }
 
         String dockerFolderRes = Resolver.buildVar(build, dockerFolder);
@@ -105,8 +128,17 @@ public class CreateImageCommand extends DockerCommand {
                     super.onError(throwable);
                 }
             };
-            BuildImageResultCallback result = client.buildImageCmd(docker).withTag(expandedImageTag)
-                    .withNoCache(noCache).withRemove(rm).exec(callback);
+            BuildImageCmd buildImageCmd = client
+                    .buildImageCmd(docker)
+                    .withTag(expandedImageTag)
+                    .withNoCache(noCache)
+                    .withRemove(rm);
+            if (!buildArgsMap.isEmpty()) {
+                for (final Map.Entry<String, String> entry : buildArgsMap.entrySet()) {
+                    buildImageCmd = buildImageCmd.withBuildArg(entry.getKey(), entry.getValue());
+                }
+            }
+            BuildImageResultCallback result = buildImageCmd.exec(callback);
             console.logInfo("Build image id:" + result.awaitImageId());
         } catch (Exception e) {
             throw new RuntimeException(e);

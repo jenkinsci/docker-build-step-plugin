@@ -17,6 +17,10 @@
             <f:checkbox />
         </f:entry>
 
+        <f:entry field="buildArgs" title="Build arguments, e.g. http_proxy=http://1.2.3.4:4321">
+            <f:textbox default="" />
+        </f:entry>
+
         <f:entry field="rm" title="Remove intermediate containers after a successful build">
             <f:checkbox />
         </f:entry>
