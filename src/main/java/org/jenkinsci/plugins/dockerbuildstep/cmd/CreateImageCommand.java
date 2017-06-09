@@ -78,7 +78,7 @@ public class CreateImageCommand extends DockerCommand {
         }
         final Map<String, String> buildArgsMap = new HashMap<String, String>();
 
-        if ((buildArgs != null) && (buildArgs != "")) {
+        if ((buildArgs != null) && (!buildArgs.trim().isEmpty())) {
             console.logInfo("Parsing buildArgs: " + buildArgs);
             String[] split = Resolver.buildVar(build, buildArgs).split(",|;");
             for (String arg : split) {
