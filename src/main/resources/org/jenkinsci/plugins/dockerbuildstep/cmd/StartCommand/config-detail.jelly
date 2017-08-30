@@ -12,7 +12,7 @@ help file problem.
 -->
     <f:advanced align="left">
 
-        <f:entry field="waitPorts" title="Wait for ports">
+        <f:entry field="waitPorts" title="Wait for ports" description="List of container port combinations to wait for. Format [container] [port1],[port2]">
             <f:textarea />
         </f:entry>
 
