@@ -6,6 +6,7 @@ import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.core.command.PushImageResultCallback;
 import hudson.AbortException;
 import hudson.Extension;
+import hudson.Launcher;
 import hudson.model.AbstractBuild;
 
 import java.io.InputStream;
@@ -57,7 +58,7 @@ public class PullImageCommand extends DockerCommand {
     }
 
     @Override
-    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build,final ConsoleLogger console)
+    public void execute(Launcher launcher, @SuppressWarnings("rawtypes") AbstractBuild build,final ConsoleLogger console)
             throws DockerException, AbortException {
         // TODO check it when submitting the form
         if (fromImage == null || fromImage.isEmpty()) {

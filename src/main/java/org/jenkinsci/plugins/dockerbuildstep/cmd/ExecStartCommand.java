@@ -5,6 +5,7 @@ import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.core.command.ExecStartResultCallback;
 import hudson.Extension;
+import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
@@ -27,7 +28,7 @@ public class ExecStartCommand extends DockerCommand {
     }
 
     @Override
-    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, final ConsoleLogger console)
+    public void execute(Launcher launcher, @SuppressWarnings("rawtypes") AbstractBuild build, final ConsoleLogger console)
             throws DockerException {
 
         if (commandIds == null || commandIds.isEmpty()) {

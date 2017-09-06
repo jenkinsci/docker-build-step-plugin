@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  */
 public class Resolver {
 
-    public static String buildVar(final AbstractBuild<?, ?> build,final String toResolve) {
+    public static String buildVar(final AbstractBuild<?, ?> build, final String toResolve) {
         if(toResolve == null)
             return null;
         

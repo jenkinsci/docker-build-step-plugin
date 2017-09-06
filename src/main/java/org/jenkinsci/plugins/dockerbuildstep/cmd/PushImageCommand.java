@@ -7,6 +7,7 @@ import com.github.dockerjava.api.model.PushResponseItem;
 import com.github.dockerjava.core.command.PushImageResultCallback;
 import hudson.AbortException;
 import hudson.Extension;
+import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerRegistryEndpoint;
@@ -48,7 +49,7 @@ public class PushImageCommand extends DockerCommand {
     }
 
     @Override
-    public void execute(AbstractBuild build, final ConsoleLogger console) throws DockerException,
+    public void execute(Launcher launcher, AbstractBuild build, final ConsoleLogger console) throws DockerException,
             AbortException {
         if (!StringUtils.isNotBlank(image)) {
             throw new IllegalArgumentException("Image name must be provided");

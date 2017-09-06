@@ -7,6 +7,7 @@ import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.*;
 import hudson.Extension;
+import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.util.FormValidation;
 import org.jenkinsci.plugins.dockerbuildstep.action.EnvInvisibleAction;
@@ -136,7 +137,7 @@ public class CreateContainerCommand extends DockerCommand {
     }
 
     @Override
-    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
+    public void execute(Launcher launcher, @SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
             throws DockerException {
         // TODO check it when submitting the form
         if (image == null || image.isEmpty()) {

@@ -4,6 +4,7 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.exception.NotFoundException;
 import hudson.Extension;
+import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
@@ -54,7 +55,7 @@ public class TagImageCommand extends DockerCommand {
     }
 
     @Override
-    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build,
+    public void execute(Launcher launcher, @SuppressWarnings("rawtypes") AbstractBuild build,
                         ConsoleLogger console) throws DockerException {
         // TODO check it when submitting the form
         if (image == null || image.isEmpty()) {

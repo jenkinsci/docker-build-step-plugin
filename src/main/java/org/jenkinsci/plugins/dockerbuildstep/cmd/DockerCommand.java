@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.dockerbuildstep.cmd;
 import hudson.AbortException;
 import hudson.DescriptorExtensionList;
 import hudson.ExtensionPoint;
+import hudson.Launcher;
 import hudson.model.Describable;
 import hudson.model.AbstractBuild;
 import hudson.model.Descriptor;
@@ -17,6 +18,7 @@ import org.apache.commons.io.Charsets;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerRegistryToken;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerRegistryEndpoint;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
 import org.jenkinsci.plugins.dockerbuildstep.DockerCredConfig;
 import org.jenkinsci.plugins.dockerbuildstep.action.DockerContainerConsoleAction;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
@@ -85,12 +87,22 @@ public abstract class DockerCommand implements Describable<DockerCommand>, Exten
     public static CredentialsMatcher CREDENTIALS_MATCHER = CredentialsMatchers.anyOf(CredentialsMatchers
             .instanceOf(StandardUsernamePasswordCredentials.class));
 
-    public abstract void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
+    public abstract void execute(Launcher launcher, @SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
             throws DockerException, AbortException;
 
     protected static DockerClient getClient(AbstractBuild<?,?> build, AuthConfig authConfig) {
         return ((DockerBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(DockerBuilder.class))
                 .getDockerClient(build, authConfig);
+    }
+
+    protected static DockerClient getClient(Descriptor<?> descriptor, String dockerUrlRes, String dockerVersionRes, String dockerCertPathRes, AuthConfig authConfig) {
+        return ((DockerBuilder.DescriptorImpl) descriptor)
+                .getDockerClient(dockerUrlRes, dockerVersionRes, dockerCertPathRes, authConfig);
+    }
+
+    protected static Config getConfig(AbstractBuild<?,?> build) {
+        return ((DockerBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(DockerBuilder.class))
+                .getConfig(build);
     }
 
     public DockerCommandDescriptor getDescriptor() {
@@ -104,7 +116,7 @@ public abstract class DockerCommand implements Describable<DockerCommand>, Exten
     public String getInfoString() {
         return "Info from DockerCommand";
     }
-
+    
     /**
      * Only the first container started is attached!
      */

@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
 import hudson.Extension;
+import hudson.Launcher;
 import hudson.model.AbstractBuild;
 
 import java.util.Arrays;
@@ -41,7 +42,7 @@ public class RestartCommand extends DockerCommand {
     }
 
     @Override
-    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console) throws DockerException {
+    public void execute(Launcher launcher, @SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console) throws DockerException {
         if (containerIds == null || containerIds.isEmpty()) {
             throw new IllegalArgumentException("At least one parameter is required");
         }

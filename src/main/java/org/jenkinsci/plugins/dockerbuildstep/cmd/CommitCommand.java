@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
 import hudson.AbortException;
 import hudson.Extension;
+import hudson.Launcher;
 import hudson.model.AbstractBuild;
 
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
@@ -52,7 +53,7 @@ public class CommitCommand extends DockerCommand {
     }
 
     @Override
-    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
+    public void execute(Launcher launcher, @SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
             throws DockerException, AbortException {
         // TODO check it when submitting the form
         if (containerId == null || containerId.isEmpty()) {

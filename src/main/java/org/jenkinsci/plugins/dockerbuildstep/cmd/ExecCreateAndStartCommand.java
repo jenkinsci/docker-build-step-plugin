@@ -6,6 +6,7 @@ import com.github.dockerjava.api.command.ExecCreateCmdResponse;
 import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.core.command.ExecStartResultCallback;
 import hudson.Extension;
+import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
@@ -35,7 +36,7 @@ public class ExecCreateAndStartCommand extends DockerCommand {
     }
 
     @Override
-    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, final ConsoleLogger console)
+    public void execute(Launcher launcher, @SuppressWarnings("rawtypes") AbstractBuild build, final ConsoleLogger console)
             throws DockerException {
         if (containerIds == null || containerIds.isEmpty()) {
             console.logError("Container ID cannot be empty");

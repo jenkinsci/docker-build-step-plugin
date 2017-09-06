@@ -4,6 +4,7 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import hudson.Extension;
+import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.util.FormValidation;
 import org.jenkinsci.plugins.dockerbuildstep.action.DockerContainerConsoleAction;
@@ -51,7 +52,7 @@ public class StartCommand extends DockerCommand {
     }
 
     @Override
-    public void execute(@SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
+    public void execute(Launcher launcher, @SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)
             throws DockerException {
         if (containerIds == null || containerIds.isEmpty()) {
             throw new IllegalArgumentException("At least one parameter is required");

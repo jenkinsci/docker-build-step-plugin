@@ -1,14 +1,36 @@
 package org.jenkinsci.plugins.dockerbuildstep;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isEmpty;
+
+import java.io.Serializable;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.net.ssl.SSLContext;
+
+import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand.DockerCommandDescriptor;
+import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
+import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
+
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.command.DockerCmdExecFactory;
+import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.model.AuthConfig;
-import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
+import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.LocalDirectorySSLConfig;
 import com.github.dockerjava.core.SSLConfig;
 import com.github.dockerjava.jaxrs.DockerCmdExecFactoryImpl;
+
 import hudson.AbortException;
 import hudson.DescriptorExtensionList;
 import hudson.Extension;
@@ -19,26 +41,7 @@ import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
-import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
-import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
-import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand.DockerCommandDescriptor;
-import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
-import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
-
-import javax.net.ssl.SSLContext;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
  * Build step which executes various Docker commands via Docker REST API.
@@ -71,13 +74,13 @@ public class DockerBuilder extends Builder {
         }
 
         try {
-            dockerCmd.execute(build, clog);
+            dockerCmd.execute(launcher, build, clog);
         } catch (DockerException e) {
             clog.logError("command '" + dockerCmd.getDescriptor().getDisplayName() + "' failed: " + e.getMessage());
             LOGGER.severe("Failed to execute Docker command " + dockerCmd.getDescriptor().getDisplayName() + ": "
                     + e.getMessage());
             throw new AbortException(e.getMessage());
-        }
+        } 
         return true;
     }
 
@@ -87,7 +90,9 @@ public class DockerBuilder extends Builder {
     }
 
     @Extension
-    public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
+    public static final class DescriptorImpl extends BuildStepDescriptor<Builder> implements Serializable {
+
+        private static final long serialVersionUID = -4606090261824385504L;
 
         private String dockerUrl;
         private String dockerVersion;
@@ -130,7 +135,6 @@ public class DockerBuilder extends Builder {
                         .withRegistryPassword(authConfig.getPassword())
                         .withRegistryUrl(authConfig.getRegistryAddress());
             }
-            ClassLoader classLoader = Jenkins.getInstance().getPluginManager().uberClassLoader;
             // using jaxrs/jersey implementation here (netty impl is also available)
             DockerCmdExecFactory dockerCmdExecFactory = new DockerCmdExecFactoryImpl()
                     .withConnectTimeout(1000)
@@ -214,10 +218,19 @@ public class DockerBuilder extends Builder {
         }
 
         public DockerClient getDockerClient(AbstractBuild<?, ?> build, AuthConfig authConfig) {
-            String dockerUrlRes = build == null ? Resolver.envVar(dockerUrl) : Resolver.buildVar(build, dockerUrl);
-            String dockerVersionRes = build == null ? Resolver.envVar(dockerVersion) : Resolver.buildVar(build, dockerVersion);
-            String dockerCertPathRes = build == null ? Resolver.envVar(dockerCertPath) : Resolver.buildVar(build, dockerCertPath);
-            return createDockerClient(dockerUrlRes, dockerVersionRes, dockerCertPathRes, authConfig);
+            return getDockerClient(Resolver.buildVar(build, dockerUrl), Resolver.buildVar(build, dockerVersion), Resolver.buildVar(build, dockerCertPath), authConfig);
+        }
+
+        public Config getConfig(AbstractBuild<?, ?> build) {
+            return new Config(Resolver.buildVar(build, dockerUrl), Resolver.buildVar(build, dockerVersion), Resolver.buildVar(build, dockerCertPath));
+        }
+
+        public DockerClient getDockerClient(String dockerUrlRes, String dockerVersionRes, String dockerCertPathRes, AuthConfig authConfig) {
+            return createDockerClient(
+                    dockerUrlRes == null ? Resolver.envVar(dockerUrl) : dockerUrlRes,
+                    dockerVersionRes == null ? Resolver.envVar(dockerVersion) : dockerVersionRes,
+                    dockerCertPathRes == null ? Resolver.envVar(dockerCertPath) : dockerCertPathRes,
+                    authConfig);
         }
 
         public DescriptorExtensionList<DockerCommand, DockerCommandDescriptor> getCmdDescriptors() {
@@ -227,5 +240,17 @@ public class DockerBuilder extends Builder {
     }
 
     private static Logger LOGGER = Logger.getLogger(DockerBuilder.class.getName());
+
+    public static class Config implements Serializable {
+		private static final long serialVersionUID = -2906931690456614657L;
+
+		final public String dockerUrlRes, dockerVersionRes, dockerCertPathRes;
+
+		public Config(String dockerUrlRes, String dockerVersionRes, String dockerCertPathRes) {
+			this.dockerUrlRes = dockerUrlRes;
+			this.dockerVersionRes = dockerVersionRes;
+			this.dockerCertPathRes = dockerCertPathRes;
+		}
+    }
 
 }

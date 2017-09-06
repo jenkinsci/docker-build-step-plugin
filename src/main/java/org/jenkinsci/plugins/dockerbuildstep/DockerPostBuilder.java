@@ -83,7 +83,7 @@ public class DockerPostBuilder extends BuildStepDescriptor<Publisher> {
             for (String id : ids) {
                 StopCommand stopCommand = new StopCommand(id);
                 try {
-                    stopCommand.execute(build, clog);
+                    stopCommand.execute(launcher, build, clog);
                 } catch (NotFoundException e) {
                     clog.logWarn("unable to stop container id " + id + ", container not found!");
                 } catch (NotModifiedException e) {
@@ -92,7 +92,7 @@ public class DockerPostBuilder extends BuildStepDescriptor<Publisher> {
             }
 
             RemoveCommand removeCommand = new RemoveCommand(containerIds, true, removeVolumes, force);
-            removeCommand.execute(build, clog);
+            removeCommand.execute(launcher, build, clog);
 
             return true;
         }
