@@ -18,8 +18,11 @@ import java.util.logging.Logger;
 public class Resolver {
 
     public static String buildVar(final AbstractBuild<?, ?> build, final String toResolve) {
-        if(toResolve == null)
+        if (toResolve == null)
             return null;
+        
+        if (build == null) // is null when called from config page to test connection
+            return toResolve;
         
         VariableResolver<String> vr = build.getBuildVariableResolver();
         String resolved = Util.replaceMacro(toResolve, vr);
