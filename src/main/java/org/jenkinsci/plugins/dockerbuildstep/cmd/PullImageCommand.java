@@ -1,27 +1,23 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
-import com.github.dockerjava.api.model.PullResponseItem;
-import com.github.dockerjava.api.model.PushResponseItem;
-import com.github.dockerjava.core.command.PullImageResultCallback;
-import com.github.dockerjava.core.command.PushImageResultCallback;
+import com.github.dockerjava.api.model.AuthConfig;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
-
-import java.io.InputStream;
-import java.util.List;
+import hudson.model.Descriptor;
+import jenkins.model.Jenkins;
 
 import org.jenkinsci.plugins.docker.commons.credentials.DockerRegistryEndpoint;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.remote.PullImageRemoteCallable;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.CommandUtils;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.exception.DockerException;
-import com.github.dockerjava.api.command.PullImageCmd;
-import com.github.dockerjava.api.model.Image;
 
 /**
  * This command pulls Docker image from a repository.
@@ -58,7 +54,7 @@ public class PullImageCommand extends DockerCommand {
     }
 
     @Override
-    public void execute(Launcher launcher, @SuppressWarnings("rawtypes") AbstractBuild build,final ConsoleLogger console)
+    public void execute(Launcher launcher, @SuppressWarnings("rawtypes") AbstractBuild build, final ConsoleLogger console)
             throws DockerException, AbortException {
         // TODO check it when submitting the form
         if (fromImage == null || fromImage.isEmpty()) {
@@ -75,23 +71,19 @@ public class PullImageCommand extends DockerCommand {
                 Resolver.buildVar(build, fromImage), Resolver.buildVar(build, tag));
 
         console.logInfo("Pulling image " + fromImageRes);
-        DockerClient client = getClient(build, getAuthConfig(build.getParent()));
-        PullImageCmd pullImageCmd = client.pullImageCmd(fromImageRes);
-        PullImageResultCallback callback = new PullImageResultCallback() {
-            @Override
-            public void onNext(PullResponseItem item) {
-                console.logInfo(item.toString());
-                super.onNext(item);
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                console.logError("Failed to pulling image"+throwable.getMessage());
-                super.onError(throwable);
-            }
-        };
-        pullImageCmd.exec(callback).awaitSuccess();
-        console.logInfo("Done");
+        
+        try {
+            Config cfgData = getConfig(build);
+            Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
+            AuthConfig authConfig = getAuthConfig(build.getParent());
+            
+            launcher.getChannel().call(new PullImageRemoteCallable(console, cfgData, descriptor, authConfig, fromImageRes));
+            console.logInfo("Done");
+        } catch (Exception e) {
+            console.logError("failed to pull image " + fromImageRes);
+            e.printStackTrace();
+            throw new IllegalArgumentException(e);
+        }
     }
 
     @Extension

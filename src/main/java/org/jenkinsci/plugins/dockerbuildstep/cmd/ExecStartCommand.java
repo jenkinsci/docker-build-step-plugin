@@ -1,12 +1,15 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
-import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.exception.DockerException;
-import com.github.dockerjava.api.model.Frame;
-import com.github.dockerjava.core.command.ExecStartResultCallback;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
+import hudson.model.Descriptor;
+import jenkins.model.Jenkins;
+
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.remote.ExecStartRemoteCallable;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -38,31 +41,22 @@ public class ExecStartCommand extends DockerCommand {
 
         String commandIdsRes = Resolver.buildVar(build, commandIds);
         List<String> cmdIds = Arrays.asList(commandIdsRes.split(","));
-        DockerClient client = getClient(build, null);
 
         // TODO execute async on containers
         for (String cmdId : cmdIds) {
             console.logInfo(String.format("Executing command with ID '%s'", cmdId));
-            ExecStartResultCallback callback = new ExecStartResultCallback() {
-                @Override
-                public void onNext(Frame item) {
-                    console.logInfo(item.toString());
-                    super.onNext(item);
-                }
-
-                @Override
-                public void onError(Throwable throwable) {
-                    console.logError("Failed to exec start:" + throwable.getMessage());
-                    super.onError(throwable);
-                }
-            };
+            
             try {
-                client.execStartCmd(cmdId).exec(callback).awaitCompletion();
-            } catch (InterruptedException e) {
-                console.logError("Failed to exec start:" + e.getMessage());
+                Config cfgData = getConfig(build);
+                Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
+                
+                launcher.getChannel().call(new ExecStartRemoteCallable(console, cfgData, descriptor, cmdId));
+            } catch (Exception e) {
+                console.logError("failed to execute cmd id " + cmdId);
+                e.printStackTrace();
+                throw new IllegalArgumentException(e);
             }
         }
-
     }
 
     @Extension

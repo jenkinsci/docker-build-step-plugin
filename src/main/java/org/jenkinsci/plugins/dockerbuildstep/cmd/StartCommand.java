@@ -1,21 +1,23 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
-import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
-import hudson.util.FormValidation;
+import hudson.model.Descriptor;
+import jenkins.model.Jenkins;
+
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
 import org.jenkinsci.plugins.dockerbuildstep.action.DockerContainerConsoleAction;
 import org.jenkinsci.plugins.dockerbuildstep.action.EnvInvisibleAction;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.remote.InspectContainerRemoteCallable;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.remote.StartContainerRemoteCallable;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
-import org.jenkinsci.plugins.dockerbuildstep.util.BindParser;
-import org.jenkinsci.plugins.dockerbuildstep.util.PortBindingParser;
 import org.jenkinsci.plugins.dockerbuildstep.util.PortUtils;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -61,51 +63,64 @@ public class StartCommand extends DockerCommand {
         List<String> ids = Arrays.asList(Resolver.buildVar(build, containerIds).split(","));
         List<String> logIds = Arrays.asList(Resolver.buildVar(build, containerIdsLogging).split(","));
 
-        DockerClient client = getClient(build, null);
-
         // TODO check, if container exists and is stopped (probably catch exception)
+        Config cfgData = getConfig(build);
+        Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
         for (String id : ids) {
-            id = id.trim();
+            try {
+                id = id.trim();
 
-            DockerContainerConsoleAction outAction = null;
-            if (logIds.contains(id)) {
-                outAction = attachContainerOutput(build, id);
+                DockerContainerConsoleAction outAction = null;
+                if (logIds.contains(id)) {
+                    outAction = attachContainerOutput(build, id);
+                }
+                
+                InspectContainerResponse inspectResp = launcher.getChannel().call(new StartContainerRemoteCallable(cfgData, descriptor, id));
+                console.logInfo("started container id " + id);
+    
+                if (outAction != null) {
+                    outAction.setContainerName(inspectResp.getName());
+                }
+                EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
+                build.addAction(envAction);
+            } catch (Exception e) {
+                console.logError("failed to start command " + id);
+                e.printStackTrace();
+                throw new IllegalArgumentException(e);
             }
-
-            client.startContainerCmd(id).exec();
-            console.logInfo("started container id " + id);
-
-            InspectContainerResponse inspectResp = client.inspectContainerCmd(id).exec();
-            if (outAction != null) {
-                outAction.setContainerName(inspectResp.getName());
-            }
-            EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
-            build.addAction(envAction);
+            
         }
 
         // wait for ports
         if (waitPorts != null && !waitPorts.isEmpty()) {
             String waitPortsResolved = Resolver.buildVar(build, waitPorts);
-            waitForPorts(waitPortsResolved, client, console);
+            waitForPorts(launcher, cfgData, descriptor, waitPortsResolved, console);
         }
     }
-
-    private void waitForPorts(String waitForPorts, DockerClient client, ConsoleLogger console) throws DockerException {
+    
+    private void waitForPorts(Launcher launcher, Config cfgData, Descriptor<?> descriptor, String waitForPorts, ConsoleLogger console) throws DockerException {
         Map<String, List<Integer>> containers = PortUtils.parsePorts(waitForPorts);
         for (String cId : containers.keySet()) {
-            InspectContainerResponse inspectResp = client.inspectContainerCmd(cId).exec();
-            String ip = inspectResp.getNetworkSettings().getIpAddress();
-            List<Integer> ports = containers.get(cId);
-            for (Integer port : ports) {
-                console.logInfo("Waiting for port " + port + " on " + ip + " (container ID " + cId + ")");
-                boolean portReady = PortUtils.waitForPort(ip, port);
-                if (portReady) {
-                    console.logInfo(ip + ":" + port + " ready");
-                } else {
-                    // TODO fail the build, but make timeout configurable first
-                    console.logWarn(ip + ":" + port + " still not available (container ID " + cId
-                            + "), but build continues ...");
+            try {
+                InspectContainerResponse inspectResp = launcher.getChannel().call(new InspectContainerRemoteCallable(cfgData, descriptor, cId));
+                
+                String ip = inspectResp.getNetworkSettings().getIpAddress();
+                List<Integer> ports = containers.get(cId);
+                for (Integer port : ports) {
+                    console.logInfo("Waiting for port " + port + " on " + ip + " (container ID " + cId + ")");
+                    boolean portReady = PortUtils.waitForPort(ip, port);
+                    if (portReady) {
+                        console.logInfo(ip + ":" + port + " ready");
+                    } else {
+                        // TODO fail the build, but make timeout configurable first
+                        console.logWarn(ip + ":" + port + " still not available (container ID " + cId
+                                + "), but build continues ...");
+                    }
                 }
+            } catch (Exception e) {
+                console.logError("failed to start command (wait for ports) " + cId);
+                e.printStackTrace();
+                throw new IllegalArgumentException(e);
             }
         }
     }

@@ -3,15 +3,19 @@ package org.jenkinsci.plugins.dockerbuildstep.cmd;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
+import hudson.model.Descriptor;
+import jenkins.model.Jenkins;
 
 import java.util.Arrays;
 import java.util.List;
 
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.remote.KillContainerRemoteCallable;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.exception.DockerException;
 
 /**
@@ -43,13 +47,21 @@ public class KillCommand extends DockerCommand {
         }
 
         String containerIdsRes = Resolver.buildVar(build, containerIds);
-        
         List<String> ids = Arrays.asList(containerIdsRes.split(","));
-        DockerClient client = getClient(build, null);
+        
+        Config cfgData = getConfig(build);
+        Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
         for (String id : ids) {
             id = id.trim();
-            client.killContainerCmd(id).exec();
-            console.logInfo("killed container id " + id);
+            
+            try {
+                launcher.getChannel().call(new KillContainerRemoteCallable(cfgData, descriptor, id));
+            	console.logInfo("killed container id " + id);
+            } catch (Exception e) {
+                console.logError("failed to kill containers " + ids);
+                e.printStackTrace();
+                throw new IllegalArgumentException(e);
+            }
         }
     }
 

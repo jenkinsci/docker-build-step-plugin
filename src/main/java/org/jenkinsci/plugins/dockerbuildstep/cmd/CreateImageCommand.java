@@ -1,26 +1,19 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.BuildImageCmd;
 import com.github.dockerjava.api.exception.DockerException;
-import com.github.dockerjava.api.model.BuildResponseItem;
-import com.github.dockerjava.core.command.BuildImageResultCallback;
 import hudson.Extension;
-import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.Descriptor;
-import hudson.remoting.Callable;
 import jenkins.model.Jenkins;
 
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.remote.CreateImageRemoteCallable;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import java.io.File;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -111,91 +104,16 @@ public class CreateImageCommand extends DockerCommand {
         String imageId = null;
         try {
             Config cfgData = getConfig(build);
-            imageId = launcher.getChannel().call(new RemoteCallable(expandedDockerFolder, expandedImageTag, dockerFileRes, cfgData, buildArgsMap, noCache, rm, Jenkins.getInstance().getDescriptor(DockerBuilder.class)));
+            Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
+            
+            imageId = launcher.getChannel().call(new CreateImageRemoteCallable(cfgData, descriptor, expandedDockerFolder, expandedImageTag, dockerFileRes, buildArgsMap, noCache, rm));
         } catch (Exception e) {
-        	console.logError("Failed to create docker image: " + e.getMessage());
+            console.logError("Failed to create docker image: " + e.getMessage());
             e.printStackTrace();
             throw new IllegalArgumentException(e);
         }
         
         console.logInfo("Build image id:" + imageId);
-    }
-
-    public static class RemoteCallable implements Callable<String, Exception>, Serializable {
-
-        private static final long serialVersionUID = -6593420984897195978L;
-
-        String expandedDockerFolder;
-        String expandedImageTag;
-        String dockerFileRes;
-        Config cfgData;
-        Map<String, String> buildArgsMap;
-        boolean noCache;
-        boolean rm;
-
-        Descriptor<?> descriptor;
-
-        public RemoteCallable(String expandedDockerFolder, String expandedImageTag, String dockerFileRes, Config cfgData, Map<String, String> buildArgsMap, boolean noCache, boolean rm, Descriptor descriptor) {
-            this.expandedDockerFolder = expandedDockerFolder;
-            this.expandedImageTag = expandedImageTag;
-            this.dockerFileRes = dockerFileRes;
-            this.cfgData = cfgData;
-            this.buildArgsMap = buildArgsMap;
-            this.noCache = noCache;
-            this.rm = rm;
-            this.descriptor = descriptor;
-        }
-
-        public String call() throws Exception {
-            FilePath folder = new FilePath(new File(expandedDockerFolder));
-
-            if (!exist(folder))
-                throw new IllegalArgumentException(
-                        "configured dockerFolder '" + expandedDockerFolder + "' does not exist.");
-
-            if (!exist(folder.child(dockerFileRes))) {
-                throw new IllegalArgumentException(
-                        String.format("Configured Docker file '%s' does not exist.", dockerFileRes));
-            }
-
-            File docker = new File(expandedDockerFolder, dockerFileRes);
-
-            BuildImageResultCallback callback = new BuildImageResultCallback() {
-                @Override
-                public void onNext(BuildResponseItem item) {
-                    super.onNext(item);
-                }
-
-                @Override
-                public void onError(Throwable throwable) {
-                    super.onError(throwable);
-                }
-            };
-
-            DockerClient client = getClient(descriptor, cfgData.dockerUrlRes, cfgData.dockerVersionRes, cfgData.dockerCertPathRes, null);
-            BuildImageCmd buildImageCmd = client
-                    .buildImageCmd(docker)
-                    .withTag(expandedImageTag)
-                    .withNoCache(noCache)
-                    .withRemove(rm);
-            if (!buildArgsMap.isEmpty()) {
-                for (final Map.Entry<String, String> entry : buildArgsMap.entrySet()) {
-                    buildImageCmd = buildImageCmd.withBuildArg(entry.getKey(), entry.getValue());
-                }
-            }
-
-            BuildImageResultCallback result = buildImageCmd.exec(callback);
-
-            return result.awaitImageId();
-        }
-
-        private boolean exist(FilePath filePath) throws DockerException {
-            try {
-                return filePath.exists();
-            } catch (Exception e) {
-                throw new DockerException("Could not check file", 0, e);
-            }
-        }
     }
 
     @Extension

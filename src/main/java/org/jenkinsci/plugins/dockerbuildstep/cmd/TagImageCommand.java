@@ -1,17 +1,22 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
-import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.exception.NotFoundException;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
+import hudson.model.Descriptor;
+import jenkins.model.Jenkins;
+
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.remote.TagImageRemoteCallable;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
- * This command removes specified Docker image.
+ * This command tags the specified Docker image.
  *
  * @author draoullig
  * @see https://docs.docker.com/reference/api/docker_remote_api_v1.19/#tag-an-image-into-a-repository
@@ -73,11 +78,13 @@ public class TagImageCommand extends DockerCommand {
         final String repositoryRes = Resolver.buildVar(build, repository);
         final String tagRes = Resolver.buildVar(build, tag);
 
-        DockerClient client = getClient(build, null);
+        console.logInfo("start tagging image " + imageRes + " in " + repositoryRes + " as " + tagRes);
+        
         try {
-            console.logInfo("start tagging image " + imageRes + " in " + repositoryRes + " as " + tagRes);
-            client.tagImageCmd(imageRes, repositoryRes, tagRes).withForce(withForce).exec();
-            console.logInfo("Tagged image " + imageRes + " in " + repositoryRes + " as " + tagRes);
+            Config cfgData = getConfig(build);
+            Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
+            
+            launcher.getChannel().call(new TagImageRemoteCallable(cfgData, descriptor, imageRes, repositoryRes, tagRes, withForce));
         } catch (NotFoundException e) {
             if (!ignoreIfNotFound) {
                 console.logError(String.format("image '%s' not found ",
@@ -88,8 +95,13 @@ public class TagImageCommand extends DockerCommand {
                         .format("image '%s' not found, but skipping this error is turned on, let's continue ... ",
                                 imageRes));
             }
+        } catch (Exception e) {
+            console.logError("Failed to tag image: " + imageRes + ". Error: " + e.getMessage());
+            e.printStackTrace();
+            throw new IllegalArgumentException(e);
         }
-
+        
+        console.logInfo("Tagged image " + imageRes + " in " + repositoryRes + " as " + tagRes);
     }
 
     @Extension

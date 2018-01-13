@@ -3,14 +3,19 @@ package org.jenkinsci.plugins.dockerbuildstep.cmd;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
+import hudson.model.Descriptor;
+import jenkins.model.Jenkins;
 
 import java.util.List;
 
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.remote.ListContainersRemoteCallable;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.remote.StopContainerRemoteCallable;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.model.Container;
 
@@ -42,13 +47,21 @@ public class StopByImageIdCommand extends DockerCommand {
 
         String imageIdRes = Resolver.buildVar(build, imageId);
         
-        DockerClient client = getClient(build, null);
-        List<Container> containers = client.listContainersCmd().exec();
-        for (Container c : containers) {
-            if (imageIdRes.equalsIgnoreCase(c.getImage())) {
-                client.stopContainerCmd(c.getId()).exec();
-                console.logInfo("stop container id " + c.getId());
+        try {
+            Config cfgData = getConfig(build);
+            Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
+            
+            List<Container> containers = launcher.getChannel().call(new ListContainersRemoteCallable(cfgData, descriptor, false));
+            for (Container container : containers) {
+                if (imageIdRes.equalsIgnoreCase(container.getImage())) {
+                    launcher.getChannel().call(new StopContainerRemoteCallable(cfgData, descriptor, container.getId()));
+                    console.logInfo("stoped container id " + container.getId());
+                }
             }
+        } catch (Exception e) {
+            console.logError("failed to stop containers by imageIdRes " + imageIdRes);
+            e.printStackTrace();
+            throw new IllegalArgumentException(e);
         }
     }
 
@@ -59,5 +72,5 @@ public class StopByImageIdCommand extends DockerCommand {
             return "Stop container(s) by image ID";
         }
     }
-
+    
 }

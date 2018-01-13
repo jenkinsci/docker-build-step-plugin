@@ -95,7 +95,7 @@ public abstract class DockerCommand implements Describable<DockerCommand>, Exten
                 .getDockerClient(build, authConfig);
     }
 
-    protected static DockerClient getClient(Descriptor<?> descriptor, String dockerUrlRes, String dockerVersionRes, String dockerCertPathRes, AuthConfig authConfig) {
+    public static DockerClient getClient(Descriptor<?> descriptor, String dockerUrlRes, String dockerVersionRes, String dockerCertPathRes, AuthConfig authConfig) {
         return ((DockerBuilder.DescriptorImpl) descriptor)
                 .getDockerClient(dockerUrlRes, dockerVersionRes, dockerCertPathRes, authConfig);
     }

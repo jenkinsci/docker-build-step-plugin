@@ -1,13 +1,17 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
-import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.command.ExecCreateCmdResponse;
-import com.github.dockerjava.api.model.Frame;
-import com.github.dockerjava.core.command.ExecStartResultCallback;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
+import hudson.model.Descriptor;
+import jenkins.model.Jenkins;
+
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.remote.ExecCreateRemoteCallable;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.remote.ExecStartRemoteCallable;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -49,30 +53,23 @@ public class ExecCreateAndStartCommand extends DockerCommand {
 
         String containerIdsRes = Resolver.buildVar(build, containerIds);
         String commandRes = Resolver.buildVar(build, command);
-
         List<String> ids = Arrays.asList(containerIdsRes.split(","));
-        DockerClient client = getClient(build, null);
+        
+        Config cfgData = getConfig(build);
+        Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
         for (String id : ids) {
             id = id.trim();
-            ExecCreateCmdResponse res = client.execCreateCmd(id).withCmd(commandRes.split(" ")).
-                    withAttachStderr(true).withAttachStdout(true).exec();
-            console.logInfo(String.format("Exec command with ID '%s' created in container '%s' ", res.getId(), id));
-            console.logInfo(String.format("Executing command with ID '%s'", res.getId()));
-            ExecStartResultCallback callback = new ExecStartResultCallback() {
-                public void onNext(Frame item) {
-                    console.logInfo(item.toString());
-                    super.onNext(item);
-                }
-
-                public void onError(Throwable throwable) {
-                    console.logError("Failed to exec start:" + throwable.getMessage());
-                    super.onError(throwable);
-                }
-            };
+            
             try {
-                client.execStartCmd(res.getId()).exec(callback).awaitCompletion();
-            } catch (InterruptedException e) {
-                console.logError("Failed to exec start:" + e.getMessage());
+                ExecCreateCmdResponse res = launcher.getChannel().call(new ExecCreateRemoteCallable(cfgData, descriptor, id, commandRes.split(" "), true));
+                console.logInfo(String.format("Exec command with ID '%s' created in container '%s' ", res.getId(), id));
+                console.logInfo(String.format("Executing command with ID '%s'", res.getId()));
+                
+                launcher.getChannel().call(new ExecStartRemoteCallable(console, cfgData, descriptor, res.getId()));
+            } catch (Exception e) {
+                console.logError("failed to exec create and start command '" + commandRes + "' in containers " + ids);
+                e.printStackTrace();
+                throw new IllegalArgumentException(e);
             }
         }
 

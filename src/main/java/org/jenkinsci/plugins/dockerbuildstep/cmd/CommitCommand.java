@@ -4,14 +4,17 @@ import hudson.AbortException;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
+import hudson.model.Descriptor;
+import jenkins.model.Jenkins;
 
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.remote.CommitRemoteCallable;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.exception.DockerException;
-import com.github.dockerjava.api.command.CommitCmd;
 
 /**
  * This command commits changes done in specified container and create new image from it.
@@ -65,11 +68,18 @@ public class CommitCommand extends DockerCommand {
         String tagRes = Resolver.buildVar(build, tag);
         String runCmdRes = Resolver.buildVar(build, runCmd);
 
-        DockerClient client = getClient(build, null);
-        CommitCmd commitCmd =
-                client.commitCmd(containerIdRes).withRepository(repoRes).withTag(tagRes).withCmd(runCmdRes);
-        String imageId = commitCmd.exec();
-
+        String imageId;
+        try {
+            Config cfgData = getConfig(build);
+            Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
+            
+            imageId = launcher.getChannel().call(new CommitRemoteCallable(cfgData, descriptor, containerIdRes, repoRes, tagRes, runCmdRes));
+        } catch (Exception e) {
+            console.logError("Failed to commit image: " + e.getMessage());
+            e.printStackTrace();
+            throw new IllegalArgumentException(e);
+        }
+        
         console.logInfo("Container " + containerIdRes + " commited as image " + imageId);
     }
 
@@ -80,5 +90,5 @@ public class CommitCommand extends DockerCommand {
             return "Commit container changes";
         }
     }
-
+    
 }

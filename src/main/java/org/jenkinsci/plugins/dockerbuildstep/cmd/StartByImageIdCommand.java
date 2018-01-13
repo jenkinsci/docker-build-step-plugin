@@ -3,15 +3,20 @@ package org.jenkinsci.plugins.dockerbuildstep.cmd;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
+import hudson.model.Descriptor;
+import jenkins.model.Jenkins;
 
 import java.util.List;
 
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
 import org.jenkinsci.plugins.dockerbuildstep.action.EnvInvisibleAction;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.remote.ListContainersRemoteCallable;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.remote.StartContainerRemoteCallable;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.command.InspectContainerResponse;
@@ -45,17 +50,23 @@ public class StartByImageIdCommand extends DockerCommand {
 
         String imageIdRes = Resolver.buildVar(build, imageId);
         
-        DockerClient client = getClient(build, null);
-        List<Container> containers = client.listContainersCmd().withShowAll(true).exec();
-        for (Container c : containers) {
-            if (imageIdRes.equalsIgnoreCase(c.getImage())) {
-                client.startContainerCmd(c.getId());
-                console.logInfo("started container id " + c.getId());
-
-                InspectContainerResponse inspectResp = client.inspectContainerCmd(c.getId()).exec();
-                EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
-                build.addAction(envAction);
+        try {
+            Config cfgData = getConfig(build);
+            Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
+            List<Container> containers = launcher.getChannel().call(new ListContainersRemoteCallable(cfgData, descriptor, true));
+            
+            for (Container container : containers) {
+                if (imageIdRes.equalsIgnoreCase(container.getImage())) {
+                    InspectContainerResponse inspectResp = launcher.getChannel().call(new StartContainerRemoteCallable(cfgData, descriptor, container.getId()));
+                    console.logInfo("started container id " + container.getId());
+                    EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
+                    build.addAction(envAction);
+                }
             }
+        } catch (Exception e) {
+            console.logError("failed to start container by image id " + imageIdRes);
+            e.printStackTrace();
+            throw new IllegalArgumentException(e);
         }
     }
 
@@ -66,5 +77,5 @@ public class StartByImageIdCommand extends DockerCommand {
             return "Start container(s) by image ID";
         }
     }
-
+    
 }

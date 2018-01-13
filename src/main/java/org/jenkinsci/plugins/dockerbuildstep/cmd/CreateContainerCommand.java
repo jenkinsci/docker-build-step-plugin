@@ -1,16 +1,19 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
-import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.exception.DockerException;
-import com.github.dockerjava.api.command.CreateContainerCmd;
-import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.*;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
+import hudson.model.Descriptor;
 import hudson.util.FormValidation;
+import jenkins.model.Jenkins;
+
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
 import org.jenkinsci.plugins.dockerbuildstep.action.EnvInvisibleAction;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.remote.CreateContainerRemoteCallable;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.*;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -144,87 +147,90 @@ public class CreateContainerCommand extends DockerCommand {
             throw new IllegalArgumentException("At least one parameter is required");
         }
 
-        String imageRes = Resolver.buildVar(build, image);
-        String commandRes = Resolver.buildVar(build, command);
-        String hostNameRes = Resolver.buildVar(build, hostName);
-        String containerNameRes = Resolver.buildVar(build, containerName);
-        String envVarsRes = Resolver.buildVar(build, envVars);
-        Links linksRes = LinkUtils.parseLinks(Resolver.buildVar(build, links));
-        String exposedPortsRes = Resolver.buildVar(build, exposedPorts);
-        String cpuSharesRes = Resolver.buildVar(build, cpuShares);
-        String memoryLimitRes = Resolver.buildVar(build, memoryLimit);
-
-        DockerClient client = getClient(build, null);
-        CreateContainerCmd cfgCmd = client.createContainerCmd(imageRes);
-        if (!commandRes.isEmpty()) {
-            cfgCmd.withCmd(commandRes.split(" "));
-        }
-        cfgCmd.withHostName(hostNameRes);
-        cfgCmd.withName(containerNameRes);
-        HostConfig hc = new HostConfig();
-        cfgCmd.withLinks(linksRes.getLinks());
-        if (!envVarsRes.isEmpty()) {
-            String[] encVarResSlitted = envVarsRes.split("\\r?\\n");
-            cfgCmd.withEnv(encVarResSlitted);
-        }
+        // Parse and log parameters
+        
+        final String imageRes = Resolver.buildVar(build, image);
+        final String commandRawRes = Resolver.buildVar(build, command);
+        final String[] commandRes = commandRawRes.isEmpty() ? null : commandRawRes.split(" ");
+        final String hostNameRes = Resolver.buildVar(build, hostName);
+        final String containerNameRes = Resolver.buildVar(build, containerName);
+        final String envVarsRawRes = Resolver.buildVar(build, envVars);
+        final String[] envVarsRes = envVarsRawRes.isEmpty() ? null : envVarsRawRes.split("\\r?\\n");
+        final Links linksRes = LinkUtils.parseLinks(Resolver.buildVar(build, links));
+        final String exposedPortsRes = Resolver.buildVar(build, exposedPorts);
+        final ExposedPort[] ports;
         if (exposedPortsRes != null && !exposedPortsRes.isEmpty()) {
             String[] exposedPortsSplitted = exposedPortsRes.split(",");
-            ExposedPort[] ports = new ExposedPort[exposedPortsSplitted.length];
+            ports = new ExposedPort[exposedPortsSplitted.length];
             for (int i = 0; i < ports.length; i++) {
                 ports[i] = ExposedPort.parse(exposedPortsSplitted[i]);
             }
-            cfgCmd.withExposedPorts(ports);
+        } else {
+            ports = null;
         }
-        if (cpuSharesRes != null && !cpuSharesRes.isEmpty()) {
-            cfgCmd.withCpuShares(Integer.parseInt(cpuSharesRes));
-        }
-        if (memoryLimitRes != null && !memoryLimitRes.isEmpty()) {
-            long ml = CommandUtils.sizeInBytes(memoryLimitRes);
+        final String cpuSharesRawRes = Resolver.buildVar(build, cpuShares);
+        final Integer cpuSharesRes = cpuSharesRawRes == null || cpuSharesRawRes.isEmpty() ? null : Integer.parseInt(cpuSharesRawRes);
+        final String memoryLimitRawRes = Resolver.buildVar(build, memoryLimit);
+        final Long memoryLimitRes;
+        if (memoryLimitRawRes != null && !memoryLimitRawRes.isEmpty()) {
+            long ml = CommandUtils.sizeInBytes(memoryLimitRawRes);
             if (ml > -1) {
-                cfgCmd.withMemory(ml);
+                memoryLimitRes = ml;
             } else {
-                console.logWarn("Unable to parse memory limit '" + memoryLimitRes + "', memory limit not enforced!");
+                memoryLimitRes = null;
+                console.logWarn("Unable to parse memory limit '" + memoryLimitRawRes + "', memory limit not enforced!");
             }
+        } else {
+            memoryLimitRes = null;
         }
+        
+        final String[] dnsRes;
         if (dns != null && !dns.isEmpty()) {
             console.logInfo("set dns: " + dns);
-            String[] dnsArray = dns.split(",");
-            if (dnsArray == null || dnsArray.length == 0) {
-                cfgCmd.withDns(dns);
-            } else {
-                cfgCmd.withDns(dnsArray);
-            }
+            dnsRes = dns.split(",");
+        } else {
+            dnsRes = null;
         }
+        
+        final String[] extraHostsRes;
         if (extraHosts != null && !extraHosts.isEmpty()) {
             console.logInfo("set extraHosts: " + extraHosts);
-            String[] extraHostsArray = extraHosts.split(",");
-            if (extraHostsArray == null || extraHostsArray.length == 0) {
-                cfgCmd.withExtraHosts(extraHosts);
-            } else {
-                cfgCmd.withExtraHosts(extraHostsArray);
-            }
+            extraHostsRes = extraHosts.split(",");
+        } else {
+            extraHostsRes = null;
         }
-
+        
+        final PortBinding[] portBindingsRes;
         if (portBindings != null && !portBindings.isEmpty()) {
             console.logInfo("set portBindings: " + portBindings);
-            PortBinding[] portBindingsRes = PortBindingParser.parse(Resolver.buildVar(build, portBindings));
-            cfgCmd.withPortBindings(portBindingsRes);
+            portBindingsRes = PortBindingParser.parse(Resolver.buildVar(build, portBindings));
+        } else {
+            portBindingsRes = null;
         }
-
+        
+        final Bind[] bindMountsRes;
         if (bindMounts != null && !bindMounts.isEmpty()) {
             console.logInfo("set portBindings: " + bindMounts);
-            Bind[] bindsRes = BindParser.parse(Resolver.buildVar(build, bindMounts));
-            cfgCmd.withBinds(bindsRes);
+            bindMountsRes = BindParser.parse(Resolver.buildVar(build, bindMounts));
+        } else {
+            bindMountsRes = null;
         }
-        if (alwaysRestart) {
-            cfgCmd.withRestartPolicy(RestartPolicy.alwaysRestart());
+        
+        // Call Docker
+        
+        try {
+            Config cfgData = getConfig(build);
+            Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
+            
+            InspectContainerResponse inspectResp = launcher.getChannel().call(new CreateContainerRemoteCallable(cfgData, descriptor, imageRes, commandRes, hostNameRes, containerNameRes, linksRes, envVarsRes, ports, cpuSharesRes, memoryLimitRes, dnsRes, extraHostsRes, portBindingsRes, bindMountsRes, alwaysRestart, publishAllPorts, privileged));
+            console.logInfo("created container id " + inspectResp.getId() + " (from image " + imageRes + ")");
+            EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
+            build.addAction(envAction);
+        } catch (Exception e) {
+            console.logError("failed to stop all containers");
+            e.printStackTrace();
+            throw new IllegalArgumentException(e);
         }
-        CreateContainerResponse resp = cfgCmd.withPublishAllPorts(publishAllPorts).withPrivileged(privileged).exec();
-        console.logInfo("created container id " + resp.getId() + " (from image " + imageRes + ")");
-
-        InspectContainerResponse inspectResp = client.inspectContainerCmd(resp.getId()).exec();
-        EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
-        build.addAction(envAction);
     }
 
     @Extension

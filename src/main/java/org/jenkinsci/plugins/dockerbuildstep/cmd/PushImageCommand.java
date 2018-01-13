@@ -1,23 +1,26 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
-import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.exception.DockerException;
-import com.github.dockerjava.api.command.PushImageCmd;
-import com.github.dockerjava.api.model.PushResponseItem;
-import com.github.dockerjava.core.command.PushImageResultCallback;
+import com.github.dockerjava.api.model.AuthConfig;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
+import hudson.model.Descriptor;
+import jenkins.model.Jenkins;
+
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerRegistryEndpoint;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.remote.PushImageRemoteCallable;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.CommandUtils;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
- * This command pulls Docker image from a repository.
+ * This command pushes a Docker image on the repository.
  *
  * @author wzheng2310@gmail.com (Wei Zheng)
  * @see https://docs.docker.com/reference/api/docker_remote_api_v1.13/#push-an-image-on-the-registry
@@ -49,7 +52,7 @@ public class PushImageCommand extends DockerCommand {
     }
 
     @Override
-    public void execute(Launcher launcher, AbstractBuild build, final ConsoleLogger console) throws DockerException,
+    public void execute(Launcher launcher, @SuppressWarnings("rawtypes") AbstractBuild build, final ConsoleLogger console) throws DockerException,
             AbortException {
         if (!StringUtils.isNotBlank(image)) {
             throw new IllegalArgumentException("Image name must be provided");
@@ -61,26 +64,22 @@ public class PushImageCommand extends DockerCommand {
                 Resolver.buildVar(build, registry),
                 Resolver.buildVar(build, image),
                 Resolver.buildVar(build, tag));
+        String tagRes = Resolver.buildVar(build, tag);
 
         console.logInfo("Pushing image " + imageRes);
-        final DockerClient client = getClient(build, getAuthConfig(build.getParent()));
-        PushImageCmd pushImageCmd = client.pushImageCmd(imageRes).withTag(
-                Resolver.buildVar(build, tag));
-        PushImageResultCallback callback = new PushImageResultCallback() {
-            @Override
-            public void onNext(PushResponseItem item) {
-                console.logInfo(item.toString());
-                super.onNext(item);
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                console.logError("Failed to push image:"+throwable.getMessage());
-                super.onError(throwable);
-            }
-        };
-        pushImageCmd.exec(callback).awaitSuccess();
-        console.logInfo("Done pushing image " + imageRes);
+        
+        try {
+            Config cfgData = getConfig(build);
+            Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
+            AuthConfig authConfig = getAuthConfig(build.getParent());
+            
+            launcher.getChannel().call(new PushImageRemoteCallable(console, cfgData, descriptor, authConfig, imageRes, tagRes));
+            console.logInfo("Done pushing image " + imageRes);
+        } catch (Exception e) {
+            console.logError("failed to push image " + imageRes);
+            e.printStackTrace();
+            throw new IllegalArgumentException(e);
+        }
     }
 
     @Extension
