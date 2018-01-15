@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 
@@ -18,7 +19,7 @@ import hudson.remoting.Callable;
  * 
  * @author David Csakvari
  */
-public class StartContainerRemoteCallable implements Callable<InspectContainerResponse, Exception>, Serializable {
+public class StartContainerRemoteCallable implements Callable<String, Exception>, Serializable {
 
     private static final long serialVersionUID = 8479489609579635741L;
 
@@ -33,13 +34,15 @@ public class StartContainerRemoteCallable implements Callable<InspectContainerRe
         this.id = id;
     }
     
-    public InspectContainerResponse call() throws Exception {
+    public String call() throws Exception {
         DockerClient client = DockerCommand.getClient(descriptor, cfgData.dockerUrlRes, cfgData.dockerVersionRes, cfgData.dockerCertPathRes, null);
 
         client.startContainerCmd(id);
         InspectContainerResponse inspectResp = client.inspectContainerCmd(id).exec();
 
-        return inspectResp;
+        ObjectMapper mapper = new ObjectMapper();
+        String serialized = mapper.writeValueAsString(inspectResp);
+        return serialized;
     }
     
 }

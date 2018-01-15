@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
 import com.github.dockerjava.api.exception.DockerException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import hudson.Extension;
 import hudson.Launcher;
@@ -12,16 +13,14 @@ import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
 import org.jenkinsci.plugins.dockerbuildstep.action.DockerContainerConsoleAction;
 import org.jenkinsci.plugins.dockerbuildstep.action.EnvInvisibleAction;
-import org.jenkinsci.plugins.dockerbuildstep.cmd.remote.InspectContainerRemoteCallable;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.remote.WaitForPortsRemoteCallable;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.remote.StartContainerRemoteCallable;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
-import org.jenkinsci.plugins.dockerbuildstep.util.PortUtils;
 import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This command starts one or more Docker containers. It also exports some build environment variables like IP or
@@ -75,7 +74,10 @@ public class StartCommand extends DockerCommand {
                     outAction = attachContainerOutput(build, id);
                 }
                 
-                InspectContainerResponse inspectResp = launcher.getChannel().call(new StartContainerRemoteCallable(cfgData, descriptor, id));
+                String inspectRespSerialized = launcher.getChannel().call(new StartContainerRemoteCallable(cfgData, descriptor, id));
+                ObjectMapper mapper = new ObjectMapper();
+                InspectContainerResponse inspectResp = mapper.readValue(inspectRespSerialized, InspectContainerResponse.class);
+                
                 console.logInfo("started container id " + id);
     
                 if (outAction != null) {
@@ -88,7 +90,6 @@ public class StartCommand extends DockerCommand {
                 e.printStackTrace();
                 throw new IllegalArgumentException(e);
             }
-            
         }
 
         // wait for ports
@@ -99,29 +100,12 @@ public class StartCommand extends DockerCommand {
     }
     
     private void waitForPorts(Launcher launcher, Config cfgData, Descriptor<?> descriptor, String waitForPorts, ConsoleLogger console) throws DockerException {
-        Map<String, List<Integer>> containers = PortUtils.parsePorts(waitForPorts);
-        for (String cId : containers.keySet()) {
-            try {
-                InspectContainerResponse inspectResp = launcher.getChannel().call(new InspectContainerRemoteCallable(cfgData, descriptor, cId));
-                
-                String ip = inspectResp.getNetworkSettings().getIpAddress();
-                List<Integer> ports = containers.get(cId);
-                for (Integer port : ports) {
-                    console.logInfo("Waiting for port " + port + " on " + ip + " (container ID " + cId + ")");
-                    boolean portReady = PortUtils.waitForPort(ip, port);
-                    if (portReady) {
-                        console.logInfo(ip + ":" + port + " ready");
-                    } else {
-                        // TODO fail the build, but make timeout configurable first
-                        console.logWarn(ip + ":" + port + " still not available (container ID " + cId
-                                + "), but build continues ...");
-                    }
-                }
-            } catch (Exception e) {
-                console.logError("failed to start command (wait for ports) " + cId);
-                e.printStackTrace();
-                throw new IllegalArgumentException(e);
-            }
+    	try {
+	    	launcher.getChannel().call(new WaitForPortsRemoteCallable(console, cfgData, descriptor, waitForPorts));
+    	} catch (Exception e) {
+            console.logError("failed to start command (wait for ports) ");
+            e.printStackTrace();
+            throw new IllegalArgumentException(e);
         }
     }
 

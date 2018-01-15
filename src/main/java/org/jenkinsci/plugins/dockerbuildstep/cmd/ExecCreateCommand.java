@@ -17,7 +17,6 @@ import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import com.github.dockerjava.api.exception.DockerException;
-import com.github.dockerjava.api.command.ExecCreateCmdResponse;
 
 public class ExecCreateCommand extends DockerCommand {
 
@@ -61,8 +60,8 @@ public class ExecCreateCommand extends DockerCommand {
             id = id.trim();
             
             try {
-                ExecCreateCmdResponse res = launcher.getChannel().call(new ExecCreateRemoteCallable(cfgData, descriptor, id, commandRes.split(" "), false));
-                console.logInfo(String.format("Exec command with ID '%s' created in container '%s' ", res.getId(), id));
+                String commandId = launcher.getChannel().call(new ExecCreateRemoteCallable(cfgData, descriptor, id, commandRes.split(" "), false));
+                console.logInfo(String.format("Exec command with ID '%s' created in container '%s' ", commandId, id));
                 // TODO export env. variables with command IDs
             } catch (Exception e) {
                 console.logError("failed to exec command '" + commandRes + "' in containers " + ids);

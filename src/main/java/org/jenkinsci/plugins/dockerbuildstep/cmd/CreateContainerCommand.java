@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
 import com.github.dockerjava.api.exception.DockerException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import hudson.Extension;
 import hudson.Launcher;
@@ -211,7 +212,10 @@ public class CreateContainerCommand extends DockerCommand {
             Config cfgData = getConfig(build);
             Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
             
-            InspectContainerResponse inspectResp = launcher.getChannel().call(new CreateContainerRemoteCallable(cfgData, descriptor, imageRes, commandRes, hostNameRes, containerNameRes, linksRes, envVarsRes, exposedPortsRes, cpuSharesRes, memoryLimitRes, dnsRes, extraHostsRes, portBindingsRes, bindMountsRes, alwaysRestart, publishAllPorts, privileged));
+            String inspectRespSerialized = launcher.getChannel().call(new CreateContainerRemoteCallable(cfgData, descriptor, imageRes, commandRes, hostNameRes, containerNameRes, linksRes, envVarsRes, exposedPortsRes, cpuSharesRes, memoryLimitRes, dnsRes, extraHostsRes, portBindingsRes, bindMountsRes, alwaysRestart, publishAllPorts, privileged));
+            ObjectMapper mapper = new ObjectMapper();
+            InspectContainerResponse inspectResp = mapper.readValue(inspectRespSerialized, InspectContainerResponse.class);
+            
             console.logInfo("created container id " + inspectResp.getId() + " (from image " + imageRes + ")");
             EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
             build.addAction(envAction);

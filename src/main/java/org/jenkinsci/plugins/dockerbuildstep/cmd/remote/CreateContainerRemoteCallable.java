@@ -8,6 +8,7 @@ import org.jenkinsci.plugins.dockerbuildstep.util.BindParser;
 import org.jenkinsci.plugins.dockerbuildstep.util.LinkUtils;
 import org.jenkinsci.plugins.dockerbuildstep.util.PortBindingParser;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
@@ -26,7 +27,7 @@ import hudson.remoting.Callable;
  * 
  * @author David Csakvari
  */
-public class CreateContainerRemoteCallable implements Callable<InspectContainerResponse, Exception>, Serializable {
+public class CreateContainerRemoteCallable implements Callable<String, Exception>, Serializable {
 
     private static final long serialVersionUID = -4028940605497568422L;
     
@@ -75,7 +76,7 @@ public class CreateContainerRemoteCallable implements Callable<InspectContainerR
         this.privileged = privileged;
     }
 
-    public InspectContainerResponse call() throws Exception {
+    public String call() throws Exception {
         DockerClient client = DockerCommand.getClient(descriptor, cfgData.dockerUrlRes, cfgData.dockerVersionRes, cfgData.dockerCertPathRes, null);
         
         CreateContainerCmd cfgCmd = client.createContainerCmd(imageRes);
@@ -123,6 +124,9 @@ public class CreateContainerRemoteCallable implements Callable<InspectContainerR
         
         CreateContainerResponse resp = cfgCmd.withPublishAllPorts(publishAllPorts).withPrivileged(privileged).exec();
         InspectContainerResponse inspectResp = client.inspectContainerCmd(resp.getId()).exec();
-        return inspectResp;
+        
+        ObjectMapper mapper = new ObjectMapper();
+        String serialized = mapper.writeValueAsString(inspectResp);
+        return serialized;
     }
 }

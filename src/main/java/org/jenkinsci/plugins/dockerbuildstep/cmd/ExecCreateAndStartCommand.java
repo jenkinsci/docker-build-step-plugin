@@ -1,7 +1,6 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
 import com.github.dockerjava.api.exception.DockerException;
-import com.github.dockerjava.api.command.ExecCreateCmdResponse;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -61,11 +60,11 @@ public class ExecCreateAndStartCommand extends DockerCommand {
             id = id.trim();
             
             try {
-                ExecCreateCmdResponse res = launcher.getChannel().call(new ExecCreateRemoteCallable(cfgData, descriptor, id, commandRes.split(" "), true));
-                console.logInfo(String.format("Exec command with ID '%s' created in container '%s' ", res.getId(), id));
-                console.logInfo(String.format("Executing command with ID '%s'", res.getId()));
+                String commandId = launcher.getChannel().call(new ExecCreateRemoteCallable(cfgData, descriptor, id, commandRes.split(" "), true));
+                console.logInfo(String.format("Exec command with ID '%s' created in container '%s' ", commandId, id));
+                console.logInfo(String.format("Executing command with ID '%s'", commandId));
                 
-                launcher.getChannel().call(new ExecStartRemoteCallable(console, cfgData, descriptor, res.getId()));
+                launcher.getChannel().call(new ExecStartRemoteCallable(console, cfgData, descriptor, commandId));
             } catch (Exception e) {
                 console.logError("failed to exec create and start command '" + commandRes + "' in containers " + ids);
                 e.printStackTrace();

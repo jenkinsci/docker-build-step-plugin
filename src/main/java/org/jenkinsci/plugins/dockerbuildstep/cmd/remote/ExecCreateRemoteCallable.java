@@ -18,7 +18,7 @@ import hudson.remoting.Callable;
  * 
  * @author David Csakvari
  */
-public class ExecCreateRemoteCallable implements Callable<ExecCreateCmdResponse, Exception>, Serializable {
+public class ExecCreateRemoteCallable implements Callable<String, Exception>, Serializable {
 
     private static final long serialVersionUID = 1536648869989705828L;
 
@@ -37,14 +37,17 @@ public class ExecCreateRemoteCallable implements Callable<ExecCreateCmdResponse,
         this.withAttachStdoutAndStderr = withAttachStdoutAndStderr;
     }
 
-    public ExecCreateCmdResponse call() throws Exception {
+    public String call() throws Exception {
         DockerClient client = DockerCommand.getClient(descriptor, cfgData.dockerUrlRes, cfgData.dockerVersionRes, cfgData.dockerCertPathRes, null);
 
+        final ExecCreateCmdResponse response;
         if (withAttachStdoutAndStderr) {
-            return client.execCreateCmd(id).withCmd(cmd).withAttachStderr(true).withAttachStdout(true).exec();
+            response = client.execCreateCmd(id).withCmd(cmd).withAttachStderr(true).withAttachStdout(true).exec();
         } else {
-            return client.execCreateCmd(id).withCmd(cmd).exec();
+            response = client.execCreateCmd(id).withCmd(cmd).exec();
         }
+        
+        return response.getId();
     }
 
 }
