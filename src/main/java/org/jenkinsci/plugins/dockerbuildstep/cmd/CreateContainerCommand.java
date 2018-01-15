@@ -2,7 +2,6 @@ package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
 import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.command.InspectContainerResponse;
-import com.github.dockerjava.api.model.*;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -156,18 +155,8 @@ public class CreateContainerCommand extends DockerCommand {
         final String containerNameRes = Resolver.buildVar(build, containerName);
         final String envVarsRawRes = Resolver.buildVar(build, envVars);
         final String[] envVarsRes = envVarsRawRes.isEmpty() ? null : envVarsRawRes.split("\\r?\\n");
-        final Links linksRes = LinkUtils.parseLinks(Resolver.buildVar(build, links));
+        final String linksRes = Resolver.buildVar(build, links);
         final String exposedPortsRes = Resolver.buildVar(build, exposedPorts);
-        final ExposedPort[] ports;
-        if (exposedPortsRes != null && !exposedPortsRes.isEmpty()) {
-            String[] exposedPortsSplitted = exposedPortsRes.split(",");
-            ports = new ExposedPort[exposedPortsSplitted.length];
-            for (int i = 0; i < ports.length; i++) {
-                ports[i] = ExposedPort.parse(exposedPortsSplitted[i]);
-            }
-        } else {
-            ports = null;
-        }
         final String cpuSharesRawRes = Resolver.buildVar(build, cpuShares);
         final Integer cpuSharesRes = cpuSharesRawRes == null || cpuSharesRawRes.isEmpty() ? null : Integer.parseInt(cpuSharesRawRes);
         final String memoryLimitRawRes = Resolver.buildVar(build, memoryLimit);
@@ -200,18 +189,18 @@ public class CreateContainerCommand extends DockerCommand {
             extraHostsRes = null;
         }
         
-        final PortBinding[] portBindingsRes;
+        final String portBindingsRes;
         if (portBindings != null && !portBindings.isEmpty()) {
             console.logInfo("set portBindings: " + portBindings);
-            portBindingsRes = PortBindingParser.parse(Resolver.buildVar(build, portBindings));
+            portBindingsRes = Resolver.buildVar(build, portBindings);
         } else {
             portBindingsRes = null;
         }
         
-        final Bind[] bindMountsRes;
+        final String bindMountsRes;
         if (bindMounts != null && !bindMounts.isEmpty()) {
             console.logInfo("set portBindings: " + bindMounts);
-            bindMountsRes = BindParser.parse(Resolver.buildVar(build, bindMounts));
+            bindMountsRes = Resolver.buildVar(build, bindMounts);
         } else {
             bindMountsRes = null;
         }
@@ -222,7 +211,7 @@ public class CreateContainerCommand extends DockerCommand {
             Config cfgData = getConfig(build);
             Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
             
-            InspectContainerResponse inspectResp = launcher.getChannel().call(new CreateContainerRemoteCallable(cfgData, descriptor, imageRes, commandRes, hostNameRes, containerNameRes, linksRes, envVarsRes, ports, cpuSharesRes, memoryLimitRes, dnsRes, extraHostsRes, portBindingsRes, bindMountsRes, alwaysRestart, publishAllPorts, privileged));
+            InspectContainerResponse inspectResp = launcher.getChannel().call(new CreateContainerRemoteCallable(cfgData, descriptor, imageRes, commandRes, hostNameRes, containerNameRes, linksRes, envVarsRes, exposedPortsRes, cpuSharesRes, memoryLimitRes, dnsRes, extraHostsRes, portBindingsRes, bindMountsRes, alwaysRestart, publishAllPorts, privileged));
             console.logInfo("created container id " + inspectResp.getId() + " (from image " + imageRes + ")");
             EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
             build.addAction(envAction);

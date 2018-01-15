@@ -4,16 +4,16 @@ import java.io.Serializable;
 
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
+import org.jenkinsci.plugins.dockerbuildstep.util.BindParser;
+import org.jenkinsci.plugins.dockerbuildstep.util.LinkUtils;
+import org.jenkinsci.plugins.dockerbuildstep.util.PortBindingParser;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
-import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
-import com.github.dockerjava.api.model.Links;
-import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.RestartPolicy;
 
 import hudson.model.Descriptor;
@@ -37,25 +37,24 @@ public class CreateContainerRemoteCallable implements Callable<InspectContainerR
     String[] commandRes;
     String hostNameRes;
     String containerNameRes;
-    Links linksRes;
+    String linksRes;
     String[] envVarsRes;
-    ExposedPort[] ports;
+    String exposedPortsRes;
     Integer cpuSharesRes;
     Long memoryLimitRes;
     String[] dnsRes;
     String[] extraHostsRes;
-    PortBinding[] portBindingsRes;
-    Bind[] bindMountsRes;
+    String portBindingsRes;
+    String bindMountsRes;
     boolean alwaysRestart;
     boolean publishAllPorts;
     boolean privileged;
     
     public CreateContainerRemoteCallable(Config cfgData, Descriptor<?> descriptor, String imageRes, String[] commandRes,
-            String hostNameRes, String containerNameRes, Links linksRes, String[] envVarsRes, ExposedPort[] ports,
+            String hostNameRes, String containerNameRes, String linksRes, String[] envVarsRes, String exposedPortsRes,
             Integer cpuSharesRes, Long memoryLimitRes, String[] dnsRes, String[] extraHostsRes,
-            PortBinding[] portBindingsRes, Bind[] bindMountsRes, boolean alwaysRestart, boolean publishAllPorts,
+            String portBindingsRes, String bindMountsRes, boolean alwaysRestart, boolean publishAllPorts,
             boolean privileged) {
-        super();
         this.cfgData = cfgData;
         this.descriptor = descriptor;
         this.imageRes = imageRes;
@@ -64,7 +63,7 @@ public class CreateContainerRemoteCallable implements Callable<InspectContainerR
         this.containerNameRes = containerNameRes;
         this.linksRes = linksRes;
         this.envVarsRes = envVarsRes;
-        this.ports = ports;
+        this.exposedPortsRes = exposedPortsRes;
         this.cpuSharesRes = cpuSharesRes;
         this.memoryLimitRes = memoryLimitRes;
         this.dnsRes = dnsRes;
@@ -86,12 +85,19 @@ public class CreateContainerRemoteCallable implements Callable<InspectContainerR
         cfgCmd.withHostName(hostNameRes);
         cfgCmd.withName(containerNameRes);
         HostConfig hc = new HostConfig();
-        cfgCmd.withLinks(linksRes.getLinks());
+        cfgCmd.withLinks(LinkUtils.parseLinks(linksRes).getLinks());
         if (envVarsRes != null) {
             cfgCmd.withEnv(envVarsRes);
         }
-        if (ports != null) {
-            cfgCmd.withExposedPorts(ports);
+        if (exposedPortsRes != null && !exposedPortsRes.isEmpty()) {
+        	final ExposedPort[] ports;
+            String[] exposedPortsSplitted = exposedPortsRes.split(",");
+            ports = new ExposedPort[exposedPortsSplitted.length];
+            for (int i = 0; i < ports.length; i++) {
+                ports[i] = ExposedPort.parse(exposedPortsSplitted[i]);
+            }
+
+        	cfgCmd.withExposedPorts(ports);
         }
         if (cpuSharesRes != null) {
             cfgCmd.withCpuShares(cpuSharesRes);
@@ -106,10 +112,10 @@ public class CreateContainerRemoteCallable implements Callable<InspectContainerR
             cfgCmd.withExtraHosts(extraHostsRes);
         }
         if (portBindingsRes != null) {
-            cfgCmd.withPortBindings(portBindingsRes);
+            cfgCmd.withPortBindings(PortBindingParser.parse(portBindingsRes));
         }
         if (bindMountsRes != null) {
-            cfgCmd.withBinds(bindMountsRes);
+            cfgCmd.withBinds(BindParser.parse(bindMountsRes));
         }
         if (alwaysRestart) {
             cfgCmd.withRestartPolicy(RestartPolicy.alwaysRestart());
