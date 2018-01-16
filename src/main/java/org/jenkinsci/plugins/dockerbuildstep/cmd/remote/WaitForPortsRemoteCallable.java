@@ -12,6 +12,7 @@ import org.jenkinsci.plugins.dockerbuildstep.util.PortUtils;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 
+import hudson.model.BuildListener;
 import hudson.model.Descriptor;
 import hudson.remoting.Callable;
 
@@ -26,21 +27,22 @@ public class WaitForPortsRemoteCallable implements Callable<Void, Exception>, Se
 
     private static final long serialVersionUID = 8479489609579635741L;
 
-    ConsoleLogger console;
+    BuildListener listener;
     
     Config cfgData;
     Descriptor<?> descriptor;
     
     String waitForPorts;
     
-    public WaitForPortsRemoteCallable(ConsoleLogger console, Config cfgData, Descriptor<?> descriptor, String waitForPorts) {
-        this.console = console;
+    public WaitForPortsRemoteCallable(BuildListener listener, Config cfgData, Descriptor<?> descriptor, String waitForPorts) {
+        this.listener = listener;
     	this.cfgData = cfgData;
         this.descriptor = descriptor;
         this.waitForPorts = waitForPorts;
     }
     
     public Void call() throws Exception {
+        final ConsoleLogger console = new ConsoleLogger(listener);
         DockerClient client = DockerCommand.getClient(descriptor, cfgData.dockerUrlRes, cfgData.dockerVersionRes, cfgData.dockerCertPathRes, null);
         
         Map<String, List<Integer>> containers = PortUtils.parsePorts(waitForPorts);

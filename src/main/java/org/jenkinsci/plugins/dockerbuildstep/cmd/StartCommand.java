@@ -100,9 +100,9 @@ public class StartCommand extends DockerCommand {
     }
     
     private void waitForPorts(Launcher launcher, Config cfgData, Descriptor<?> descriptor, String waitForPorts, ConsoleLogger console) throws DockerException {
-    	try {
-	    	launcher.getChannel().call(new WaitForPortsRemoteCallable(console, cfgData, descriptor, waitForPorts));
-    	} catch (Exception e) {
+        try {
+            launcher.getChannel().call(new WaitForPortsRemoteCallable(console.getListener(), cfgData, descriptor, waitForPorts));
+        } catch (Exception e) {
             console.logError("failed to start command (wait for ports) ");
             e.printStackTrace();
             throw new IllegalArgumentException(e);

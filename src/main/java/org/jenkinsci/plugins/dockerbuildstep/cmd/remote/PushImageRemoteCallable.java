@@ -12,6 +12,7 @@ import com.github.dockerjava.api.model.AuthConfig;
 import com.github.dockerjava.api.model.PushResponseItem;
 import com.github.dockerjava.core.command.PushImageResultCallback;
 
+import hudson.model.BuildListener;
 import hudson.model.Descriptor;
 import hudson.remoting.Callable;
 
@@ -26,7 +27,7 @@ public class PushImageRemoteCallable implements Callable<Void, Exception>, Seria
 
     private static final long serialVersionUID = 1536648869989705828L;
 
-    ConsoleLogger console;
+    BuildListener listener;
     
     Config cfgData;
     Descriptor<?> descriptor;
@@ -35,8 +36,8 @@ public class PushImageRemoteCallable implements Callable<Void, Exception>, Seria
     String imageRes;
     String tagRes;
 
-    public PushImageRemoteCallable(ConsoleLogger console, Config cfgData, Descriptor<?> descriptor, AuthConfig authConfig, String imageRes, String tagRes) {
-        this.console = console;
+    public PushImageRemoteCallable(BuildListener listener, Config cfgData, Descriptor<?> descriptor, AuthConfig authConfig, String imageRes, String tagRes) {
+        this.listener = listener;
     	this.cfgData = cfgData;
         this.descriptor = descriptor;
         this.authConfig = authConfig;
@@ -45,6 +46,7 @@ public class PushImageRemoteCallable implements Callable<Void, Exception>, Seria
     }
 
     public Void call() throws Exception {
+        final ConsoleLogger console = new ConsoleLogger(listener);
         DockerClient client = DockerCommand.getClient(descriptor, cfgData.dockerUrlRes, cfgData.dockerVersionRes, cfgData.dockerCertPathRes, authConfig);
 
         PushImageCmd pushImageCmd = client.pushImageCmd(imageRes).withTag(tagRes);

@@ -77,7 +77,7 @@ public class PullImageCommand extends DockerCommand {
             Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
             AuthConfig authConfig = getAuthConfig(build.getParent());
             
-            launcher.getChannel().call(new PullImageRemoteCallable(console, cfgData, descriptor, authConfig, fromImageRes));
+            launcher.getChannel().call(new PullImageRemoteCallable(console.getListener(), cfgData, descriptor, authConfig, fromImageRes));
             console.logInfo("Done");
         } catch (Exception e) {
             console.logError("failed to pull image " + fromImageRes);

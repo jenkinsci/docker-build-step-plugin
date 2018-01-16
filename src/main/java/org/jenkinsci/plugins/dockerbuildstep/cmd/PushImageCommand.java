@@ -73,7 +73,7 @@ public class PushImageCommand extends DockerCommand {
             Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
             AuthConfig authConfig = getAuthConfig(build.getParent());
             
-            launcher.getChannel().call(new PushImageRemoteCallable(console, cfgData, descriptor, authConfig, imageRes, tagRes));
+            launcher.getChannel().call(new PushImageRemoteCallable(console.getListener(), cfgData, descriptor, authConfig, imageRes, tagRes));
             console.logInfo("Done pushing image " + imageRes);
         } catch (Exception e) {
             console.logError("failed to push image " + imageRes);

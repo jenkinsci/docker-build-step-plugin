@@ -50,7 +50,7 @@ public class ExecStartCommand extends DockerCommand {
                 Config cfgData = getConfig(build);
                 Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
                 
-                launcher.getChannel().call(new ExecStartRemoteCallable(console, cfgData, descriptor, cmdId));
+                launcher.getChannel().call(new ExecStartRemoteCallable(console.getListener(), cfgData, descriptor, cmdId));
             } catch (Exception e) {
                 console.logError("failed to execute cmd id " + cmdId);
                 e.printStackTrace();

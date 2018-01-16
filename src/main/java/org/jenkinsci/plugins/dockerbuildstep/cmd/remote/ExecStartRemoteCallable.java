@@ -10,6 +10,7 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.core.command.ExecStartResultCallback;
 
+import hudson.model.BuildListener;
 import hudson.model.Descriptor;
 import hudson.remoting.Callable;
 
@@ -24,21 +25,22 @@ public class ExecStartRemoteCallable implements Callable<Void, Exception>, Seria
 
     private static final long serialVersionUID = 1536648869989705828L;
 
-    ConsoleLogger console;
+    BuildListener listener;
     
     Config cfgData;
     Descriptor<?> descriptor;
 
     String cmdId;
     
-    public ExecStartRemoteCallable(ConsoleLogger console, Config cfgData, Descriptor<?> descriptor, String cmdId) {
-        this.console = console;
+    public ExecStartRemoteCallable(BuildListener listener, Config cfgData, Descriptor<?> descriptor, String cmdId) {
+        this.listener = listener;
     	this.cfgData = cfgData;
         this.descriptor = descriptor;
         this.cmdId = cmdId;
     }
 
     public Void call() throws Exception {
+        final ConsoleLogger console = new ConsoleLogger(listener);
         DockerClient client = DockerCommand.getClient(descriptor, cfgData.dockerUrlRes, cfgData.dockerVersionRes, cfgData.dockerCertPathRes, null);
 
         ExecStartResultCallback callback = new ExecStartResultCallback() {

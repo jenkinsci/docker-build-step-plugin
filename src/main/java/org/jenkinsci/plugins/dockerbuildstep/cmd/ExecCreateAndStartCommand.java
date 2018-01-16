@@ -64,7 +64,7 @@ public class ExecCreateAndStartCommand extends DockerCommand {
                 console.logInfo(String.format("Exec command with ID '%s' created in container '%s' ", commandId, id));
                 console.logInfo(String.format("Executing command with ID '%s'", commandId));
                 
-                launcher.getChannel().call(new ExecStartRemoteCallable(console, cfgData, descriptor, commandId));
+                launcher.getChannel().call(new ExecStartRemoteCallable(console.getListener(), cfgData, descriptor, commandId));
             } catch (Exception e) {
                 console.logError("failed to exec create and start command '" + commandRes + "' in containers " + ids);
                 e.printStackTrace();
