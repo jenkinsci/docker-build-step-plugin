@@ -37,7 +37,7 @@ public class StartContainerRemoteCallable implements Callable<String, Exception>
     public String call() throws Exception {
         DockerClient client = DockerCommand.getClient(descriptor, cfgData.dockerUrlRes, cfgData.dockerVersionRes, cfgData.dockerCertPathRes, null);
 
-        client.startContainerCmd(id);
+        client.startContainerCmd(id).exec();
         InspectContainerResponse inspectResp = client.inspectContainerCmd(id).exec();
 
         ObjectMapper mapper = new ObjectMapper();
