@@ -17,7 +17,7 @@
             <f:checkbox />
         </f:entry>
 
-        <f:entry field="buildArgs" title="Build arguments, e.g. http_proxy=http://1.2.3.4:4321">
+        <f:entry field="buildArgs" title="List of build arguments, separated by comma, semi-colon or pipe (e.g. http_proxy=http://1.2.3.4:4321;foo=bar)">
             <f:textbox default="" />
         </f:entry>
 
