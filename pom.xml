@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>1.554.1</version>
+        <version>1.579</version>
     </parent>
 
     <groupId>org.jenkins-ci.plugins</groupId>
@@ -61,6 +61,11 @@
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>docker-commons</artifactId>
             <version>${version.jenkins.docker-commons}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>matrix-project</artifactId>
+            <version>${version.matrix-project}</version>
         </dependency>
     </dependencies>
 
