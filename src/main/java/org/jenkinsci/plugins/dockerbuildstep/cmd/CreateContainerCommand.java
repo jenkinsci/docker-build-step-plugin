@@ -23,7 +23,8 @@ import org.kohsuke.stapler.QueryParameter;
  * This command creates new container from specified image.
  *
  * @author vjuranek
- * @see @Link:http//docs.docker.com/reference/api/docker_remote_api_v1.13/#create-a-container
+ * @see <a href="https://docs.docker.com/engine/api/v1.37/#operation/ContainerCreate">https://docs.docker.com/engine/api/v1.37/#operation/ContainerCreate</a>
+ * @see <a href="https://docs.docker.com/engine/api/v1.18/#21-containers">https://docs.docker.com/engine/api/v1.18/#21-containers</a>
  */
 public class CreateContainerCommand extends DockerCommand {
 
@@ -148,7 +149,7 @@ public class CreateContainerCommand extends DockerCommand {
         }
 
         // Parse and log parameters
-        
+
         final String imageRes = Resolver.buildVar(build, image);
         final String commandRawRes = Resolver.buildVar(build, command);
         final String[] commandRes = commandRawRes.isEmpty() ? null : commandRawRes.split(" ");
@@ -173,7 +174,7 @@ public class CreateContainerCommand extends DockerCommand {
         } else {
             memoryLimitRes = null;
         }
-        
+
         final String[] dnsRes;
         if (dns != null && !dns.isEmpty()) {
             console.logInfo("set dns: " + dns);
@@ -181,7 +182,7 @@ public class CreateContainerCommand extends DockerCommand {
         } else {
             dnsRes = null;
         }
-        
+
         final String[] extraHostsRes;
         if (extraHosts != null && !extraHosts.isEmpty()) {
             console.logInfo("set extraHosts: " + extraHosts);
@@ -189,7 +190,7 @@ public class CreateContainerCommand extends DockerCommand {
         } else {
             extraHostsRes = null;
         }
-        
+
         final String portBindingsRes;
         if (portBindings != null && !portBindings.isEmpty()) {
             console.logInfo("set portBindings: " + portBindings);
@@ -197,25 +198,25 @@ public class CreateContainerCommand extends DockerCommand {
         } else {
             portBindingsRes = null;
         }
-        
+
         final String bindMountsRes;
         if (bindMounts != null && !bindMounts.isEmpty()) {
-            console.logInfo("set portBindings: " + bindMounts);
+            console.logInfo("set Mounts: " + bindMounts);
             bindMountsRes = Resolver.buildVar(build, bindMounts);
         } else {
             bindMountsRes = null;
         }
-        
+
         // Call Docker
-        
+
         try {
             Config cfgData = getConfig(build);
             Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
-            
+
             String inspectRespSerialized = launcher.getChannel().call(new CreateContainerRemoteCallable(cfgData, descriptor, imageRes, commandRes, hostNameRes, containerNameRes, linksRes, envVarsRes, exposedPortsRes, cpuSharesRes, memoryLimitRes, dnsRes, extraHostsRes, portBindingsRes, bindMountsRes, alwaysRestart, publishAllPorts, privileged));
             ObjectMapper mapper = new ObjectMapper();
             InspectContainerResponse inspectResp = mapper.readValue(inspectRespSerialized, InspectContainerResponse.class);
-            
+
             console.logInfo("created container id " + inspectResp.getId() + " (from image " + imageRes + ")");
             EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
             build.addAction(envAction);
