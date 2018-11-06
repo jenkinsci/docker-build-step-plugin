@@ -2,15 +2,67 @@
 
 This plugin allows adding various Docker commands into your Jenkins Freestyle job as a build step.
 
+# Plugin Information
+
+If you would like to use Docker for dynamic node provisioning, you should check the [Docker plugin](https://wiki.jenkins-ci.org/display/JENKINS/Docker+Plugin).
+
+## Commands
+
+Plugin currently support following commands:
+
+- commit changes in specified container
+- create new container from image
+- create image from Dockerfile
+- create exec command
+- kill container(s)
+- pull image from a repository
+- push image to a repository
+- remove container(s)
+- remove all containers
+- restart container(s)
+- start container(s)
+- stop container(s)
+- stop all containers
+- start/stop all containers created from specified image
+- start exec command
+
+## Build Variables
+
+Some commands also export build variables, so that you can easily use them in subsequent build steps.
+
+Variables exported by create and start commands:
+
+`DOCKER_CONTAINER_IDS` - IDs of created/started containers
+
+`DOCKER_IP_$HOSTNAME` - IP of running container with hostname `$HOSTNAME`
+
+When port binding is set up (in start command), the following environment variables are exported:
+
+`DOCKER_HOST_BIND_PORTS` - contains comma separated list of ports to which are bound docker container ports
+
+`DOCKER_HOST_PORT_$SCHEMA_$PORT` - which docker container port is bound to this port (e.g. DOCKER_HOST_PORT_TCP_80 would contain value 8080 in case that container port 8080 is bound to port 80 on host)
+
+`DOCKER_HOST_SOCKET_$SCHEMA_$PORT` - host IP:PORT to which conatiner $PORT using $SCHEMA is bound. E.g. with following port binding 127.0.0.1:80:8080, container TCP port is 8080 is bound to host port 80 on loopback and DOCKER_HOST_SOCKET_TCP_8080 will contain 127.0.0.1:80.
+
+## Known limitations
+
+Commands run without any issue only on master, on remote slaves some commands may fail execution. See [JENKINS-24071](https://issues.jenkins-ci.org/browse/JENKINS-24071) for details.
+
 # Setup
+
+## Build Nodes
+
+The Docker service must be installed and running on nodes where you run the build.
 
 ## Set Docker URL
 
+In Jenkins global configuration, you need to specify Docker REST API URL.
+
 Jenkins -> Manage Jenkins -> Configure System -> Docker Builder
 
-Docker URL Field
-* Configures Docker server REST API URL
-* For Linux hosts, set the local socket `unix:///var/run/docker.sock`
+* Configure Docker server REST API URL
+  * For Linux nodes, set the local socket `unix:///var/run/docker.sock`
+  * For other nodes, you may need to set something like `http://127.0.0.1:2375`
 * Test the connection.
 
 # Usage
@@ -138,11 +190,17 @@ There is a range of Docker Command options, roughly correlating with the Docker 
 
 <!-- ## Docker Build and Publish -->
 
+# Reference
+
+* Jenkins Plugin ID: `docker-build-step`
+* [`docker-build-step` in Jenkins Plugins](https://plugins.jenkins.io/docker-build-step)
+* [`Docker build step plugin` in Jenkins Plugin Wiki](https://wiki.jenkins.io/display/JENKINS/Docker+build+step+plugin)
+* [`docker-build-step-plugin` GitHub project](https://github.com/jenkinsci/docker-build-step-plugin)
+* [Docker website](https://www.docker.com/)
+
 # Credits
 
 Uses components from [Docker Commons Plugin](https://wiki.jenkins.io/display/JENKINS/Docker+Commons+Plugin) which provides APIs for other Docker-related plugins
-
-Some documentation and materials adapted from [Website, Chinese, NSFW?](http://www.bkjia.com/Linux/1037945.html)
 
 # License
 
