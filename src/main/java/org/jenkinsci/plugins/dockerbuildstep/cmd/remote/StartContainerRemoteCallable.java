@@ -1,17 +1,15 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd.remote;
 
-import java.io.Serializable;
-
-import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
-import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.InspectContainerResponse;
-
 import hudson.model.Descriptor;
 import hudson.remoting.Callable;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
+import org.jenkinsci.remoting.RoleChecker;
 
+import java.io.Serializable;
 
 /**
  * A Callable wrapping the start container command.
@@ -44,5 +42,9 @@ public class StartContainerRemoteCallable implements Callable<String, Exception>
         String serialized = mapper.writeValueAsString(inspectResp);
         return serialized;
     }
-    
+
+    @Override
+    public void checkRoles(RoleChecker checker) throws SecurityException {
+
+    }
 }

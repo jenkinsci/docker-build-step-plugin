@@ -221,7 +221,7 @@ public class CreateContainerCommand extends DockerCommand {
             EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
             build.addAction(envAction);
         } catch (Exception e) {
-            console.logError("failed to stop all containers");
+            console.logError("failed to create containers");
             e.printStackTrace();
             throw new IllegalArgumentException(e);
         }

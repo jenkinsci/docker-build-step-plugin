@@ -1,13 +1,5 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd.remote;
 
-import java.io.Serializable;
-
-import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
-import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
-import org.jenkinsci.plugins.dockerbuildstep.util.BindParser;
-import org.jenkinsci.plugins.dockerbuildstep.util.LinkUtils;
-import org.jenkinsci.plugins.dockerbuildstep.util.PortBindingParser;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
@@ -16,10 +8,16 @@ import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.RestartPolicy;
-
 import hudson.model.Descriptor;
 import hudson.remoting.Callable;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
+import org.jenkinsci.plugins.dockerbuildstep.util.BindParser;
+import org.jenkinsci.plugins.dockerbuildstep.util.LinkUtils;
+import org.jenkinsci.plugins.dockerbuildstep.util.PortBindingParser;
+import org.jenkinsci.remoting.RoleChecker;
 
+import java.io.Serializable;
 
 /**
  * A Callable wrapping the commands necessary to create a container.
@@ -86,7 +84,7 @@ public class CreateContainerRemoteCallable implements Callable<String, Exception
         cfgCmd.withHostName(hostNameRes);
         cfgCmd.withName(containerNameRes);
         HostConfig hc = new HostConfig();
-        cfgCmd.withLinks(LinkUtils.parseLinks(linksRes).getLinks());
+        hc.withLinks(LinkUtils.parseLinks(linksRes).getLinks());
         if (envVarsRes != null) {
             cfgCmd.withEnv(envVarsRes);
         }
@@ -101,32 +99,39 @@ public class CreateContainerRemoteCallable implements Callable<String, Exception
         	cfgCmd.withExposedPorts(ports);
         }
         if (cpuSharesRes != null) {
-            cfgCmd.withCpuShares(cpuSharesRes);
+            hc.withCpuShares(cpuSharesRes);
         }
         if (memoryLimitRes != null) {
-            cfgCmd.withMemory(memoryLimitRes);
+            hc.withMemory(memoryLimitRes);
         }
         if (dnsRes != null) {
-            cfgCmd.withDns(dnsRes);
+            hc.withDns(dnsRes);
         }
         if (extraHostsRes != null) {
-            cfgCmd.withExtraHosts(extraHostsRes);
+            hc.withExtraHosts(extraHostsRes);
         }
         if (portBindingsRes != null) {
-            cfgCmd.withPortBindings(PortBindingParser.parse(portBindingsRes));
+            hc.withPortBindings(PortBindingParser.parse(portBindingsRes));
         }
         if (bindMountsRes != null) {
-            cfgCmd.withBinds(BindParser.parse(bindMountsRes));
+            hc.withBinds(BindParser.parse(bindMountsRes));
         }
         if (alwaysRestart) {
-            cfgCmd.withRestartPolicy(RestartPolicy.alwaysRestart());
+            hc.withRestartPolicy(RestartPolicy.alwaysRestart());
         }
         
-        CreateContainerResponse resp = cfgCmd.withPublishAllPorts(publishAllPorts).withPrivileged(privileged).exec();
+        hc.withPublishAllPorts(publishAllPorts).withPrivileged(privileged);
+        cfgCmd.withHostConfig(hc);
+        CreateContainerResponse resp = cfgCmd.exec();
         InspectContainerResponse inspectResp = client.inspectContainerCmd(resp.getId()).exec();
-        
+
         ObjectMapper mapper = new ObjectMapper();
         String serialized = mapper.writeValueAsString(inspectResp);
         return serialized;
+    }
+
+    @Override
+    public void checkRoles(RoleChecker checker) throws SecurityException {
+
     }
 }

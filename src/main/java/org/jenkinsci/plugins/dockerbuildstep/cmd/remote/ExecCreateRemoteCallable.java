@@ -1,16 +1,14 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd.remote;
 
-import java.io.Serializable;
-
-import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
-import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
-
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.ExecCreateCmdResponse;
-
 import hudson.model.Descriptor;
 import hudson.remoting.Callable;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
+import org.jenkinsci.remoting.RoleChecker;
 
+import java.io.Serializable;
 
 /**
  * A Callable wrapping the exec create command.
@@ -50,4 +48,8 @@ public class ExecCreateRemoteCallable implements Callable<String, Exception>, Se
         return response.getId();
     }
 
+    @Override
+    public void checkRoles(RoleChecker checker) throws SecurityException {
+
+    }
 }

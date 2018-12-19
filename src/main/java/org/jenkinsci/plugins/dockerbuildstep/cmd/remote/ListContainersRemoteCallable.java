@@ -1,17 +1,15 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd.remote;
 
-import java.io.Serializable;
-import java.util.List;
-
-import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
-import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
-
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Container;
-
 import hudson.model.Descriptor;
 import hudson.remoting.Callable;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
+import org.jenkinsci.remoting.RoleChecker;
 
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * A Callable wrapping the list containers command.
@@ -40,5 +38,9 @@ public class ListContainersRemoteCallable implements Callable<List<Container>, E
         List<Container> containers = client.listContainersCmd().withShowAll(showAll).exec();
         return containers;
     }
-    
+
+    @Override
+    public void checkRoles(RoleChecker checker) throws SecurityException {
+
+    }
 }

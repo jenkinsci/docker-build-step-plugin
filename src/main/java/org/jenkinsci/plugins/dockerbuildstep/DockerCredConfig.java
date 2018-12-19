@@ -1,33 +1,28 @@
 package org.jenkinsci.plugins.dockerbuildstep;
 
-import com.google.common.base.Strings;
-
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 import com.github.dockerjava.api.model.AuthConfig;
-
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import hudson.Extension;
+import hudson.model.AbstractDescribableImpl;
+import hudson.model.Descriptor;
+import hudson.model.Item;
+import hudson.security.ACL;
+import hudson.util.ListBoxModel;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.export.ExportedBean;
 
-import jersey.repackaged.com.google.common.base.Preconditions;
-import hudson.model.Descriptor;
-import hudson.security.ACL;
-import hudson.model.Item;
-import hudson.util.ListBoxModel;
-import hudson.Extension;
-
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
-
-import javax.annotation.Nullable;
-
-import hudson.model.AbstractDescribableImpl;
 
 /**
  * Credential configuration which allows docker commands to authenticate with registries.

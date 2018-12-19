@@ -1,14 +1,13 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd.remote;
 
-import java.io.Serializable;
-
-import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
-import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
-
 import com.github.dockerjava.api.DockerClient;
-
 import hudson.model.Descriptor;
 import hudson.remoting.Callable;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
+import org.jenkinsci.remoting.RoleChecker;
+
+import java.io.Serializable;
 
 /**
  * A Callable wrapping the tag image command.
@@ -44,5 +43,9 @@ public class TagImageRemoteCallable implements Callable<Void, Exception>, Serial
         
         return null;
     }
-    
+
+    @Override
+    public void checkRoles(RoleChecker checker) throws SecurityException {
+
+    }
 }

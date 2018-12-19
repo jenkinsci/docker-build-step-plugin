@@ -1,19 +1,17 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd.remote;
 
+import com.github.dockerjava.api.DockerClient;
+import hudson.model.Descriptor;
+import hudson.remoting.Callable;
+import org.apache.commons.io.IOUtils;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
+import org.jenkinsci.remoting.RoleChecker;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-
-import org.apache.commons.io.IOUtils;
-import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
-import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
-
-import com.github.dockerjava.api.DockerClient;
-
-import hudson.model.Descriptor;
-import hudson.remoting.Callable;
-
 
 /**
  * A Callable wrapping the save image command.
@@ -62,5 +60,8 @@ public class SaveImageRemoteCallable implements Callable<Void, Exception>, Seria
         
         return null;
     }
-    
+
+    @Override
+    public void checkRoles(RoleChecker checker) throws SecurityException {
+    }
 }

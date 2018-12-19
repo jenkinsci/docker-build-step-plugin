@@ -1,21 +1,20 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd.remote;
 
-import java.io.File;
-import java.io.Serializable;
-import java.util.Map;
-
-import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
-import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
-
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.BuildImageCmd;
 import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.model.BuildResponseItem;
 import com.github.dockerjava.core.command.BuildImageResultCallback;
-
 import hudson.FilePath;
 import hudson.model.Descriptor;
 import hudson.remoting.Callable;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
+import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
+import org.jenkinsci.remoting.RoleChecker;
+
+import java.io.File;
+import java.io.Serializable;
+import java.util.Map;
 
 /**
  * A Callable wrapping the commands necessary to create an image.
@@ -97,5 +96,10 @@ public class CreateImageRemoteCallable implements Callable<String, Exception>, S
         } catch (Exception e) {
             throw new DockerException("Could not check file", 0, e);
         }
+    }
+
+    @Override
+    public void checkRoles(RoleChecker checker) throws SecurityException {
+
     }
 }

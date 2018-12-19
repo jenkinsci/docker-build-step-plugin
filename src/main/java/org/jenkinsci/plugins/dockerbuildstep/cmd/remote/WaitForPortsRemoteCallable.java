@@ -1,21 +1,19 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd.remote;
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
-
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.InspectContainerResponse;
+import hudson.model.BuildListener;
+import hudson.model.Descriptor;
+import hudson.remoting.Callable;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.PortUtils;
+import org.jenkinsci.remoting.RoleChecker;
 
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.InspectContainerResponse;
-
-import hudson.model.BuildListener;
-import hudson.model.Descriptor;
-import hudson.remoting.Callable;
-
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A Callable wrapping the inspect container command.
@@ -65,5 +63,9 @@ public class WaitForPortsRemoteCallable implements Callable<Void, Exception>, Se
     	
     	return null;
     }
-    
+
+    @Override
+    public void checkRoles(RoleChecker checker) throws SecurityException {
+
+    }
 }
