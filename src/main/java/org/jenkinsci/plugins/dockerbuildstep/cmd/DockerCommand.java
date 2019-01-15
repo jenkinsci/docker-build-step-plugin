@@ -1,28 +1,5 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
-import hudson.AbortException;
-import hudson.DescriptorExtensionList;
-import hudson.ExtensionPoint;
-import hudson.Launcher;
-import hudson.model.Describable;
-import hudson.model.AbstractBuild;
-import hudson.model.Descriptor;
-import hudson.model.Job;
-
-import java.io.IOException;
-
-import jenkins.model.Jenkins;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.Charsets;
-import org.jenkinsci.plugins.docker.commons.credentials.DockerRegistryToken;
-import org.jenkinsci.plugins.docker.commons.credentials.DockerRegistryEndpoint;
-import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
-import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
-import org.jenkinsci.plugins.dockerbuildstep.DockerCredConfig;
-import org.jenkinsci.plugins.dockerbuildstep.action.DockerContainerConsoleAction;
-import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
-
 import com.cloudbees.plugins.credentials.CredentialsMatcher;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
@@ -30,6 +7,26 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.model.AuthConfig;
 import com.google.common.base.Strings;
+import hudson.AbortException;
+import hudson.DescriptorExtensionList;
+import hudson.ExtensionPoint;
+import hudson.Launcher;
+import hudson.model.AbstractBuild;
+import hudson.model.Describable;
+import hudson.model.Descriptor;
+import hudson.model.Job;
+import jenkins.model.Jenkins;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.Charsets;
+import org.jenkinsci.plugins.docker.commons.credentials.DockerRegistryEndpoint;
+import org.jenkinsci.plugins.docker.commons.credentials.DockerRegistryToken;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
+import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
+import org.jenkinsci.plugins.dockerbuildstep.DockerCredConfig;
+import org.jenkinsci.plugins.dockerbuildstep.action.DockerContainerConsoleAction;
+import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
+
+import java.io.IOException;
 
 /**
  * Parent class of all Docker commands.
@@ -84,7 +81,7 @@ public abstract class DockerCommand implements Describable<DockerCommand>, Exten
         return authConfig;
     }
 
-    public static CredentialsMatcher CREDENTIALS_MATCHER = CredentialsMatchers.anyOf(CredentialsMatchers
+    public static final CredentialsMatcher CREDENTIALS_MATCHER = CredentialsMatchers.anyOf(CredentialsMatchers
             .instanceOf(StandardUsernamePasswordCredentials.class));
 
     public abstract void execute(Launcher launcher, @SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)

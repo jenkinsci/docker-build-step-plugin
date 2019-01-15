@@ -1,21 +1,20 @@
 package org.jenkinsci.plugins.dockerbuildstep.util;
 
+import com.github.dockerjava.api.exception.DockerException;
+import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import net.sf.json.JSONObject;
-
-import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
-
-import com.github.dockerjava.api.exception.DockerException;
 
 /**
  * Util class to for docker commands.
@@ -42,7 +41,7 @@ public class CommandUtils {
 
     public static void logCommandResult(InputStream inputStream,
             ConsoleLogger console, String errMessage) {
-        BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
+        BufferedReader in = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         String line = null;
         try {
           while((line = in.readLine()) != null) {
@@ -62,7 +61,7 @@ public class CommandUtils {
      */
     public static void logCommandResultStream(InputStream inputStream,
             ConsoleLogger console, String errMessage) {
-        BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
+        BufferedReader in = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         String line = null;
         try {
           while((line = in.readLine()) != null) {

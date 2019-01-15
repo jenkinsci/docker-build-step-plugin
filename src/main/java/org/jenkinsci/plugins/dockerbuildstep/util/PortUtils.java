@@ -46,20 +46,19 @@ public class PortUtils {
         return false;
     }
 
-    public static Map<String, List<Integer>> parsePorts(String waitPorts) throws IllegalArgumentException,
-            NumberFormatException {
+    public static Map<String, List<Integer>> parsePorts(String waitPorts) throws IllegalArgumentException {
         Map<String, List<Integer>> containers = new HashMap<String, List<Integer>>();
         String[] containerPorts = waitPorts.split(System.getProperty("line.separator"));
         for (String container : containerPorts) {
             String[] idPorts = container.split(" ", 2);
             if (idPorts.length < 2)
-                throw new IllegalArgumentException("Cannot parse " + idPorts + " as '[conainerId] [port1],[port2],...'");
+                throw new IllegalArgumentException("Cannot parse " + container + " as '[conainerId] [port1],[port2],...'");
             String containerId = idPorts[0].trim();
             String portsStr = idPorts[1].trim();
 
             List<Integer> ports = new ArrayList<Integer>();
             for (String port : portsStr.split(",")) {
-                ports.add(new Integer(port));
+                ports.add(Integer.valueOf(port));
             }
             containers.put(containerId, ports);
         }

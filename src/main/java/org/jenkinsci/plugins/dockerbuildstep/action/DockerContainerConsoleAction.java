@@ -14,7 +14,6 @@ import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.jelly.XMLOutput;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
-import org.jenkinsci.plugins.dockerbuildstep.log.container.DockerLogStreamReader;
 
 import java.io.*;
 
@@ -25,7 +24,7 @@ import java.io.*;
 public class DockerContainerConsoleAction extends TaskAction implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private final AbstractBuild<?, ?> build;
+    private final transient AbstractBuild<?, ?> build;
 
     private final String containerId;
 
@@ -148,17 +147,13 @@ public class DockerContainerConsoleAction extends TaskAction implements Serializ
 
         @Override
         protected void perform(final TaskListener listener) throws Exception {
-            DockerLogStreamReader reader = null;
-            OutputStreamWriter writer = null;
-            try {
-                writer = new OutputStreamWriter(listener.getLogger(), Charsets.UTF_8);
-                final OutputStreamWriter finalWriter = writer;
+            try (OutputStreamWriter writer = new OutputStreamWriter(listener.getLogger(), Charsets.UTF_8)) {
                 AttachContainerResultCallback callback = new AttachContainerResultCallback() {
                     @Override
                     public void onNext(Frame item) {
                         try {
-                            finalWriter.append(item.toString());
-                            finalWriter.flush();
+                            writer.append(item.toString());
+                            writer.flush();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -168,24 +163,21 @@ public class DockerContainerConsoleAction extends TaskAction implements Serializ
                     @Override
                     public void onError(Throwable throwable) {
                         try {
-                            finalWriter.append(throwable.getMessage());
-                            finalWriter.flush();
+                            writer.append(throwable.getMessage());
+                            writer.flush();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                         super.onError(throwable);
                     }
                 };
-                DockerClient client = ((DockerBuilder.DescriptorImpl) Jenkins.getInstance().getDescriptor(
-                        DockerBuilder.class)).getDockerClient(build, null);
-                client.attachContainerCmd(containerId).withFollowStream(true).withStdOut(true).withStdErr(true).exec(callback).awaitCompletion();
+                DockerBuilder.DescriptorImpl descriptor = (DockerBuilder.DescriptorImpl)
+                        Jenkins.getInstance().getDescriptor(DockerBuilder.class);
+                if (null != descriptor) {
+                    DockerClient client = descriptor.getDockerClient(build, null);
+                    client.attachContainerCmd(containerId).withFollowStream(true).withStdOut(true).withStdErr(true).exec(callback).awaitCompletion();
+                }
             } finally {
-                if (writer != null) {
-                    writer.close();
-                }
-                if (reader != null) {
-                    reader.close();
-                }
                 workerThread = null;
             }
         }
