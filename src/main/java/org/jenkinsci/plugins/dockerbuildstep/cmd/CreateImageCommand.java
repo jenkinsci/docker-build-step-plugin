@@ -106,7 +106,7 @@ public class CreateImageCommand extends DockerCommand {
             Config cfgData = getConfig(build);
             Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
             
-            imageId = launcher.getChannel().call(new CreateImageRemoteCallable(cfgData, descriptor, expandedDockerFolder, expandedImageTag, dockerFileRes, buildArgsMap, noCache, rm));
+            imageId = launcher.getChannel().call(new CreateImageRemoteCallable(console.getListener(), cfgData, descriptor, expandedDockerFolder, expandedImageTag, dockerFileRes, buildArgsMap, noCache, rm));
         } catch (Exception e) {
             console.logError("Failed to create docker image: " + e.getMessage());
             e.printStackTrace();
