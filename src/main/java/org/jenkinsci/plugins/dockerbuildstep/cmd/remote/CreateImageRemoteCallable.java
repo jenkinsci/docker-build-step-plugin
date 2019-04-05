@@ -38,7 +38,7 @@ public class CreateImageRemoteCallable implements Callable<String, Exception>, S
     Map<String, String> buildArgsMap;
     boolean noCache;
     boolean rm;
-    BuildListener listener = null;
+    BuildListener listener;
     
     public CreateImageRemoteCallable(BuildListener listener, Config cfgData, Descriptor<?> descriptor, String expandedDockerFolder, String expandedImageTag, String dockerFileRes, Map<String, String> buildArgsMap, boolean noCache, boolean rm) {
         this.expandedDockerFolder = expandedDockerFolder;
@@ -49,6 +49,7 @@ public class CreateImageRemoteCallable implements Callable<String, Exception>, S
         this.noCache = noCache;
         this.rm = rm;
         this.descriptor = descriptor;
+        this.listener = listener;
     }
 
     public String call() throws Exception {
