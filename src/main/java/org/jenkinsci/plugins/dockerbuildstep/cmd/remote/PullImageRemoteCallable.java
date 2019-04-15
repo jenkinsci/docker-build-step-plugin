@@ -51,7 +51,10 @@ public class PullImageRemoteCallable implements Callable<Void, Exception>, Seria
         PullImageResultCallback callback = new PullImageResultCallback() {
             @Override
             public void onNext(PullResponseItem item) {
-                console.logInfo(item.toString());
+                String text = item.getStream();
+                if (text != null) {
+                    console.logInfo(text);
+                }
                 super.onNext(item);
             }
 
