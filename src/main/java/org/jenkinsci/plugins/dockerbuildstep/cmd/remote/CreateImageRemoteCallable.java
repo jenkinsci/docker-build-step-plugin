@@ -14,6 +14,7 @@ import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.model.BuildResponseItem;
 import com.github.dockerjava.core.command.BuildImageResultCallback;
 
+import hudson.model.BuildListener;
 import hudson.FilePath;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
@@ -29,6 +30,8 @@ public class CreateImageRemoteCallable implements Callable<String, Exception>, S
 
     private static final long serialVersionUID = -6593420984897195978L;
 
+    BuildListener listener;
+
     Config cfgData;
     Descriptor<?> descriptor;
 
@@ -38,9 +41,8 @@ public class CreateImageRemoteCallable implements Callable<String, Exception>, S
     Map<String, String> buildArgsMap;
     boolean noCache;
     boolean rm;
-    BuildListener listener;
-    
     public CreateImageRemoteCallable(BuildListener listener, Config cfgData, Descriptor<?> descriptor, String expandedDockerFolder, String expandedImageTag, String dockerFileRes, Map<String, String> buildArgsMap, boolean noCache, boolean rm) {
+        this.listener = listener;
         this.expandedDockerFolder = expandedDockerFolder;
         this.expandedImageTag = expandedImageTag;
         this.dockerFileRes = dockerFileRes;
@@ -49,7 +51,6 @@ public class CreateImageRemoteCallable implements Callable<String, Exception>, S
         this.noCache = noCache;
         this.rm = rm;
         this.descriptor = descriptor;
-        this.listener = listener;
     }
 
     public String call() throws Exception {
@@ -70,13 +71,16 @@ public class CreateImageRemoteCallable implements Callable<String, Exception>, S
         BuildImageResultCallback callback = new BuildImageResultCallback() {
             @Override
             public void onNext(BuildResponseItem item) {
-        		console.logInfo(item.toString());
+                String text = item.getStream();
+                if (text != null) {
+                    console.logInfo(text);
+                }
                 super.onNext(item);
             }
 
             @Override
             public void onError(Throwable throwable) {
-        		console.logError("Failed to build image: " + throwable.getMessage());
+                console.logError("Failed to exec start:" + throwable.getMessage());
                 super.onError(throwable);
             }
         };

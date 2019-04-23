@@ -53,7 +53,10 @@ public class PushImageRemoteCallable implements Callable<Void, Exception>, Seria
         PushImageResultCallback callback = new PushImageResultCallback() {
             @Override
             public void onNext(PushResponseItem item) {
-                console.logInfo(item.toString());
+                String text = item.getStream();
+                if (text != null) {
+                    console.logInfo(text);
+                }
                 super.onNext(item);
             }
 
