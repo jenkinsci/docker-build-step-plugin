@@ -6,10 +6,12 @@ import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.model.BuildResponseItem;
 import com.github.dockerjava.core.command.BuildImageResultCallback;
 import hudson.FilePath;
+import hudson.model.BuildListener;
 import hudson.model.Descriptor;
 import hudson.remoting.Callable;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
+import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.remoting.RoleChecker;
 
 import java.io.File;
@@ -26,6 +28,8 @@ public class CreateImageRemoteCallable implements Callable<String, Exception>, S
 
     private static final long serialVersionUID = -6593420984897195978L;
 
+    BuildListener listener;
+
     Config cfgData;
     Descriptor<?> descriptor;
 
@@ -35,8 +39,8 @@ public class CreateImageRemoteCallable implements Callable<String, Exception>, S
     Map<String, String> buildArgsMap;
     boolean noCache;
     boolean rm;
-
-    public CreateImageRemoteCallable(Config cfgData, Descriptor<?> descriptor, String expandedDockerFolder, String expandedImageTag, String dockerFileRes, Map<String, String> buildArgsMap, boolean noCache, boolean rm) {
+    public CreateImageRemoteCallable(BuildListener listener, Config cfgData, Descriptor<?> descriptor, String expandedDockerFolder, String expandedImageTag, String dockerFileRes, Map<String, String> buildArgsMap, boolean noCache, boolean rm) {
+        this.listener = listener;
         this.expandedDockerFolder = expandedDockerFolder;
         this.expandedImageTag = expandedImageTag;
         this.dockerFileRes = dockerFileRes;
@@ -48,6 +52,7 @@ public class CreateImageRemoteCallable implements Callable<String, Exception>, S
     }
 
     public String call() throws Exception {
+        final ConsoleLogger console = new ConsoleLogger(listener);
         FilePath folder = new FilePath(new File(expandedDockerFolder));
 
         if (!exist(folder))
@@ -64,11 +69,16 @@ public class CreateImageRemoteCallable implements Callable<String, Exception>, S
         BuildImageResultCallback callback = new BuildImageResultCallback() {
             @Override
             public void onNext(BuildResponseItem item) {
+                String text = item.getStream();
+                if (text != null) {
+                    console.logInfo(text);
+                }
                 super.onNext(item);
             }
 
             @Override
             public void onError(Throwable throwable) {
+                console.logError("Failed to exec start:" + throwable.getMessage());
                 super.onError(throwable);
             }
         };
