@@ -32,7 +32,7 @@
         <version.jenkins.docker-commons>1.4.0</version.jenkins.docker-commons>
         <version.glassfish.javax.json>1.0.4 1.1.4</version.glassfish.javax.json>
         <version.jenkins.credentials>2.1.18</version.jenkins.credentials>
-        <version.maven.release>2.5</version.maven.release>
+        <version.maven.release>2.5.3</version.maven.release>
         <version.matrix-project>1.14</version.matrix-project>
     </properties>
 
