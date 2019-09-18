@@ -28,15 +28,17 @@ public class CreateImageCommand extends DockerCommand {
     private final String dockerFolder;
     private final String imageTag;
     private final String dockerFile;
+    private final boolean pull;
     private final boolean noCache;
     private final boolean rm;
     private final String buildArgs;
     
     @DataBoundConstructor
-    public CreateImageCommand(String dockerFolder, String imageTag, String dockerFile, boolean noCache, boolean rm, String buildArgs) {
+    public CreateImageCommand(String dockerFolder, String imageTag, String dockerFile, boolean pull, boolean noCache, boolean rm, String buildArgs) {
         this.dockerFolder = dockerFolder;
         this.imageTag = imageTag;
         this.dockerFile = dockerFile;
+        this.pull = pull;
         this.noCache = noCache;
         this.buildArgs = buildArgs;
         this.rm = rm;
@@ -52,6 +54,10 @@ public class CreateImageCommand extends DockerCommand {
 
     public String getDockerFile() {
         return dockerFile;
+    }
+
+    public boolean isPull() {
+        return pull;
     }
 
     public boolean isNoCache() {
@@ -105,8 +111,8 @@ public class CreateImageCommand extends DockerCommand {
         try {
             Config cfgData = getConfig(build);
             Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
-            
-            imageId = launcher.getChannel().call(new CreateImageRemoteCallable(console.getListener(), cfgData, descriptor, expandedDockerFolder, expandedImageTag, dockerFileRes, buildArgsMap, noCache, rm));
+
+            imageId = launcher.getChannel().call(new CreateImageRemoteCallable(console.getListener(), cfgData, descriptor, expandedDockerFolder, expandedImageTag, dockerFileRes, buildArgsMap, pull, noCache, rm));
         } catch (Exception e) {
             console.logError("Failed to create docker image: " + e.getMessage());
             e.printStackTrace();

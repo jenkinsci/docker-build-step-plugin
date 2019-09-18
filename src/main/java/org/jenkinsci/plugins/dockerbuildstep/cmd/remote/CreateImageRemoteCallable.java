@@ -39,15 +39,17 @@ public class CreateImageRemoteCallable implements Callable<String, Exception>, S
     String expandedImageTag;
     String dockerFileRes;
     Map<String, String> buildArgsMap;
+    boolean pull;
     boolean noCache;
     boolean rm;
-    public CreateImageRemoteCallable(BuildListener listener, Config cfgData, Descriptor<?> descriptor, String expandedDockerFolder, String expandedImageTag, String dockerFileRes, Map<String, String> buildArgsMap, boolean noCache, boolean rm) {
+    public CreateImageRemoteCallable(BuildListener listener, Config cfgData, Descriptor<?> descriptor, String expandedDockerFolder, String expandedImageTag, String dockerFileRes, Map<String, String> buildArgsMap, boolean pull, boolean noCache, boolean rm) {
         this.listener = listener;
         this.expandedDockerFolder = expandedDockerFolder;
         this.expandedImageTag = expandedImageTag;
         this.dockerFileRes = dockerFileRes;
         this.cfgData = cfgData;
         this.buildArgsMap = buildArgsMap;
+        this.pull = pull;
         this.noCache = noCache;
         this.rm = rm;
         this.descriptor = descriptor;
@@ -89,6 +91,7 @@ public class CreateImageRemoteCallable implements Callable<String, Exception>, S
         BuildImageCmd buildImageCmd = client
                 .buildImageCmd(docker)
                 .withTag(expandedImageTag)
+                .withPull(pull)
                 .withNoCache(noCache)
                 .withRemove(rm);
         if (!buildArgsMap.isEmpty()) {

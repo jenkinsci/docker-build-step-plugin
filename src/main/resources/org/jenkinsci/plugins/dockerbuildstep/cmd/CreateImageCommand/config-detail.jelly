@@ -13,6 +13,10 @@
             <f:textbox default="Dockerfile" />
         </f:entry>
 
+        <f:entry field="pull" title="Attempt to pull a newer version of the image">
+            <f:checkbox />
+        </f:entry>
+
         <f:entry field="noCache" title="Don't use the cache when building the image">
             <f:checkbox />
         </f:entry>
