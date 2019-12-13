@@ -10,7 +10,7 @@
     <artifactId>docker-build-step</artifactId>
     <version>2.5-SNAPSHOT</version>
     <packaging>hpi</packaging>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/Docker+build+step+plugin</url>
+    <url>https://github.com/jenkinsci/docker-build-step-plugin</url>
 
     <developers>
         <developer>
