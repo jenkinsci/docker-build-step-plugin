@@ -37,7 +37,7 @@
         <version.matrix-project>1.14</version.matrix-project>
     </properties>
 
-    <dependencies>
+    <dependencies><!-- this is a comment -->
         <dependency> <!-- Overwrites transitive dependency, otherwise fails with java.lang.ClassNotFoundException: org.apache.http.config.Lookup -->
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
