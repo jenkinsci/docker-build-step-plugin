@@ -36,6 +36,9 @@
 		<f:entry field="extraHosts" title="Extra Hosts" description="Option --add-host:Comma separated list of add-Host.Add hostnames to /etc/hosts in the container. Example: central.maven.org:185.31.18.209,repo1.maven.org:185.31.18.209,...">
 			<f:textbox />
 		</f:entry>
+		<f:entry field="networkMode" title="Network Mode" description="Option --network:Network mode to use for this container. Supported standard values are: bridge, host, none, and container:<name|id>. Any other value is taken as a custom network's name to which this container should connect to.">
+			<f:textbox />
+		</f:entry>
 		<f:entry field="publishAllPorts" title="Publish all ports">
 			<f:checkbox />
 		</f:entry>

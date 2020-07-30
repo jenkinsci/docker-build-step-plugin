@@ -39,6 +39,7 @@ public class CreateContainerCommand extends DockerCommand {
     private final String memoryLimit;
     private final String dns;
     private final String extraHosts;
+    private final String networkMode;
     private final boolean publishAllPorts;
     private final String portBindings;
     private final String bindMounts;
@@ -48,7 +49,7 @@ public class CreateContainerCommand extends DockerCommand {
     @DataBoundConstructor
     public CreateContainerCommand(String image, String command, String hostName, String containerName, String envVars,
                                   String links, String exposedPorts, String cpuShares, String memoryLimit, String dns,
-                                  String extraHosts, boolean publishAllPorts, String portBindings,
+                                  String extraHosts, String networkMode, boolean publishAllPorts, String portBindings,
                                   String bindMounts, boolean privileged, boolean alwaysRestart) throws IllegalArgumentException {
         this.image = image;
         this.command = command;
@@ -61,6 +62,7 @@ public class CreateContainerCommand extends DockerCommand {
         this.memoryLimit = memoryLimit;
         this.dns = dns;
         this.extraHosts = extraHosts;
+        this.networkMode = networkMode;
         this.publishAllPorts = publishAllPorts;
         this.portBindings = portBindings;
         this.bindMounts = bindMounts;
@@ -110,6 +112,10 @@ public class CreateContainerCommand extends DockerCommand {
 
     public String getExtraHosts() {
         return extraHosts;
+    }
+
+    public String networkMode() {
+        return networkMode;
     }
 
     public boolean isPublishAllPorts() {
@@ -191,6 +197,14 @@ public class CreateContainerCommand extends DockerCommand {
             extraHostsRes = null;
         }
 
+        final String networkModeRes;
+        if (networkMode != null && !networkMode.isBlank()) {
+            console.logInfo("set networkMode: " + networkMode);
+            networkModeRes = networkMode;
+        } else {
+            networkModeRes = null;
+        }
+
         final String portBindingsRes;
         if (portBindings != null && !portBindings.isEmpty()) {
             console.logInfo("set portBindings: " + portBindings);
@@ -213,7 +227,7 @@ public class CreateContainerCommand extends DockerCommand {
             Config cfgData = getConfig(build);
             Descriptor<?> descriptor = Jenkins.getInstance().getDescriptor(DockerBuilder.class);
 
-            String inspectRespSerialized = launcher.getChannel().call(new CreateContainerRemoteCallable(cfgData, descriptor, imageRes, commandRes, hostNameRes, containerNameRes, linksRes, envVarsRes, exposedPortsRes, cpuSharesRes, memoryLimitRes, dnsRes, extraHostsRes, portBindingsRes, bindMountsRes, alwaysRestart, publishAllPorts, privileged));
+            String inspectRespSerialized = launcher.getChannel().call(new CreateContainerRemoteCallable(cfgData, descriptor, imageRes, commandRes, hostNameRes, containerNameRes, linksRes, envVarsRes, exposedPortsRes, cpuSharesRes, memoryLimitRes, dnsRes, extraHostsRes, networkModeRes, portBindingsRes, bindMountsRes, alwaysRestart, publishAllPorts, privileged));
             ObjectMapper mapper = new ObjectMapper();
             InspectContainerResponse inspectResp = mapper.readValue(inspectRespSerialized, InspectContainerResponse.class);
 

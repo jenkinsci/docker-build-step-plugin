@@ -45,6 +45,7 @@ public class CreateContainerRemoteCallable implements Callable<String, Exception
     Long memoryLimitRes;
     String[] dnsRes;
     String[] extraHostsRes;
+    String networkModeRes;
     String portBindingsRes;
     String bindMountsRes;
     boolean alwaysRestart;
@@ -53,7 +54,7 @@ public class CreateContainerRemoteCallable implements Callable<String, Exception
     
     public CreateContainerRemoteCallable(Config cfgData, Descriptor<?> descriptor, String imageRes, String[] commandRes,
             String hostNameRes, String containerNameRes, String linksRes, String[] envVarsRes, String exposedPortsRes,
-            Integer cpuSharesRes, Long memoryLimitRes, String[] dnsRes, String[] extraHostsRes,
+            Integer cpuSharesRes, Long memoryLimitRes, String[] dnsRes, String[] extraHostsRes, String networkModeRes,
             String portBindingsRes, String bindMountsRes, boolean alwaysRestart, boolean publishAllPorts,
             boolean privileged) {
         this.cfgData = cfgData;
@@ -69,6 +70,7 @@ public class CreateContainerRemoteCallable implements Callable<String, Exception
         this.memoryLimitRes = memoryLimitRes;
         this.dnsRes = dnsRes;
         this.extraHostsRes = extraHostsRes;
+        this.networkModeRes = networkModeRes;
         this.portBindingsRes = portBindingsRes;
         this.bindMountsRes = bindMountsRes;
         this.alwaysRestart = alwaysRestart;
@@ -111,6 +113,9 @@ public class CreateContainerRemoteCallable implements Callable<String, Exception
         }
         if (extraHostsRes != null) {
             cfgCmd.withExtraHosts(extraHostsRes);
+        }
+        if (networkModeRes != null) {
+            cfgCmd.withNetworkMode(networkModeRes);
         }
         if (portBindingsRes != null) {
             cfgCmd.withPortBindings(PortBindingParser.parse(portBindingsRes));
