@@ -198,7 +198,7 @@ public class CreateContainerCommand extends DockerCommand {
         }
 
         final String networkModeRes;
-        if (networkMode != null && !networkMode.isBlank()) {
+        if (networkMode != null && !networkMode.isEmpty()) {
             console.logInfo("set networkMode: " + networkMode);
             networkModeRes = networkMode;
         } else {
