@@ -114,7 +114,7 @@ public class CreateContainerCommand extends DockerCommand {
         return extraHosts;
     }
 
-    public String networkMode() {
+    public String getNetworkMode() {
         return networkMode;
     }
 
