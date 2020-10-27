@@ -89,7 +89,7 @@ public class CreateImageCommand extends DockerCommand {
             console.logInfo("Parsing buildArgs: " + buildArgs);
             String[] split = Resolver.buildVar(build, buildArgs).split(",|;");
             for (String arg : split) {
-                String[] pair = arg.split("=");
+                String[] pair = arg.split("=", 2);
                 if (pair.length == 2) {
                     buildArgsMap.put(pair[0].trim(), pair[1].trim());
                 } else {
