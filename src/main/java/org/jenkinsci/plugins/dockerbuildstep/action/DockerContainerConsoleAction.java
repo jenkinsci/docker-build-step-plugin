@@ -5,7 +5,7 @@ import com.github.dockerjava.api.command.AttachContainerCmd;
 import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.core.command.AttachContainerResultCallback;
 import com.google.common.base.Charsets;
-import com.jcraft.jzlib.GZIPInputStream;
+import java.util.zip.GZIPInputStream;
 import hudson.console.AnnotatedLargeText;
 import hudson.model.*;
 import hudson.security.ACL;
