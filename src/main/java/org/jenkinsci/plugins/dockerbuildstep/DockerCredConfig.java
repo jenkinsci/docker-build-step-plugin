@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.dockerbuildstep;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
@@ -14,7 +15,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.export.ExportedBean;
 
-import jersey.repackaged.com.google.common.base.Preconditions;
 import hudson.model.Descriptor;
 import hudson.security.ACL;
 import hudson.model.Item;

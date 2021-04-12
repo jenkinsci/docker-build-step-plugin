@@ -28,8 +28,7 @@
 
     <properties>
         <version.apache.httpclient>4.5.8</version.apache.httpclient>
-        <version.docker.java>3.0.10</version.docker.java>
-        <version.jenkins.docker-commons>1.4.0</version.jenkins.docker-commons>
+        <version.docker.java>3.2.7</version.docker.java>
         <version.jenkins.docker-commons>1.15</version.jenkins.docker-commons>
         <version.glassfish.javax.json>1.1.4</version.glassfish.javax.json>
         <version.jenkins.credentials>2.1.18</version.jenkins.credentials>
@@ -39,13 +38,18 @@
 
     <dependencies>
         <dependency> <!-- Overwrites transitive dependency, otherwise fails with java.lang.ClassNotFoundException: org.apache.http.config.Lookup -->
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>${version.apache.httpclient}</version>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>5.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.docker-java</groupId>
-            <artifactId>docker-java</artifactId>
+            <artifactId>docker-java-core</artifactId>
+            <version>${version.docker.java}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java-transport-httpclient5</artifactId>
             <version>${version.docker.java}</version>
         </dependency>
         <dependency>

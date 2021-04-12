@@ -13,6 +13,9 @@ import java.util.logging.Logger;
 
 import javax.net.ssl.SSLContext;
 
+import com.github.dockerjava.core.DockerClientImpl;
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
+import com.github.dockerjava.transport.DockerHttpClient;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand.DockerCommandDescriptor;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
@@ -26,10 +29,10 @@ import com.github.dockerjava.api.command.DockerCmdExecFactory;
 import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.model.AuthConfig;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
-import com.github.dockerjava.core.DockerClientBuilder;
+
 import com.github.dockerjava.core.LocalDirectorySSLConfig;
 import com.github.dockerjava.core.SSLConfig;
-import com.github.dockerjava.jaxrs.DockerCmdExecFactoryImpl;
+
 
 import hudson.AbortException;
 import hudson.DescriptorExtensionList;
@@ -135,12 +138,16 @@ public class DockerBuilder extends Builder {
                         .withRegistryPassword(authConfig.getPassword())
                         .withRegistryUrl(authConfig.getRegistryAddress());
             }
-            // using jaxrs/jersey implementation here (netty impl is also available)
-            DockerCmdExecFactory dockerCmdExecFactory = new DockerCmdExecFactoryImpl()
-                    .withConnectTimeout(1000)
-                    .withMaxTotalConnections(1)
-                    .withMaxPerRouteConnections(1);
-            return DockerClientBuilder.getInstance(configBuilder).withDockerCmdExecFactory(dockerCmdExecFactory).build();
+
+            DefaultDockerClientConfig config = configBuilder.build();
+
+            DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
+                    .dockerHost(config.getDockerHost())
+                    .sslConfig(config.getSSLConfig())
+                    .maxConnections(100)
+                    .build();
+
+            return DockerClientImpl.getInstance(config, httpClient);
         }
 
         public FormValidation doTestConnection(@QueryParameter String dockerUrl, @QueryParameter String dockerVersion, @QueryParameter String dockerCertPath) {
