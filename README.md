@@ -62,7 +62,7 @@ Jenkins -> Manage Jenkins -> Configure System -> Docker Builder
 
 * Configure Docker server REST API URL
   * For Linux nodes, set the local socket `unix:///var/run/docker.sock`
-  * For other nodes, you may need to set something like `http://127.0.0.1:2375`
+  * For other nodes, you may need to set something like `tcp://127.0.0.1:2375`
 * Test the connection.
 
 # Usage
