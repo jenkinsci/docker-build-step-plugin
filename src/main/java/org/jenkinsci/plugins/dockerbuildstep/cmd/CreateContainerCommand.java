@@ -2,6 +2,8 @@ package org.jenkinsci.plugins.dockerbuildstep.cmd;
 
 import com.github.dockerjava.api.exception.DockerException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import hudson.Extension;
 import hudson.Launcher;
@@ -229,13 +231,15 @@ public class CreateContainerCommand extends DockerCommand {
 
             String inspectRespSerialized = launcher.getChannel().call(new CreateContainerRemoteCallable(cfgData, descriptor, imageRes, commandRes, hostNameRes, containerNameRes, linksRes, envVarsRes, exposedPortsRes, cpuSharesRes, memoryLimitRes, dnsRes, extraHostsRes, networkModeRes, portBindingsRes, bindMountsRes, alwaysRestart, publishAllPorts, privileged));
             ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             InspectContainerResponse inspectResp = mapper.readValue(inspectRespSerialized, InspectContainerResponse.class);
 
             console.logInfo("created container id " + inspectResp.getId() + " (from image " + imageRes + ")");
             EnvInvisibleAction envAction = new EnvInvisibleAction(inspectResp);
             build.addAction(envAction);
         } catch (Exception e) {
-            console.logError("failed to stop all containers");
+            console.logError("Failed to create container");
             e.printStackTrace();
             throw new IllegalArgumentException(e);
         }
