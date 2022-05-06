@@ -20,6 +20,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.model.Container;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 
 /**
@@ -61,6 +63,8 @@ public class StartByImageIdCommand extends DockerCommand {
                     String inspectRespSerialized = launcher.getChannel().call(new StartContainerRemoteCallable(cfgData, descriptor, container.getId()));
                     
                     ObjectMapper mapper = new ObjectMapper();
+                    mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+                    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                     InspectContainerResponse inspectResp = mapper.readValue(inspectRespSerialized, InspectContainerResponse.class);
                     
                     console.logInfo("started container id " + container.getId());

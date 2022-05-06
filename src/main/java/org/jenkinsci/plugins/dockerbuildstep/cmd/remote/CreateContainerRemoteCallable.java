@@ -9,6 +9,7 @@ import org.jenkinsci.plugins.dockerbuildstep.util.LinkUtils;
 import org.jenkinsci.plugins.dockerbuildstep.util.PortBindingParser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
@@ -131,6 +132,7 @@ public class CreateContainerRemoteCallable implements Callable<String, Exception
         InspectContainerResponse inspectResp = client.inspectContainerCmd(resp.getId()).exec();
         
         ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         String serialized = mapper.writeValueAsString(inspectResp);
         return serialized;
     }
