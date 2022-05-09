@@ -29,7 +29,7 @@
     <properties>
         <version.apache.httpclient>4.5.8</version.apache.httpclient>
         <version.docker.java>3.2.7</version.docker.java>
-        <version.jenkins.docker-commons>1.15</version.jenkins.docker-commons>
+        <version.jenkins.docker-commons>1.18</version.jenkins.docker-commons>
         <version.glassfish.javax.json>1.1.4</version.glassfish.javax.json>
         <version.jenkins.credentials>2.6.1.1</version.jenkins.credentials>
         <version.maven.release>2.5.3</version.maven.release>
