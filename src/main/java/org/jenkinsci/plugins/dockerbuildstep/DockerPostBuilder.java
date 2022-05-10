@@ -7,6 +7,7 @@ import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.FreeStyleProject;
+import hudson.maven.MavenModuleSet;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -37,7 +38,7 @@ public class DockerPostBuilder extends BuildStepDescriptor<Publisher> {
 
     @Override
     public boolean isApplicable(@SuppressWarnings("rawtypes") Class<? extends AbstractProject> jobType) {
-        return FreeStyleProject.class.equals(jobType) || MatrixProject.class.equals(jobType);
+        return FreeStyleProject.class.equals(jobType) || MatrixProject.class.equals(jobType) || MavenModuleSet.class.equals(jobType);
     }
 
     @Override
