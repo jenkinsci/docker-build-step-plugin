@@ -33,7 +33,7 @@
         <version.glassfish.javax.json>1.1.4</version.glassfish.javax.json>
         <version.jenkins.credentials>2.6.1.1</version.jenkins.credentials>
         <version.maven.release>2.5.3</version.maven.release>
-        <version.matrix-project>1.14</version.matrix-project>
+        <version.matrix-project>1.17</version.matrix-project>
         <version.maven-plugin>2.17</version.maven-plugin>
     </properties>
 
