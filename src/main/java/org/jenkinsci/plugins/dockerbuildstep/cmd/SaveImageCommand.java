@@ -8,7 +8,7 @@ import jenkins.model.Jenkins;
 
 import java.io.IOException;
 
-import org.apache.commons.httpclient.HttpStatus;
+import java.net.HttpURLConnection;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.remote.SaveImageRemoteCallable;
@@ -120,7 +120,7 @@ public class SaveImageCommand extends DockerCommand {
                     String.format("Error to save '%s' ", imageNameRes + " "
                             + imageTagRes)
                             + " " + e.getLocalizedMessage(),
-                    HttpStatus.SC_INTERNAL_SERVER_ERROR);
+                    HttpURLConnection.HTTP_INTERNAL_ERROR);
         } catch (Exception e) {
             console.logError("failed to save image " + imageNameRes);
             e.printStackTrace();
