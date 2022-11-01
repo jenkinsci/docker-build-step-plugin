@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -42,7 +43,7 @@ public class CommandUtils {
 
     public static void logCommandResult(InputStream inputStream,
             ConsoleLogger console, String errMessage) {
-        BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
+        BufferedReader in = new BufferedReader(new InputStreamReader(inputStream, Charset.defaultCharset()));
         String line = null;
         try {
           while((line = in.readLine()) != null) {
@@ -62,7 +63,7 @@ public class CommandUtils {
      */
     public static void logCommandResultStream(InputStream inputStream,
             ConsoleLogger console, String errMessage) {
-        BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
+        BufferedReader in = new BufferedReader(new InputStreamReader(inputStream, Charset.defaultCharset()));
         String line = null;
         try {
           while((line = in.readLine()) != null) {

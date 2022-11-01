@@ -3,8 +3,8 @@ package org.jenkinsci.plugins.dockerbuildstep.cmd.remote;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.io.Serializable;
 
+import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
@@ -12,7 +12,6 @@ import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 import com.github.dockerjava.api.DockerClient;
 
 import hudson.model.Descriptor;
-import hudson.remoting.Callable;
 
 
 /**
@@ -21,7 +20,7 @@ import hudson.remoting.Callable;
  * 
  * @author David Csakvari
  */
-public class SaveImageRemoteCallable implements Callable<Void, Exception>, Serializable {
+public class SaveImageRemoteCallable extends MasterToSlaveCallable<Void, Exception> {
 
     private static final long serialVersionUID = -6899484703281434847L;
 

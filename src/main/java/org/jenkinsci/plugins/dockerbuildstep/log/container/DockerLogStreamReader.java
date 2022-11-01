@@ -18,7 +18,6 @@ package org.jenkinsci.plugins.dockerbuildstep.log.container;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.io.ByteStreams.copy;
-import static com.google.common.io.ByteStreams.nullOutputStream;
 
 import java.io.Closeable;
 import java.io.EOFException;

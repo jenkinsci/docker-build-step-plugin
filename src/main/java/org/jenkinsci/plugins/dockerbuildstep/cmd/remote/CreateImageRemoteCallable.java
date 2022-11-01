@@ -1,9 +1,9 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd.remote;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.Map;
 
+import jenkins.security.MasterToSlaveCallable;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
@@ -18,7 +18,6 @@ import hudson.model.BuildListener;
 import hudson.FilePath;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
-import hudson.remoting.Callable;
 
 /**
  * A Callable wrapping the commands necessary to create an image.
@@ -26,7 +25,7 @@ import hudson.remoting.Callable;
  * 
  * @author David Csakvari
  */
-public class CreateImageRemoteCallable implements Callable<String, Exception>, Serializable {
+public class CreateImageRemoteCallable extends MasterToSlaveCallable<String, Exception> {
 
     private static final long serialVersionUID = -6593420984897195978L;
 
