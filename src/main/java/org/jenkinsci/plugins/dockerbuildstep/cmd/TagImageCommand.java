@@ -19,7 +19,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
  * This command tags the specified Docker image.
  *
  * @author draoullig
- * @see https://docs.docker.com/reference/api/docker_remote_api_v1.19/#tag-an-image-into-a-repository
+ * @see <a href="https://docs.docker.com/engine/api/v1.41/#tag/Image/operation/ImageTag">Tag an image</a>
  */
 public class TagImageCommand extends DockerCommand {
 

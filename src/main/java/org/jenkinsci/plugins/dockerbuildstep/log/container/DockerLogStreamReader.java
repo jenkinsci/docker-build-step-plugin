@@ -33,7 +33,7 @@ import com.google.common.io.ByteStreams;
  * 
  * As a workaround we borrowed the decoding magic from https://github.com/spotify/docker-client.
  * 
- * @see https://github.com/spotify/docker-client/blob/master/src/main/java/com/spotify/docker/client/LogReader.java
+ * @see <a href="https://github.com/spotify/docker-client/blob/master/src/main/java/com/spotify/docker/client/LogReader.java">LogReader</a>
  */
 public class DockerLogStreamReader implements Closeable {
     private final InputStream stream;

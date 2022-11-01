@@ -22,7 +22,7 @@ import com.github.dockerjava.api.exception.NotFoundException;
 /**
  * This command saves the specified Docker image.
  * 
- * @see docker save
+ * @see <a href="https://docs.docker.com/engine/reference/commandline/save/">docker save</a>
  * 
  * @author draoullig
  * 

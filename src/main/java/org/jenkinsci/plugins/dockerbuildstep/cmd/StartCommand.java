@@ -29,7 +29,7 @@ import java.util.List;
  * started containers.
  *
  * @author vjuranek
- * @see http://docs.docker.com/reference/api/docker_remote_api_v1.13/#start-a-container
+ * @see <a href="https://docs.docker.com/engine/api/v1.41/#tag/Container/operation/ContainerStart">Start a container</a>
  */
 public class StartCommand extends DockerCommand {
 

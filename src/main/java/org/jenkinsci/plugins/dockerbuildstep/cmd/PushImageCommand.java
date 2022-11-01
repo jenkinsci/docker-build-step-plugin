@@ -23,7 +23,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
  * This command pushes a Docker image on the repository.
  *
  * @author wzheng2310@gmail.com (Wei Zheng)
- * @see https://docs.docker.com/reference/api/docker_remote_api_v1.13/#push-an-image-on-the-registry
+ * @see <a href="https://docs.docker.com/engine/api/v1.41/#tag/Image/operation/ImagePush">Push an image</a>
  */
 public class PushImageCommand extends DockerCommand {
     private final String image;

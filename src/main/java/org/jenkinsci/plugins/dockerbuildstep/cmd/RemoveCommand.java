@@ -22,7 +22,7 @@ import com.github.dockerjava.api.exception.NotFoundException;
 /**
  * This command removes specified Docker container(s).
  * 
- * @see http://docs.docker.com/reference/api/docker_remote_api_v1.13/#remove-a-container
+ * @see <a href="https://docs.docker.com/engine/api/v1.41/#tag/Container/operation/ContainerDelete">Remove a container</a>
  * 
  * @author vjuranek
  * 

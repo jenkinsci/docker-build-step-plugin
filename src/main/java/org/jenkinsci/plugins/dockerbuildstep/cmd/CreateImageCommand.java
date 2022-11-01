@@ -21,7 +21,7 @@ import java.util.Map;
  * This command creates a new image from specified Dockerfile.
  *
  * @author marcus
- * @see http://docs.docker.com/reference/api/docker_remote_api_v1.13/#build-an-image-from-dockerfile-via-stdin
+ * @see <a href="https://docs.docker.com/engine/api/v1.41/#tag/Image/operation/ImageBuild">Build an image</a>
  */
 public class CreateImageCommand extends DockerCommand {
 

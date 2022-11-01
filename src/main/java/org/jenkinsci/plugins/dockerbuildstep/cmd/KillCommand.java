@@ -21,7 +21,7 @@ import com.github.dockerjava.api.exception.DockerException;
 /**
  * This command kills specified container(s).
  * 
- * @see http://docs.docker.com/reference/api/docker_remote_api_v1.13/#kill-a-container
+ * @see <a href="https://docs.docker.com/engine/api/v1.41/#tag/Container/operation/ContainerKill">Kill a container</a>
  * 
  * @author vjuranek
  * 

@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
  * 
  * As a workaround we borrowed the decoding magic from https://github.com/spotify/docker-client.
  * 
- * @see https://github.com/spotify/docker-client/blob/master/src/main/java/com/spotify/docker/client/LogMessage.java
+ * @see <a href="https://github.com/spotify/docker-client/blob/master/src/main/java/com/spotify/docker/client/LogMessage.java">LogMessage</a>
  */
 public class DockerLogMessage {
     final DockerLogStreamType stream;
