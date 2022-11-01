@@ -1,14 +1,12 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd.remote;
 
-import java.io.Serializable;
-
+import jenkins.security.MasterToSlaveCallable;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 
 import com.github.dockerjava.api.DockerClient;
 
 import hudson.model.Descriptor;
-import hudson.remoting.Callable;
 
 /**
  * A Callable wrapping the tag image command.
@@ -16,7 +14,7 @@ import hudson.remoting.Callable;
  * 
  * @author David Csakvari
  */
-public class TagImageRemoteCallable implements Callable<Void, Exception>, Serializable {
+public class TagImageRemoteCallable extends MasterToSlaveCallable<Void, Exception> {
 
     private static final long serialVersionUID = -6899484703281434847L;
 

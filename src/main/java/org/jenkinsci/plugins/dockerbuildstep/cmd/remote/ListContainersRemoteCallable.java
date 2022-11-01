@@ -1,8 +1,8 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd.remote;
 
-import java.io.Serializable;
 import java.util.List;
 
+import jenkins.security.MasterToSlaveCallable;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 
@@ -10,7 +10,6 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Container;
 
 import hudson.model.Descriptor;
-import hudson.remoting.Callable;
 
 
 /**
@@ -19,7 +18,7 @@ import hudson.remoting.Callable;
  * 
  * @author David Csakvari
  */
-public class ListContainersRemoteCallable implements Callable<List<Container>, Exception>, Serializable {
+public class ListContainersRemoteCallable extends MasterToSlaveCallable<List<Container>, Exception> {
 
     private static final long serialVersionUID = 8479489609579635741L;
 

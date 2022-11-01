@@ -1,7 +1,6 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd.remote;
 
-import java.io.Serializable;
-
+import jenkins.security.MasterToSlaveCallable;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 
@@ -9,7 +8,6 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.ExecCreateCmdResponse;
 
 import hudson.model.Descriptor;
-import hudson.remoting.Callable;
 
 
 /**
@@ -18,7 +16,7 @@ import hudson.remoting.Callable;
  * 
  * @author David Csakvari
  */
-public class ExecCreateRemoteCallable implements Callable<String, Exception>, Serializable {
+public class ExecCreateRemoteCallable extends MasterToSlaveCallable<String, Exception> {
 
     private static final long serialVersionUID = 1536648869989705828L;
 

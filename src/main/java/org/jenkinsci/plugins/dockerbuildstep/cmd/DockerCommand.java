@@ -84,7 +84,7 @@ public abstract class DockerCommand implements Describable<DockerCommand>, Exten
         return authConfig;
     }
 
-    public static CredentialsMatcher CREDENTIALS_MATCHER = CredentialsMatchers.anyOf(CredentialsMatchers
+    public static final CredentialsMatcher CREDENTIALS_MATCHER = CredentialsMatchers.anyOf(CredentialsMatchers
             .instanceOf(StandardUsernamePasswordCredentials.class));
 
     public abstract void execute(Launcher launcher, @SuppressWarnings("rawtypes") AbstractBuild build, ConsoleLogger console)

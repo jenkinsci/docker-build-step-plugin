@@ -1,7 +1,6 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd.remote;
 
-import java.io.Serializable;
-
+import jenkins.security.MasterToSlaveCallable;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 import org.jenkinsci.plugins.dockerbuildstep.util.BindParser;
@@ -15,11 +14,9 @@ import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.ExposedPort;
-import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.RestartPolicy;
 
 import hudson.model.Descriptor;
-import hudson.remoting.Callable;
 
 
 /**
@@ -28,7 +25,7 @@ import hudson.remoting.Callable;
  * 
  * @author David Csakvari
  */
-public class CreateContainerRemoteCallable implements Callable<String, Exception>, Serializable {
+public class CreateContainerRemoteCallable extends MasterToSlaveCallable<String, Exception> {
 
     private static final long serialVersionUID = -4028940605497568422L;
     
@@ -88,7 +85,6 @@ public class CreateContainerRemoteCallable implements Callable<String, Exception
         }
         cfgCmd.withHostName(hostNameRes);
         cfgCmd.withName(containerNameRes);
-        HostConfig hc = new HostConfig();
         cfgCmd.withLinks(LinkUtils.parseLinks(linksRes).getLinks());
         if (envVarsRes != null) {
             cfgCmd.withEnv(envVarsRes);

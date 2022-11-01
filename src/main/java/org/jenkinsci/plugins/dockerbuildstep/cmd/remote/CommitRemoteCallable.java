@@ -1,7 +1,6 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd.remote;
 
-import java.io.Serializable;
-
+import jenkins.security.MasterToSlaveCallable;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 
@@ -9,7 +8,6 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CommitCmd;
 
 import hudson.model.Descriptor;
-import hudson.remoting.Callable;
 
 
 /**
@@ -18,7 +16,7 @@ import hudson.remoting.Callable;
  * 
  * @author David Csakvari
  */
-public class CommitRemoteCallable implements Callable<String, Exception>, Serializable {
+public class CommitRemoteCallable extends MasterToSlaveCallable<String, Exception> {
     
     private static final long serialVersionUID = -8663454265047375486L;
 

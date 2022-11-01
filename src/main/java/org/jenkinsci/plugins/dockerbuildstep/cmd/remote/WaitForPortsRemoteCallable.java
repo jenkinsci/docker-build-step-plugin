@@ -1,9 +1,9 @@
 package org.jenkinsci.plugins.dockerbuildstep.cmd.remote;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import jenkins.security.MasterToSlaveCallable;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
@@ -14,7 +14,6 @@ import com.github.dockerjava.api.command.InspectContainerResponse;
 
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
-import hudson.remoting.Callable;
 
 
 /**
@@ -23,7 +22,7 @@ import hudson.remoting.Callable;
  * 
  * @author David Csakvari
  */
-public class WaitForPortsRemoteCallable implements Callable<Void, Exception>, Serializable {
+public class WaitForPortsRemoteCallable extends MasterToSlaveCallable<Void, Exception> {
 
     private static final long serialVersionUID = 8479489609579635741L;
 
