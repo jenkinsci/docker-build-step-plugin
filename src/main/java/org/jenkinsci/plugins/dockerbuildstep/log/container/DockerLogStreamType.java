@@ -21,7 +21,7 @@ package org.jenkinsci.plugins.dockerbuildstep.log.container;
  * 
  * As a workaround we borrowed the decoding magic from https://github.com/spotify/docker-client.
  * 
- * @see https://github.com/spotify/docker-client/blob/master/src/main/java/com/spotify/docker/client/LogMessage.java
+ * @see <a href="https://github.com/spotify/docker-client/blob/master/src/main/java/com/spotify/docker/client/LogMessage.java">LogMessage</a>
  */
 public enum DockerLogStreamType {
     STDIN(0), STDOUT(1), STDERR(2);

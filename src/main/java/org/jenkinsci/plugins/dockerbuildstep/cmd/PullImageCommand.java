@@ -22,7 +22,7 @@ import com.github.dockerjava.api.exception.DockerException;
 /**
  * This command pulls Docker image from a repository.
  *
- * @see http://docs.docker.com/reference/api/docker_remote_api_v1.13/#create-an-image
+ * @see <a href="https://docs.docker.com/engine/api/v1.41/#tag/Image/operation/ImageCreate">Create an image</a>
  *
  * @author vjuranek
  *

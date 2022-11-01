@@ -19,7 +19,7 @@ import com.github.dockerjava.api.exception.DockerException;
 /**
  * This command commits changes done in specified container and create new image from it.
  * 
- * @see http://docs.docker.com/reference/api/docker_remote_api_v1.13/#create-a-new-image-from-a-containers-changes
+ * @see <a href="https://docs.docker.com/engine/api/v1.41/#tag/Image/operation/ImageCommit">Create a new image from a container</a>
  * 
  * @author vjuranek
  * 

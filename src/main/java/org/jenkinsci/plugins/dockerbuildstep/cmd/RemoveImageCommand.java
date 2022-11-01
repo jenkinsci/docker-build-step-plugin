@@ -19,8 +19,7 @@ import com.github.dockerjava.api.exception.NotFoundException;
 /**
  * This command removes specified Docker image.
  * 
- * @see http 
- *      ://docs.docker.com/reference/api/docker_remote_api_v1.13/#remove-an-image
+ * @see <a href="https://docs.docker.com/engine/api/v1.41/#tag/Image/operation/ImageDelete">Remove an image</a>
  * 
  * @author draoullig
  * 

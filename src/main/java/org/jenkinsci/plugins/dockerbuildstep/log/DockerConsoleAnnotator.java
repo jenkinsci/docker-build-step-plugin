@@ -11,7 +11,7 @@ import java.nio.charset.Charset;
  * Console annotator which annotates Docker messages using {@link DockerConsoleNote}. Annotated message has to start
  * with <i>[Docker]</i> prefix.
  * 
- * @see {@link http://javadoc.jenkins-ci.org/hudson/console/LineTransformationOutputStream.html LineTransformationOutputStream} 
+ * @see LineTransformationOutputStream
  * 
  * @author vjuranek
  * 

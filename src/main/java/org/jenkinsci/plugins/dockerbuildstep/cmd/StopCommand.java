@@ -21,7 +21,7 @@ import com.github.dockerjava.api.exception.DockerException;
 /**
  * This command stops one or more Docker containers.
  * 
- * @see http://docs.docker.com/reference/api/docker_remote_api_v1.13/#stop-a-container
+ * @see <a href="https://docs.docker.com/engine/api/v1.41/#tag/Container/operation/ContainerStop">Stop a container</a>
  * 
  * @author vjuranek
  * 
