@@ -4,6 +4,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -13,8 +14,8 @@ import java.util.logging.Logger;
 
 import javax.net.ssl.SSLContext;
 
-import com.github.dockerjava.api.command.DockerCmdExecFactory;
-import com.github.dockerjava.netty.NettyDockerCmdExecFactory;
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
+import com.github.dockerjava.transport.DockerHttpClient;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand;
 import org.jenkinsci.plugins.dockerbuildstep.cmd.DockerCommand.DockerCommandDescriptor;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
@@ -140,9 +141,11 @@ public class DockerBuilder extends Builder {
 
             DefaultDockerClientConfig config = configBuilder.build();
 
-            DockerCmdExecFactory dcef = new NettyDockerCmdExecFactory();
+            DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
+                    .dockerHost(URI.create(dockerUrl))
+                    .build();
             return DockerClientBuilder.getInstance(config)
-                    .withDockerCmdExecFactory(dcef)
+                    .withDockerHttpClient(httpClient)
                     .build();
         }
 
