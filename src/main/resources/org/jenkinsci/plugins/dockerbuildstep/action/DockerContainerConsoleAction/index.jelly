@@ -54,7 +54,7 @@ Displays the Docker container output, based on Jenkins console.jelly
         <j:when test="${it.isLogUpdated()}">
           <pre id="out" class="console-output"/>
           <div id="spinner">
-            <img src="${imagesURL}/spinner.gif" alt="" /> 
+            <l:progressAnimation/>
           </div>
          <t:progressiveText href="progressiveHtml" idref="out" spinner="spinner" startOffset="${offset}" />
         </j:when>
