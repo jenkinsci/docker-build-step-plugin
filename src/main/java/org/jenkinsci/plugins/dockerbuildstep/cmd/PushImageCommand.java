@@ -9,7 +9,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.Descriptor;
 import jenkins.model.Jenkins;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.docker.commons.credentials.DockerRegistryEndpoint;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder;
 import org.jenkinsci.plugins.dockerbuildstep.DockerBuilder.Config;
