@@ -2,99 +2,103 @@ package org.jenkinsci.plugins.dockerbuildstep.util;
 
 import static com.github.dockerjava.api.model.AccessMode.ro;
 import static com.github.dockerjava.api.model.AccessMode.rw;
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.github.dockerjava.api.model.AccessMode;
 import com.github.dockerjava.api.model.Bind;
 
+import org.junit.jupiter.api.Test;
+
 /**
  *  Defines legal syntax for entering bind mount definitions ({@link Bind}s).
  */
-public class BindParserTest {
+class BindParserTest {
 
     @Test
-    public void defaultAccessMode_blank() {
+    void defaultAccessMode_blank() {
         assertCreatesBinds(input("/host /container"), 
                 expected("/host", "/container", AccessMode.DEFAULT));
     }
 
     @Test
-    public void readWrite_blank() {
+    void readWrite_blank() {
         assertCreatesBinds(input("/host /container rw"), expected("/host", "/container", rw));
     }
 
     @Test
-    public void readOnly_blank() {
+    void readOnly_blank() {
         assertCreatesBinds(input("/host /container ro"), expected("/host", "/container", ro));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void invalidAccessMode_blank() {
-        BindParser.parse("/host /container xx");
+    @Test
+    void invalidAccessMode_blank() {
+        assertThrows(IllegalArgumentException.class, () ->
+            BindParser.parse("/host /container xx"));
     }
 
     @Test
-    public void defaultAccessMode_colon() {
+    void defaultAccessMode_colon() {
         assertCreatesBinds(input("/host:/container"), 
                 expected("/host", "/container", AccessMode.DEFAULT));
     }
 
     @Test
-    public void readWrite_colon() {
+    void readWrite_colon() {
         assertCreatesBinds(input("/host:/container:rw"), expected("/host", "/container", rw));
     }
 
     @Test
-    public void readOnly_colon() {
+    void readOnly_colon() {
         assertCreatesBinds(input("/host:/container:ro"), expected("/host", "/container", ro));
     }
 
     @Test
-    public void pathWithBlanks_colon() {
+    void pathWithBlanks_colon() {
         // not sure if this would work in Docker and why anybody should want to do this,
         // but let's allow this as well.
         assertCreatesBinds(input("/host with blanks:/container with blanks:ro"), 
                 expected("/host with blanks", "/container with blanks", ro));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void invalidAccessMode_colon() {
-        BindParser.parse("/host:/container:xx");
+    @Test
+    void invalidAccessMode_colon() {
+        assertThrows(IllegalArgumentException.class, () ->
+            BindParser.parse("/host:/container:xx"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void parseInvalidInput() {
-        BindParser.parse("nonsense");
-    }
-    
     @Test
-    public void parseEmptyString() {
+    void parseInvalidInput() {
+        assertThrows(IllegalArgumentException.class, () ->
+            BindParser.parse("nonsense"));
+    }
+
+    @Test
+    void parseEmptyString() {
         assertEquals(0, BindParser.parse("").length);
     }
-    
+
     @Test
-    public void twoBindings_UnixStyle() {
+    void twoBindings_UnixStyle() {
     	assertCreatesBinds(input("/host1:/container1:rw\n/host2:/container2:ro"), 
     			expected("/host1", "/container1", rw),
     			expected("/host2", "/container2", ro));
     }
-    
+
     @Test
-    public void twoBindings_DosStyle() {
+    void twoBindings_DosStyle() {
     	assertCreatesBinds(input("/host1:/container1:rw\r\n/host2:/container2:ro"), 
     			expected("/host1", "/container1", rw),
     			expected("/host2", "/container2", ro));
     }
     
-    private void assertCreatesBinds(String input, Expected... expected) {
+    private static void assertCreatesBinds(String input, Expected... expected) {
         Bind[] parsed = BindParser.parse(input);
-        assertEquals("wrong number of Binds created", expected.length, parsed.length);
+        assertEquals(expected.length, parsed.length, "wrong number of Binds created");
         for (int i = 0; i < parsed.length; i++) {
-	        assertEquals("Bind #" + i, expected[i].hostPath, parsed[i].getPath());
-	        assertEquals("Bind #" + i, expected[i].containerPath, parsed[i].getVolume().getPath());
-	        assertEquals("Bind #" + i, expected[i].accessMode, parsed[i].getAccessMode());
+	        assertEquals(expected[i].hostPath, parsed[i].getPath(), "Bind #" + i);
+	        assertEquals(expected[i].containerPath, parsed[i].getVolume().getPath(), "Bind #" + i);
+	        assertEquals(expected[i].accessMode, parsed[i].getAccessMode(), "Bind #" + i);
 		}
     }
     
