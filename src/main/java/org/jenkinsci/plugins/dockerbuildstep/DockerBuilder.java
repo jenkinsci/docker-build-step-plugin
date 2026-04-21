@@ -23,6 +23,7 @@ import org.jenkinsci.plugins.dockerbuildstep.util.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.exception.DockerException;
@@ -41,6 +42,7 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
+import jenkins.model.Jenkins;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
@@ -149,7 +151,9 @@ public class DockerBuilder extends Builder {
                     .build();
         }
 
+        @RequirePOST
         public FormValidation doTestConnection(@QueryParameter String dockerUrl, @QueryParameter String dockerVersion, @QueryParameter String dockerCertPath) {
+            Jenkins.get().checkPermission(Jenkins.MANAGE);
             LOGGER.fine(String.format("Trying to get client for %s and version %s and cert path %s", dockerUrl, dockerVersion, dockerCertPath));
             try {
                 this.dockerUrl = dockerUrl;

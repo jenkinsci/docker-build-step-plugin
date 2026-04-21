@@ -20,6 +20,7 @@ import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 import org.jenkinsci.plugins.dockerbuildstep.util.*;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.interceptor.RequirePOST;
 
 /**
  * This command creates new container from specified image.
@@ -252,6 +253,7 @@ public class CreateContainerCommand extends DockerCommand {
             return "Create container";
         }
 
+        @RequirePOST
         public FormValidation doTestPortBindings(@QueryParameter String portBindings) {
             try {
                 PortBindingParser.parse(portBindings);
@@ -261,6 +263,7 @@ public class CreateContainerCommand extends DockerCommand {
             return FormValidation.ok("OK");
         }
 
+        @RequirePOST
         public FormValidation doTestBindMounts(@QueryParameter String bindMounts) {
             try {
                 BindParser.parse(bindMounts);
@@ -270,6 +273,7 @@ public class CreateContainerCommand extends DockerCommand {
             return FormValidation.ok("OK");
         }
 
+        @RequirePOST
         public FormValidation doTestEnvVars(@QueryParameter String envVars) {
             try {
                 envVars.split("\\r?\\n");
