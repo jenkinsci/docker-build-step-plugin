@@ -156,10 +156,7 @@ public class DockerBuilder extends Builder {
             Jenkins.get().checkPermission(Jenkins.MANAGE);
             LOGGER.fine(String.format("Trying to get client for %s and version %s and cert path %s", dockerUrl, dockerVersion, dockerCertPath));
             try {
-                this.dockerUrl = dockerUrl;
-                this.dockerVersion = dockerVersion;
-                this.dockerCertPath = dockerCertPath;
-                DockerClient dockerClient = getDockerClient(null, null);
+                DockerClient dockerClient = createDockerClient(dockerUrl, dockerVersion, dockerCertPath, null);
                 dockerClient.pingCmd().exec();
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, e.getMessage(), e);

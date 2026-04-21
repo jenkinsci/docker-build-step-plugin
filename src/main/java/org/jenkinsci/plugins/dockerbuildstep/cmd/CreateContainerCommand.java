@@ -275,10 +275,13 @@ public class CreateContainerCommand extends DockerCommand {
 
         @RequirePOST
         public FormValidation doTestEnvVars(@QueryParameter String envVars) {
-            try {
-                envVars.split("\\r?\\n");
-            } catch (IllegalArgumentException e) {
-                return FormValidation.error(e.getMessage());
+            if (envVars == null || envVars.trim().isEmpty()) {
+                return FormValidation.ok("OK");
+            }
+            for (String line : envVars.split("\\r?\\n")) {
+                if (!line.trim().isEmpty() && !line.contains("=")) {
+                    return FormValidation.error("Invalid env var format (expected KEY=VALUE): " + line);
+                }
             }
             return FormValidation.ok("OK");
         }
