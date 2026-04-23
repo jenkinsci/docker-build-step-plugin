@@ -8,14 +8,16 @@ import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import net.sf.json.JSONObject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.dockerjava.api.exception.DockerException;
 
 /**
@@ -24,6 +26,10 @@ import com.github.dockerjava.api.exception.DockerException;
  * @author wzheng2310@gmail.com (Wei Zheng)
  */
 public class CommandUtils {
+
+    private static final Logger LOGGER = Logger.getLogger(CommandUtils.class.getName());
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
     public static String imageFullNameFrom(String registry, String repoAndImg, String tag) {
         if (StringUtils.isNotBlank(registry) || StringUtils.isNotBlank(tag)) {
             StringBuilder sb = new StringBuilder();
@@ -48,9 +54,13 @@ public class CommandUtils {
         try {
           while((line = in.readLine()) != null) {
             console.logInfo(line);
-            JSONObject jsonResponse = JSONObject.fromObject(line);
-            if (jsonResponse.containsKey("error") || jsonResponse.containsKey("errorDetail")) {
-              throw new DockerException(line, 200);
+            try {
+              JsonNode json = MAPPER.readTree(line);
+              if (json.has("error") || json.has("errorDetail")) {
+                throw new DockerException(line, 200);
+              }
+            } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+              LOGGER.log(Level.FINE, "Non-JSON line from Docker stream, skipping error check: {0}", line);
             }
           }
         } catch (IOException e) {
