@@ -23,23 +23,31 @@
  */
 package org.jenkinsci.plugins.dockerbuildstep;
 
-import static org.junit.Assert.assertEquals;
 import hudson.EnvVars;
 import hudson.model.FreeStyleBuild;
 
 import org.jenkinsci.plugins.dockerbuildstep.action.EnvInvisibleAction;
-import org.junit.Rule;
-import org.junit.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class DockerEnvContributorTest {
+@WithJenkins
+class DockerEnvContributorTest {
 
-    @Rule public JenkinsRule j = new JenkinsRule();
+    private JenkinsRule j;
 
-    private DockerEnvContributor contributor = new DockerEnvContributor();
+    private final DockerEnvContributor contributor = new DockerEnvContributor();
+
+    @BeforeEach
+    void beforeEach(JenkinsRule rule) {
+        j = rule;
+    }
 
     @Test
-    public void doNotTouchExistingContainerIds() throws Exception {
+    void doNotTouchExistingContainerIds() throws Exception {
         FreeStyleBuild build = j.createFreeStyleProject().scheduleBuild2(0).get();
 
         final EnvVars envVars = existingEnvVars("existing,ids");
@@ -50,7 +58,7 @@ public class DockerEnvContributorTest {
     }
 
     @Test
-    public void addNewContainerIds() throws Exception {
+    void addNewContainerIds() throws Exception {
         FreeStyleBuild build = j.createFreeStyleProject().scheduleBuild2(0).get();
 
         final EnvVars envVars = new EnvVars();
@@ -62,7 +70,7 @@ public class DockerEnvContributorTest {
     }
 
     @Test
-    public void mergeContainerIds() throws Exception {
+    void mergeContainerIds() throws Exception {
         FreeStyleBuild build = j.createFreeStyleProject().scheduleBuild2(0).get();
 
         final EnvVars envVars = existingEnvVars("original");
@@ -74,7 +82,7 @@ public class DockerEnvContributorTest {
     }
 
     @Test
-    public void collapseSameContainerIds() throws Exception {
+    void collapseSameContainerIds() throws Exception {
         FreeStyleBuild build = j.createFreeStyleProject().scheduleBuild2(0).get();
 
         final EnvVars envVars = existingEnvVars("existing,duplicate");

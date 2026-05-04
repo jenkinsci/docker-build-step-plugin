@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.dockerbuildstep.util;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -9,7 +9,7 @@ import java.nio.charset.Charset;
 
 import hudson.model.StreamBuildListener;
 import org.jenkinsci.plugins.dockerbuildstep.log.ConsoleLogger;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.github.dockerjava.api.exception.DockerException;
 
@@ -18,10 +18,10 @@ import com.github.dockerjava.api.exception.DockerException;
  *
  * @author wzheng2310@gmail.com (Wei Zheng)
  */
-public class CommandUtilsTest {
+class CommandUtilsTest {
 
     @Test
-    public void testImageFullNameFrom() {
+    void testImageFullNameFrom() {
         assertEquals("img", CommandUtils.imageFullNameFrom("", "img", ""));
         assertEquals("img:tag", CommandUtils.imageFullNameFrom("", "img", "tag"));
         assertEquals("repo/img", CommandUtils.imageFullNameFrom("", "repo/img", ""));
@@ -31,7 +31,7 @@ public class CommandUtilsTest {
     }
 
     @Test
-    public void testAddLatestTagIfNeeded() {
+    void testAddLatestTagIfNeeded() {
         String[] input = {
                 "img", "img:1", "img:123", "img:latest",
                 "repo/img", "repo/img:1", "repo/img:123", "repo/img:latest",
@@ -45,21 +45,21 @@ public class CommandUtilsTest {
                 "reg:80/repo/img:latest", "reg:80/repo/img:1", "reg:80/repo/img:123", "reg:80/repo/img:latest"
             };
 
-        assertEquals("input length and output length differ!", input.length, output.length);
+        assertEquals(input.length, output.length, "input length and output length differ!");
         for (int i = 0; i < input.length; i++ ) {
             assertEquals(output[i], CommandUtils.addLatestTagIfNeeded(input[i]));
         }
     }
-    
+
     @Test
-    public void testSizeInBytes() {
+    void testSizeInBytes() {
     	String[] input = {
     			"64", "128b", "256k", "512m", "1g", "666a", "-9mb"
     	};
     	long[] output = {
     			64, 128, 262144, 536870912, 1073741824, -1, -1
     	};
-        assertEquals("input length and output length differ!", input.length, output.length);
+        assertEquals(input.length, output.length, "input length and output length differ!");
         for (int i = 0; i < input.length; i++ ) {
             assertEquals(output[i], CommandUtils.sizeInBytes(input[i]));
         }
@@ -76,14 +76,14 @@ public class CommandUtilsTest {
     }
 
     @Test
-    public void logCommandResult_normalStatus_noException() {
+    void logCommandResult_normalStatus_noException() {
         String input = "{\"status\":\"Pulling from library/ubuntu\",\"id\":\"latest\"}";
         CommandUtils.logCommandResult(toInputStream(input), createConsoleLogger(), "pull failed");
         // no exception expected
     }
 
     @Test
-    public void logCommandResult_multipleNormalLines_noException() {
+    void logCommandResult_multipleNormalLines_noException() {
         CommandUtils.logCommandResult(
             toInputStream(
                 "{\"status\":\"Pulling from library/ubuntu\"}",
@@ -95,20 +95,20 @@ public class CommandUtilsTest {
         );
     }
 
-    @Test(expected = DockerException.class)
-    public void logCommandResult_errorKey_throwsDockerException() {
+    @Test
+    void logCommandResult_errorKey_throwsDockerException() {
         String input = "{\"error\":\"manifest unknown\"}";
-        CommandUtils.logCommandResult(toInputStream(input), createConsoleLogger(), "pull failed");
-    }
-
-    @Test(expected = DockerException.class)
-    public void logCommandResult_errorDetailKey_throwsDockerException() {
-        String input = "{\"errorDetail\":{\"message\":\"not found\"}}";
-        CommandUtils.logCommandResult(toInputStream(input), createConsoleLogger(), "pull failed");
+        assertThrows(DockerException.class, () -> CommandUtils.logCommandResult(toInputStream(input), createConsoleLogger(), "pull failed"));
     }
 
     @Test
-    public void logCommandResult_nonJsonLine_noException() {
+    void logCommandResult_errorDetailKey_throwsDockerException() {
+        String input = "{\"errorDetail\":{\"message\":\"not found\"}}";
+        assertThrows(DockerException.class, () -> CommandUtils.logCommandResult(toInputStream(input), createConsoleLogger(), "pull failed"));
+    }
+
+    @Test
+    void logCommandResult_nonJsonLine_noException() {
         CommandUtils.logCommandResult(
             toInputStream("Some plain text that is not JSON"),
             createConsoleLogger(),
@@ -117,7 +117,7 @@ public class CommandUtilsTest {
     }
 
     @Test
-    public void logCommandResult_mixedJsonAndNonJson_noException() {
+    void logCommandResult_mixedJsonAndNonJson_noException() {
         CommandUtils.logCommandResult(
             toInputStream(
                 "Header line",
@@ -130,7 +130,7 @@ public class CommandUtilsTest {
     }
 
     @Test
-    public void logCommandResult_emptyStream_noException() {
+    void logCommandResult_emptyStream_noException() {
         CommandUtils.logCommandResult(
             toInputStream(""),
             createConsoleLogger(),
@@ -139,9 +139,8 @@ public class CommandUtilsTest {
     }
 
     @Test
-    public void logCommandResult_errorAfterNormalLines_throwsDockerException() {
-        try {
-            CommandUtils.logCommandResult(
+    void logCommandResult_errorAfterNormalLines_throwsDockerException() {
+      DockerException e = assertThrows(DockerException.class, () -> CommandUtils.logCommandResult(
                 toInputStream(
                     "{\"status\":\"Pulling from library/ubuntu\"}",
                     "{\"status\":\"Pulling fs layer\"}",
@@ -149,21 +148,18 @@ public class CommandUtilsTest {
                 ),
                 createConsoleLogger(),
                 "pull failed"
-            );
-            fail("Should have thrown DockerException");
-        } catch (DockerException e) {
-            assertTrue(e.getMessage().contains("unauthorized"));
-        }
+            ));
+        assertTrue(e.getMessage().contains("unauthorized"));
     }
 
-    @Test(expected = DockerException.class)
-    public void logCommandResult_ioException_throwsDockerException() throws Exception {
+    @Test
+    void logCommandResult_ioException_throwsDockerException() {
         InputStream broken = new InputStream() {
             @Override
             public int read() throws java.io.IOException {
                 throw new java.io.IOException("simulated IO failure");
             }
         };
-        CommandUtils.logCommandResult(broken, createConsoleLogger(), "fallback error");
+        assertThrows(DockerException.class, () -> CommandUtils.logCommandResult(broken, createConsoleLogger(), "fallback error"));
     }
 }
